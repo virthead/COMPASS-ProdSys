@@ -1,6 +1,6 @@
 compass/settings.py
 compass/settings.pyc
 static
-static/*
+static/admin
 *.pyc
 
