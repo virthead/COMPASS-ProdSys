@@ -16,8 +16,8 @@ def main():
     proxy_local = '/tmp/x509up_u%s' % os.geteuid()
     try:
         ctx = saga.Context("UserPass")
-        ctx.user_id = "virthead" # remote login name
-        ctx.user_pass = "Vjhtvjht12" # password
+        ctx.user_id = "*****" # remote login name
+        ctx.user_pass = "*****" # password
         if os.path.isfile(proxy_local):
             old_proxy = os.stat(proxy_local).st_mtime
             logger.info("Current proxy: %s" % time.ctime(old_proxy)) 
