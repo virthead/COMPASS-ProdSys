@@ -7,6 +7,12 @@ import os
 import logging
 import time 
 from utils import check_process, getRotatingFileHandler
+from django.conf import settings
+from django.core.wsgi import get_wsgi_application
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../')) # fix me in case of using outside the project
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "compass.settings")
+application = get_wsgi_application()
 
 logger = logging.getLogger('periodic_tasks_logger')
 getRotatingFileHandler(logger, 'periodic_tasks.get_proxy.log')
@@ -16,8 +22,8 @@ def main():
     proxy_local = '/tmp/x509up_u%s' % os.geteuid()
     try:
         ctx = saga.Context("UserPass")
-        ctx.user_id = "*****" # remote login name
-        ctx.user_pass = "*****" # password
+        ctx.user_id = settings.PROXY_USER_ID # remote login name
+        ctx.user_pass = settings.PROXY_PASSWORD # password
         if os.path.isfile(proxy_local):
             old_proxy = os.stat(proxy_local).st_mtime
             logger.info("Current proxy: %s" % time.ctime(old_proxy)) 
