@@ -1,0 +1,28 @@
+<VirtualHost *:80>
+Alias /robots.txt /srv/compass/static/robots.txt
+Alias /favicon.ico /srv/compass/static/favicon.ico
+
+Alias /media/ /srv/compass/media/
+Alias /static/ /srv/compass/static/
+
+<Directory /srv/compass/static>
+Require all granted
+</Directory>
+
+<Directory /srv/compass/media>
+Require all granted
+</Directory>
+
+WSGIDaemonProcess COMPASS-ProdSys processes=2 threads=15 display-name=%{GROUP}
+WSGIProcessGroup COMPASS-ProdSys
+WSGIScriptAlias /compass-prodsys /srv/compass/compass/wsgi.py
+#WSGIPythonHome /path/to/venv
+#WSGIPythonPath /srv/compass/compass
+
+<Directory /srv/compass/compass>
+<Files wsgi.py>
+Require all granted
+</Files>
+</Directory>
+
+</VirtualHost>
