@@ -68,7 +68,10 @@ def send_merging_job(task, files_list, merge_chunk_number):
     logger.info(MERGEDDUMPFILE)
     PRODSOFT = task.soft
     ProdPathAndName = task.home + task.path + task.soft
-    dumpsPath = 'root://eoscompass.cern.ch//eos/experiment/compass/' + task.path + task.soft + '/evtdump/slot' + str(task.prodslt)
+    if j.task.site == 'BW_COMPASS_MCORE':
+        dumpsPath = '/scratch/sciteam/criedl/projectdata/' + task.path + task.soft + '/evtdump/slot' + str(task.prodslt)
+    else:
+        dumpsPath = 'root://eoscompass.cern.ch//eos/experiment/compass/' + task.path + task.soft + '/evtdump/slot' + str(task.prodslt)
     
     job = JobSpec()
     job.taskID = task.id
