@@ -78,7 +78,7 @@ def send_merging_job(task, files_list, merge_chunk_number):
     job = JobSpec()
     job.taskID = task.id
     job.jobDefinitionID   = 0
-    job.jobName           = '%(prodNameOnly)s-merge-%(runNumber)s-ch%(mergeChunkNumber)s' % {'prodNameOnly': task.production, 'runNumber': j.run_number, 'mergeChunkNumber': format(merge_chunk_number, '03d')}
+    job.jobName           = '%(prodNameOnly)s-merge-mdst-%(runNumber)s-ch%(mergeChunkNumber)s' % {'prodNameOnly': task.production, 'runNumber': j.run_number, 'mergeChunkNumber': format(merge_chunk_number, '03d')}
     job.transformation    = 'merging mdst' # payload (can be URL as well)
     job.destinationDBlock = datasetName
     job.destinationSE     = destName
