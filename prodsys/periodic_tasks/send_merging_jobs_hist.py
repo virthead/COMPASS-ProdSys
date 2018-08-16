@@ -70,7 +70,10 @@ def send_merging_job(task, files_list, merge_chunk_number):
     TMPHISTFILE = MERGEDHISTFILE
     PRODSOFT = task.soft
     ProdPathAndName = task.home + task.path + task.soft
-    histPath = 'root://eoscompass.cern.ch//eos/experiment/compass/' + task.path + task.soft + '/TRAFDIC'
+    if j.task.site == 'BW_COMPASS_MCORE':
+        histPath = '/scratch/sciteam/criedl/projectdata/' + task.path + task.soft + '/TRAFDIC'
+    else:
+        histPath = 'root://eoscompass.cern.ch//eos/experiment/compass/' + task.path + task.soft + '/TRAFDIC'
     
     job = JobSpec()
     job.taskID = task.id
