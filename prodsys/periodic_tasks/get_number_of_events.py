@@ -11,6 +11,7 @@ from django.db import DatabaseError, IntegrityError
 from _mysql import NULL
 from fabric.api import env, run, execute, settings as sett, hide
 from fabric.context_managers import shell_env, cd
+from posix import access
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../')) # fix me in case of using outside the project
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "compass.settings")
@@ -51,7 +52,11 @@ def get_number_of_events():
     tasks_list = Task.objects.all().filter(Q(status='jobs ready') | Q(status='send') | Q(status='running')).order_by('-id')
     logger.info('Got list of %s tasks' % len(tasks_list))
     
+    access_denied = False
     for t in tasks_list:
+        if access_denied:
+            break
+        
         logger.info('Getting jobs with number_of_events=-1 for task %s' % t.name)
         jobs_list = Job.objects.filter(task=t).filter(number_of_events=-1).order_by('run_number')
         logger.info('Got list of %s jobs' % len(jobs_list))
@@ -88,6 +93,7 @@ def get_number_of_events():
                 logger.info(result)
                 
                 if result.find('Permission denied') != -1:
+                    access_denied = True
                     logger.info('Session expired, exiting')
                     break
             except:
