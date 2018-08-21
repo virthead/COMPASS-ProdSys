@@ -89,7 +89,7 @@ def get_number_of_events():
                     
                     if result.find('Permission denied') != -1:
                         logger.info('Session expired, exiting')
-                        sys.exit()
+                        break
                 except:
                     logger.error('Failed to extract file name from %s' % j.file)
                     continue
