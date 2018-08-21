@@ -67,24 +67,6 @@ def get_number_of_events():
                 break
             
             number_of_events = 0
-            
-#             logger.info('Going to check if file %s already in the system' % j.file)
-#             j_search = Job.objects.filter(run_number=j.run_number).filter(chunk_number=j.chunk_number).filter(number_of_events__gt=-1)
-#             if len(j_search) > 0:
-#                 logger.info('File %s found in the system, going to inherit number of events' % j.file)
-#                 j_update = Job.objects.get(id=j.id)
-#                 j_update.number_of_events = j_search[0].number_of_events
-#                 try:
-#                     j_update.save()
-#                     logger.info('Job %s with file %s updated at %s' % (j.id, j.file, today)) 
-#                 except IntegrityError as e:
-#                     logger.exception('Unique together catched, was not saved')
-#                 except DatabaseError as e:
-#                     logger.exception('Something went wrong while saving: %s' % e.message)
-#             
-#             else:
-#                 logger.info('File %s was not found in the system, going to get number of events from the catalog' % j.file)
-#                 
             result = ''
             try:
                 cmd = '/eos/user/n/na58dst1/production/GetEventNumber.pl %s' % j.file[j.file.rfind('/') + 1:]
@@ -107,7 +89,15 @@ def get_number_of_events():
                     logger.info('Got number of events %s' % number_of_events)
                     logger.info('Going to update job %s' % j.file)
                 
-                    j_update = Job.objects.filter(file=j.file).update(number_of_events=number_of_events)
+                    j_update = Job.objects.get(id=j.id)
+                    j_update.number_of_events=number_of_events
+                    try:
+                        j_update.save()
+                        logger.info('Job %s updated' % (j_update.id)) 
+                    except IntegrityError as e:
+                        logger.exception('Unique together catched, was not saved')
+                    except DatabaseError as e:
+                        logger.exception('Something went wrong while saving: %s' % e.message)
                 except:
                     logger.error('Noninteger result, skipping')
                     continue
