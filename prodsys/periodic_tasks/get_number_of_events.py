@@ -52,7 +52,7 @@ def get_number_of_events():
     logger.info('Got list of %s tasks' % len(tasks_list))
     
     for t in tasks_list:
-        logger.info('Getting jobs with number_of_events=0 for task %s' % t.name)
+        logger.info('Getting jobs with number_of_events=-1 for task %s' % t.name)
         jobs_list = Job.objects.filter(task=t).filter(number_of_events=-1).order_by('run_number')
         logger.info('Got list of %s jobs' % len(jobs_list))
         
