@@ -87,7 +87,7 @@ def copy_to_castor():
                 cmd = l[1] 
                 logger.info('%s:%s' % (chunk, cmd))
                 result = exec_remote_cmd(cmd)
-                if result.find('Permission denied') != -1:
+                if result.find('Permission denied') != -1 or result.find('open denied') != -1:
                     logger.info('Session expired, exiting')
                     sys.exit(0)
                 

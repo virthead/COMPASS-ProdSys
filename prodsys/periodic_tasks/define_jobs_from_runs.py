@@ -83,26 +83,44 @@ def define_jobs_from_runs():
                     for l in reader:
                         l['name'] = l['name'].replace("\t", "").replace("\t", "")
                         logger.info('Going go define a job for %s ' % l['name'])
-                        runNumber = ''
-                        runNumber = l['name'][l['name'].find('-') + 1:l['name'].find('.raw')]
+                        runNumber = 0
+                        try:
+                            runNumber = int(l['name'][l['name'].find('-') + 1:l['name'].find('.raw')])
+                        except:
+                            logger.info('Run number is not integer, skipping')
+                            continue
+                        
                         logger.info('runNumber: %s' % runNumber)
-                        chunkNumber = ''
-                        chunkNumber = l['name'][l['name'].find('cdr') + 3:l['name'].find('-')]
+                        
+                        chunkNumber = 0
+                        try:
+                            chunkNumber = int(l['name'][l['name'].find('cdr') + 3:l['name'].find('-')])
+                        except:
+                            logger.info('Chunk number is not integer, skipping')
+                            continue
                         logger.info('chunkNumber: %s' % chunkNumber)
-                        logger.info('number_of_events: %s' % l['events'])
+                        
+                        number_of_events = -1
+                        try:
+                            number_of_events = int(l['events'])
+                        except:
+                            logger.info('Number of events %s is not integer, setting -1' % l['events'])
+                        
                         logger.info('Check that task and job are unique')
                         
                         if t.site == 'BW_COMPASS_MCORE':
                             bw_file = t.files_home + l['name'][l['name'].rfind('/')+1:]
                             logger.info('File for BlueWaters task was changed to %s' % bw_file)
+                            
                             qs = Job.objects.filter(task=t, file=bw_file)
                             if qs.exists():
                                 logger.info('Such task and job already exist in the system, skipping')
                                 continue
+                            
                             j = Job(
                                 task = t,
                                 file = bw_file,
-                                number_of_events = l['events'],
+                                number_of_events = number_of_events,
                                 run_number = runNumber,
                                 chunk_number = chunkNumber,
                                 date_added = today,
@@ -117,7 +135,7 @@ def define_jobs_from_runs():
                             j = Job(
                                 task = t,
                                 file = l['name'],
-                                number_of_events = l['events'],
+                                number_of_events = number_of_events,
                                 run_number = runNumber,
                                 chunk_number = chunkNumber,
                                 date_added = today,

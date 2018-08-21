@@ -86,11 +86,12 @@ def get_number_of_events():
                     logger.info(cmd)
                     result = exec_remote_cmd(cmd)
                     logger.info(result)
-                except:
-                    logger.error('Failed to extract file name from %s' % j.file)
+                    
                     if result.find('Permission denied') != -1:
                         logger.info('Session expired, exiting')
                         sys.exit()
+                except:
+                    logger.error('Failed to extract file name from %s' % j.file)
                     continue
                 
                 if result.find('Number of events:') != -1:
