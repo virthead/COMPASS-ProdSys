@@ -74,7 +74,7 @@ def get_number_of_events():
                 result = exec_remote_cmd(cmd)
                 logger.info(result)
                 
-                if result.find('Permission denied') != -1:
+                if result.find('Permission denied') != -1 or result.find('ORA-12514: TNS:listener does not currently know of service requested in connect') != -1:
                     access_denied = True
                     logger.info('Session expired, exiting')
                     break
