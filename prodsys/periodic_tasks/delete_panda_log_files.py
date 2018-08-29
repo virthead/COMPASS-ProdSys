@@ -52,7 +52,7 @@ def delete_panda_log_files():
     logger.info('Got list of %s tasks' % len(tasks_list))
     for t in tasks_list:
         logger.info('Getting runs for task %s' % t.name)
-        runs_list = Job.objects.filter(task=t).filter(logs_deleted='no').order_by('run_number').values_list('run_number', flat=True).distinct()
+        runs_list = Job.objects.filter(task=t).filter(status_logs_deleted='no').order_by('run_number').values_list('run_number', flat=True).distinct()
         logger.info('Got list of %s runs' % len(runs_list))
         if len(runs_list) == 0:
             logger.info('No runs found')
@@ -157,7 +157,7 @@ def delete_panda_log_files():
             
             if mdst and hist and dump and prod:
                 logger.info('All types of log files were deleted, going to update jobs for run %s' % run_number)
-                u = Job.objects.filter(task=t).filter(run_number=run_number).update(logs_deleted='yes', date_updated=timezone.now())
+                u = Job.objects.filter(task=t).filter(run_number=run_number).update(status_logs_deleted='yes', date_updated=timezone.now())
                 
             i+= 1
     logger.info('done')

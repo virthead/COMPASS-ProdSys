@@ -113,7 +113,7 @@ class Job(models.Model):
     status_x_check_evntdmp = models.CharField(max_length=50, default='no')
     status_castor_evntdmp = models.CharField(max_length=50, null=True, blank=True)
     attempt_castor_evntdmp = models.IntegerField(default=0)
-    logs_deleted = models.CharField(max_length=5, default='no')
+    status_logs_deleted = models.CharField(max_length=5, default='no')
     
     def __unicode__(self):
         return self.file
