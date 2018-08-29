@@ -114,6 +114,9 @@ class Job(models.Model):
     status_castor_evntdmp = models.CharField(max_length=50, null=True, blank=True)
     attempt_castor_evntdmp = models.IntegerField(default=0)
     status_logs_deleted = models.CharField(max_length=5, default='no')
+    status_logs_archived = models.CharField(max_length=5, default='no')
+    status_logs_castor = models.CharField(max_length=50, null=True, blank=True)
+    attempt_logs_castor = models.IntegerField(default=0)
     
     def __unicode__(self):
         return self.file
