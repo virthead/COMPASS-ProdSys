@@ -260,7 +260,7 @@ class JobAdmin(admin.ModelAdmin):
                     'panda_id_merging_histos', 'attempt_merging_histos', 'status_merging_histos', 'chunk_number_merging_histos',
                     'panda_id_merging_evntdmp', 'attempt_merging_evntdmp', 'status_merging_evntdmp', 'chunk_number_merging_evntdmp', 'status_x_check_evntdmp',
                     'status_castor_mdst', 'status_castor_histos', 'status_castor_evntdmp',
-                    'logs_deleted'
+                    'status_logs_deleted'
                     )
     search_fields = ['task__name', 'file', 'run_number', 'status', 'status_merging_mdst', 'status_x_check', 'status_merging_histos', 'status_merging_evntdmp']
     
