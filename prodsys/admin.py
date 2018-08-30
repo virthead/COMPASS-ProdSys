@@ -262,7 +262,9 @@ class JobAdmin(admin.ModelAdmin):
                     'status_castor_mdst', 'status_castor_histos', 'status_castor_evntdmp',
                     'status_logs_deleted'
                     )
-    search_fields = ['task__name', 'file', 'run_number', 'status', 'status_merging_mdst', 'status_x_check', 'status_merging_histos', 'status_merging_evntdmp']
+    list_filter = ('status', 'status_merging_mdst', 'status_x_check', 'status_merging_histos', 'status_merging_evntdmp', 'status_x_check_evntdmp',
+                   'status_logs_deleted')
+    search_fields = ['task__name', 'file', 'run_number']
     
     def task_name(self, instance):
         return instance.task.name
