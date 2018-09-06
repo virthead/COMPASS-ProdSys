@@ -40,6 +40,8 @@ env.hosts.append(settings.COMPASS_HOST)
 env.user = settings.COMPASS_USER
 env.password = settings.COMPASS_PASS
 
+runs_to_send = 10
+
 def exec_remote_cmd(cmd):
     with hide('output','running','warnings'), sett(warn_only=True):
         return run(cmd)
@@ -55,7 +57,12 @@ def copy_to_castor():
         runs_list = Job.objects.filter(task=t).filter(status='finished').filter(status_merging_mdst='finished').filter(status_x_check='yes').filter(attempt_castor_mdst__lt=t.max_attempts).filter(status_castor_mdst='ready').order_by('run_number').values_list('run_number', flat=True).distinct()
         logger.info('Got list of %s runs' % len(runs_list))
         
-        for r in runs_list:            
+        i = 0
+        for r in runs_list:
+            if i > runs_to_send:
+                logger.info('Max runs to send per task has reached (%s), exiting loop' % runs_to_send)
+                break
+                        
             copy_list = []
             logger.info('Getting chunk numbers for run %s' % r)
             merged_chunks_list = Job.objects.filter(task=t).filter(run_number=r).filter(status_castor_mdst='ready').order_by('chunk_number_merging_mdst').values_list('chunk_number_merging_mdst', flat=True).distinct()
@@ -102,4 +109,7 @@ def copy_to_castor():
                     if result.find('No such file or directory') != -1:
                         logger.info('File dissapeared from EOS, going to resend merging of mdst for run number %s' % r)
                         jobs_list = Job.objects.filter(task=t).filter(run_number=r).update(status_merging_mdst='ready', chunk_number_merging_mdst=-1, status_x_check='no', status_castor_mdst=None, date_updated=today)
+            
+            i += 1
+            
     logger.info('done')
