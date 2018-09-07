@@ -91,9 +91,9 @@ def send_merging_job(task, files_list, merge_chunk_number):
         job.parentID = j.panda_id_merging_histos
     
     if j.task.site == 'BW_COMPASS_MCORE':
-        job.jobParameters='ppwd=$(pwd);ppwd=$(pwd);export COMPASS_SW_PREFIX=/scratch/sciteam/criedl/projectdata/;export COMPASS_SW_PATH=%(prodPath)s;export COMPASS_PROD_NAME=%(prodName)s;export prodSlt=%(prodSlt)s;export MERGEDHISTFILE=%(MERGEDHISTFILE)s;export TMPHISTFILE=%(TMPHISTFILE)s;export PRODSOFT=%(PRODSOFT)s;coralpath=%(ProdPathAndName)s/coral;cd -P $coralpath;export coralpathsetup=$coralpath"/setup.sh";source $coralpathsetup;cd $ppwd;export histpath=%(histPath)s;%(input_files_copy)shadd -f %(MERGEDHISTFILE)s %(input_files)s;cp payload_stderr.txt payload_stderr.out;cp payload_stdout.txt payload_stdout.out;' % {'MERGEDHISTFILE': MERGEDHISTFILE, 'PRODSOFT': PRODSOFT, 'input_files_copy': input_files_copy, 'input_files': input_files, 'ProdPathAndName': ProdPathAndName, 'prodPath': task.path, 'prodName': task.production, 'prodSlt': task.prodslt, 'TMPHISTFILE': TMPHISTFILE, 'histPath': histPath}
+        job.jobParameters='ppwd=$(pwd);ppwd=$(pwd);export COMPASS_SW_PREFIX=/scratch/sciteam/criedl/projectdata/;export COMPASS_SW_PATH=%(prodPath)s;export COMPASS_PROD_NAME=%(prodName)s;export prodSlt=%(prodSlt)s;export MERGEDHISTFILE=%(MERGEDHISTFILE)s;export TMPHISTFILE=%(TMPHISTFILE)s;export PRODSOFT=%(PRODSOFT)s;coralpath=%(ProdPathAndName)s/coral;cd -P $coralpath;export coralpathsetup=$coralpath"/setup.sh";source $coralpathsetup;cd $ppwd;export histpath=%(histPath)s;%(input_files_copy)shadd -f %(MERGEDHISTFILE)s %(input_files)s;cp payload_stderr.txt payload_stderr.out;cp payload_stdout.txt payload_stdout.out;gzip payload_stderr.out;gzip payload_stdout.out;' % {'MERGEDHISTFILE': MERGEDHISTFILE, 'PRODSOFT': PRODSOFT, 'input_files_copy': input_files_copy, 'input_files': input_files, 'ProdPathAndName': ProdPathAndName, 'prodPath': task.path, 'prodName': task.production, 'prodSlt': task.prodslt, 'TMPHISTFILE': TMPHISTFILE, 'histPath': histPath}
     else:
-        job.jobParameters='export EOS_MGM_URL=root://eoscompass.cern.ch;ppwd=$(pwd);ppwd=$(pwd);export COMPASS_SW_PREFIX=/eos/experiment/compass/;export COMPASS_SW_PATH=%(prodPath)s;export COMPASS_PROD_NAME=%(prodName)s;export prodSlt=%(prodSlt)s;export MERGEDHISTFILE=%(MERGEDHISTFILE)s;export TMPHISTFILE=%(TMPHISTFILE)s;export PRODSOFT=%(PRODSOFT)s;coralpath=%(ProdPathAndName)s/coral;cd -P $coralpath;export coralpathsetup=$coralpath"/setup.sh";source $coralpathsetup;cd $ppwd;export histpath=%(histPath)s;%(input_files_copy)shadd -f %(MERGEDHISTFILE)s %(input_files)s;cp payload_stderr.txt payload_stderr.out;cp payload_stdout.txt payload_stdout.out;' % {'MERGEDHISTFILE': MERGEDHISTFILE, 'PRODSOFT': PRODSOFT, 'input_files_copy': input_files_copy, 'input_files': input_files, 'ProdPathAndName': ProdPathAndName, 'prodPath': task.path, 'prodName': task.production, 'prodSlt': task.prodslt, 'TMPHISTFILE': TMPHISTFILE, 'histPath': histPath}
+        job.jobParameters='export EOS_MGM_URL=root://eoscompass.cern.ch;ppwd=$(pwd);ppwd=$(pwd);export COMPASS_SW_PREFIX=/eos/experiment/compass/;export COMPASS_SW_PATH=%(prodPath)s;export COMPASS_PROD_NAME=%(prodName)s;export prodSlt=%(prodSlt)s;export MERGEDHISTFILE=%(MERGEDHISTFILE)s;export TMPHISTFILE=%(TMPHISTFILE)s;export PRODSOFT=%(PRODSOFT)s;coralpath=%(ProdPathAndName)s/coral;cd -P $coralpath;export coralpathsetup=$coralpath"/setup.sh";source $coralpathsetup;cd $ppwd;export histpath=%(histPath)s;%(input_files_copy)shadd -f %(MERGEDHISTFILE)s %(input_files)s;cp payload_stderr.txt payload_stderr.out;cp payload_stdout.txt payload_stdout.out;gzip payload_stderr.out;gzip payload_stdout.out;' % {'MERGEDHISTFILE': MERGEDHISTFILE, 'PRODSOFT': PRODSOFT, 'input_files_copy': input_files_copy, 'input_files': input_files, 'ProdPathAndName': ProdPathAndName, 'prodPath': task.path, 'prodName': task.production, 'prodSlt': task.prodslt, 'TMPHISTFILE': TMPHISTFILE, 'histPath': histPath}
 
     fileOLog = FileSpec()
     fileOLog.lfn = "%s.job.log.tgz" % (job.jobName)
@@ -120,7 +120,7 @@ def send_merging_job(task, files_list, merge_chunk_number):
 #     job.addFile(fileOHist)
 
     fileOstdout = FileSpec()
-    fileOstdout.lfn = "payload_stdout.txt"
+    fileOstdout.lfn = "payload_stdout.out.gz"
     fileOstdout.destinationDBlock = job.destinationDBlock
     fileOstdout.destinationSE     = job.destinationSE
     fileOstdout.dataset           = job.destinationDBlock
@@ -128,7 +128,7 @@ def send_merging_job(task, files_list, merge_chunk_number):
     job.addFile(fileOstdout)
     
     fileOstderr = FileSpec()
-    fileOstderr.lfn = "payload_stderr.txt"
+    fileOstderr.lfn = "payload_stderr.out.gz"
     fileOstderr.destinationDBlock = job.destinationDBlock
     fileOstderr.destinationSE     = job.destinationSE
     fileOstderr.dataset           = job.destinationDBlock
