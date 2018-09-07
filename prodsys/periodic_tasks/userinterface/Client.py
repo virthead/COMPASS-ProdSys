@@ -22,12 +22,12 @@ try:
     baseURL = os.environ['PANDA_URL']
 except:
 #    baseURL = 'http://pandaserver.cern.ch:25080/server/panda'
-    baseURL = 'http://pandawms.jinr.ru:980/server/panda'
+    baseURL = 'http://vm221-120.jinr.ru:25080/server/panda'
 try:
     baseURLSSL = os.environ['PANDA_URL_SSL']
 except:
 #    baseURLSSL = 'https://pandaserver.cern.ch:25443/server/panda'
-    baseURLSSL = 'https://pandawms.jinr.ru:943/server/panda'
+    baseURLSSL = 'https://vm221-120.jinr.ru:25443/server/panda'
 
 
 # exit code
