@@ -76,6 +76,7 @@ def send_merging_job(task, files_list, merge_chunk_number):
     ProdPathAndName = task.home + task.path + task.soft
     
     job = JobSpec()
+    job.VO = 'vo.compass.cern.ch'
     job.taskID = task.id
     job.jobDefinitionID   = 0
     job.jobName           = '%(prodNameOnly)s-merge-mdst-%(runNumber)s-ch%(mergeChunkNumber)s' % {'prodNameOnly': task.production, 'runNumber': j.run_number, 'mergeChunkNumber': format(merge_chunk_number, '03d')}

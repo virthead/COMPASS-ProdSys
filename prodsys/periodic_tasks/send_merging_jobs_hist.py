@@ -76,6 +76,7 @@ def send_merging_job(task, files_list, merge_chunk_number):
         histPath = 'root://eoscompass.cern.ch//eos/experiment/compass/' + task.path + task.soft + '/TRAFDIC'
     
     job = JobSpec()
+    job.VO = 'vo.compass.cern.ch'
     job.taskID = task.id
     job.jobDefinitionID   = 0
     job.jobName           = '%(prodNameOnly)s-merge-hist-%(runNumber)s-%(prodSlt)s-%(phastVer)s-ch%(mergeChunkNumber)s' % {'prodNameOnly': task.production, 'runNumber': j.run_number, 'prodSlt': task.prodslt, 'phastVer': task.phastver, 'mergeChunkNumber': format(merge_chunk_number, '03d')}

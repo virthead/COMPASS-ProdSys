@@ -108,6 +108,7 @@ def main():
             ProdPathAndName = j.task.home + j.task.path + j.task.soft
         
             job = JobSpec()
+            job.VO = 'vo.compass.cern.ch'
             job.taskID = j.task.id
             job.jobDefinitionID   = 0
             job.jobName           = '%(prodName)s-%(fileYear)s--%(runNumber)s-%(runChunk)s-%(prodSlt)s-%(phastVer)s' % {'prodName': j.task.production, 'fileYear': file_year, 'runNumber': j.run_number, 'runChunk': j.chunk_number, 'prodSlt': j.task.prodslt, 'phastVer': j.task.phastver}
