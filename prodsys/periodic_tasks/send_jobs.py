@@ -55,7 +55,7 @@ def main():
     cdbServer = cdbServerArr[0]
     
     for t in tasks_list:
-        max_send_amount = 1
+        max_send_amount = 1000
 
         logger.info('Getting jobs in status staged or failed for task %s' % t)
         jobs_list_count = Job.objects.all().filter(task=t).filter(attempt__lt=t.max_attempts).filter(Q(status='staged') | Q(status='failed')).count()
