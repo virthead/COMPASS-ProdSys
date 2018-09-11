@@ -52,6 +52,8 @@ def copy_to_castor():
 #    tasks_list = Task.objects.all().filter(name='bpc_stage3_mu-')
     logger.info('Got list of %s tasks' % len(tasks_list))
     
+    session_expired = False
+    
     for t in tasks_list:
         logger.info('Getting run numbers for task %s with status finished and status merging mdst finished and status merging histos finished and status castor mdst ready' % t.name)
         runs_list = Job.objects.filter(task=t).filter(status='finished').filter(status_merging_mdst='finished').filter(status_x_check='yes').filter(attempt_castor_mdst__lt=t.max_attempts).filter(status_castor_mdst='ready').order_by('run_number').values_list('run_number', flat=True).distinct()
@@ -59,6 +61,10 @@ def copy_to_castor():
         
         i = 0
         for r in runs_list:
+            if session_expired:
+                logger.info('Session expired, exiting')
+                break
+            
             if i > runs_to_send:
                 logger.info('Max runs to send per task has reached (%s), exiting loop' % runs_to_send)
                 break
@@ -96,7 +102,8 @@ def copy_to_castor():
                 result = exec_remote_cmd(cmd)
                 if result.find('Permission denied') != -1 or result.find('open denied') != -1:
                     logger.info('Session expired, exiting')
-                    sys.exit(0)
+                    session_expired = True
+                    break
                 
                 if result.succeeded:
                     logger.info('Successfully sent to castor run number %s merging chunk number %s' % (r, chunk))
