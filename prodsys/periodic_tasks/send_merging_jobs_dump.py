@@ -81,7 +81,7 @@ def send_merging_job(task, files_list, merge_chunk_number):
     job.transformation    = 'merging dump' # payload (can be URL as well)
     job.destinationDBlock = datasetName
     job.destinationSE     = destName
-    job.currentPriority   = 1000
+    job.currentPriority   = 5000
     job.prodSourceLabel   = 'prod_test'
     job.computingSite     = task.site
     job.attemptNr = j.attempt_merging_evntdmp + 1
