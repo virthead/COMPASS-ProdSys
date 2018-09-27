@@ -47,24 +47,29 @@ def exec_remote_cmd(cmd):
 def check_files_on_castor():
     logger.info('Getting productions with castor evntdmp status sent')
     tasks_list = Job.objects.filter(status_castor_evntdmp='sent').values_list('task_id', 'task__path', 'task__soft', 'task__prodslt', 'task__phastver', 'task__type').distinct()
-    logger.info('Got list of %s prods' % len(tasks_list))
+    logger.info('Got list of %s prods: %s' % (len(tasks_list), tasks_list))
+    logger.info('Check details in the corresponding periodic_tasks.check_castor_dump_status_taskid.log')
     
     for t in tasks_list:
-        logger.info('Getting evntdmp chunks with castor evntdmp status sent')
+        logger_task = logging.getLogger('periodic_tasks_logger')
+        getRotatingFileHandler(logger_task, 'periodic_tasks.check_castor_dump_status_%s.log' % t[0])
+        logger_task.info('Starting')
+        
+        logger_task.info('Getting evntdmp chunks with castor evntdmp status sent')
         chunks_list = Job.objects.filter(task__id=t[0]).filter(status_castor_evntdmp='sent').values_list('task_id', 'run_number', 'chunk_number_merging_evntdmp').distinct()
-        logger.info('Got list of %s chunks' % len(chunks_list))
+        logger_task.info('Got list of %s chunks' % len(chunks_list))
     
-        logger.info('Going to request list of files on castor for task %s' % t[0])
+        logger_task.info('Going to request list of files on castor for task %s' % t[0])
         
         oracle_dst = ''
         if t[5] == 'mass production':
             oracle_dst = '/oracle_dst/'
         cmd = 'nsls -l /castor/cern.ch/compass/%(prodPath)s%(oracleDst)s%(prodSoft)s/mergedDump/slot%(prodSlt)s/' % {'prodPath': t[1], 'prodSoft': t[2], 'prodSlt': t[3], 'oracleDst': oracle_dst}
-        logger.info(cmd)
+        logger_task.info(cmd)
         result = exec_remote_cmd(cmd)
         if result.succeeded:
             reader = csv.DictReader(result.splitlines(), delimiter = ' ', skipinitialspace = True, fieldnames = ['permissions', 'links', 'owner', 'group', 'size', 'date1', 'date2', 'time', 'name'])
-            logger.info('Successfully read files on castor for task %s' % t[0])
+            logger_task.info('Successfully read files on castor for task %s' % t[0])
             for c in chunks_list:
                 test = 'evtdump%(prodSlt)s-%(runNumber)s.raw' % {'runNumber': c[1], 'prodSlt': t[3]}
                 if format(c[2], '03d') != '000':
@@ -72,29 +77,30 @@ def check_files_on_castor():
                 
                 for r in reader:
                     if r['name'] == test:
-                        logger.info(r)
-                        logger.info('Found "%s" for task id %s run number %s chunk number %s, %s' % (r['permissions'][0], t[0], c[1], c[2], test))
+                        logger_task.info(r)
+                        logger_task.info('Found "%s" for task id %s run number %s chunk number %s, %s' % (r['permissions'][0], t[0], c[1], c[2], test))
                         if r['permissions'][0] == 'm':
-                            logger.info ('Going to update jobs of the chunk as migrated')
+                            logger_task.info ('Going to update jobs of the chunk as migrated')
                             try:
                                 j_update = Job.objects.filter(task=t[0], run_number=c[1], chunk_number_merging_evntdmp=c[2]).update(status_castor_evntdmp='finished', date_updated=today)
-                                logger.info('Job status_castor_evntdmp changed to finished for task %s run number %s chunk number %s' % (t[0], c[1], c[2]))
+                                logger_task.info('Job status_castor_evntdmp changed to finished for task %s run number %s chunk number %s' % (t[0], c[1], c[2]))
                             except:
-                                logger.error('Failed to update jobs for task %s run number %s chunk number %s' % (t[0], c[1], c[2]))
+                                logger_task.error('Failed to update jobs for task %s run number %s chunk number %s' % (t[0], c[1], c[2]))
                         else:
-                            logger.info ('Chunk not yet migrated')
+                            logger_task.info ('Chunk not yet migrated')
                             
                             if r['size'] == '0':
-                                logger.info('Problematic chunk found, status will be changed to ready for rewriting')
+                                logger_task.info('Problematic chunk found, status will be changed to ready for rewriting')
                                 try:
                                     j_update = Job.objects.filter(task=t[0], run_number=c[1], chunk_number_merging_evntdmp=c[2]).update(status_castor_evntdmp='ready', date_updated=today)
-                                    logger.info('Job status_castor_evntdmp changed to finished for task %s run number %s chunk number %s' % (t[0], c[1], c[2]))
+                                    logger_task.info('Job status_castor_evntdmp changed to finished for task %s run number %s chunk number %s' % (t[0], c[1], c[2]))
                                 except:
-                                    logger.error('Failed to update jobs for task %s run number %s chunk number %s' % (t[0], c[1], c[2]))
+                                    logger_task.error('Failed to update jobs for task %s run number %s chunk number %s' % (t[0], c[1], c[2]))
                         
                         break
         else:
-            logger.info('Error reading files on castor for task %s' % t)
-            logger.error(result)
+            logger_task.info('Error reading files on castor for task %s' % t)
+            logger_task.error(result)
     
-    logger.info('done')
+        logger_task.info('done')
+        logger_task.handlers[0].close()
