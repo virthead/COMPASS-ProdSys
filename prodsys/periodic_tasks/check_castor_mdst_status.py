@@ -46,8 +46,7 @@ def exec_remote_cmd(cmd):
 def check_files_on_castor():
     logger.info('Getting productions with castor mdst status sent')
     tasks_list = Job.objects.filter(status_castor_mdst='sent').values_list('task_id', 'task__path', 'task__soft', 'task__prodslt', 'task__phastver', 'task__type').distinct()
-    logger.info('Got list of %s prods' % len(tasks_list))
-    logger.info(tasks_list)
+    logger.info('Got list of %s prods: %s' % (len(tasks_list), tasks_list))
     logger.info('Check details in the corresponding periodic_tasks.check_castor_mdst_status_taskid.log')
     
     for t in tasks_list:
@@ -102,6 +101,7 @@ def check_files_on_castor():
         else:
             logger_task.info('Error reading files on castor for task %s' % t)
             logger_task.error(result)
+        
         logger_task.info('done')
         logger_task.handlers[0].close()
     
