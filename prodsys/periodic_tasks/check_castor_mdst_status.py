@@ -92,7 +92,7 @@ def check_files_on_castor():
                             logger.info('Transfer request was performed in more than 24 hours, going to restart it')
                             restart_transfer(logger_task, t[0], c[1], c[2])
                     else:
-                        logger_task.info('File was migrated')
+                        logger_task.info('File was delivered to Castor')
                     
                 for r in reader:
                     logger_task.info('name - test: %s - %s' % (r['name'], test))
