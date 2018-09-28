@@ -90,6 +90,8 @@ def check_files_on_castor():
                         if diff.days >= 1:
                             logger.info('Transfer request was performed in more than 24 hours ago, going to restart it')
                             restart_transfer(logger_task, t[0], c[1], c[2])
+                        
+                        continue
                     
                 for r in reader:
                     logger_task.info('name - test: %s - %s' % (r['name'], test))
