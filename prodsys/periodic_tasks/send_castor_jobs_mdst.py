@@ -40,7 +40,7 @@ env.hosts.append(settings.COMPASS_HOST)
 env.user = settings.COMPASS_USER
 env.password = settings.COMPASS_PASS
 
-runs_to_send = 10
+runs_to_send = 50
 
 def exec_remote_cmd(cmd):
     with hide('output','running','warnings'), sett(warn_only=True):
