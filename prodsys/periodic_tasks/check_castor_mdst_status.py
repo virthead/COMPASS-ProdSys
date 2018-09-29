@@ -87,14 +87,14 @@ def check_files_on_castor():
                     if result.find(test) == -1:
                         diff = datetime.datetime.now().replace(tzinfo=None) - c[3].replace(tzinfo=None)
                         logger_task.info('File %s was not delivered, transfer was submitted at %s which is %s hours from now' % (test, c[3], (diff.seconds/3600)))
-                        if diff.seconds/3600 >= 4:
-                            logger.info('Transfer request was performed in more than 4 hours ago, going to restart it')
+                        if diff.seconds/3600 >= 2:
+                            logger.info('Transfer request was performed in more than 2 hours ago, going to restart it')
                             restart_transfer(logger_task, t[0], c[1], c[2])
                         
                             continue
                     
                 for r in reader:
-                    logger_task.info('name - test: %s - %s' % (r['name'], test))
+#                    logger_task.info('name - test: %s - %s' % (r['name'], test))
                     if r['name'] == test:
                         logger_task.info(r)
                         logger_task.info('Found "%s" for task id %s run number %s chunk number %s, %s' % (r['permissions'][0], t[0], c[1], c[2], test))
