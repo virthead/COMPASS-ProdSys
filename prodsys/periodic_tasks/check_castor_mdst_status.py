@@ -111,7 +111,7 @@ def check_files_on_castor():
                             if r['size'] == '0':
                                 diff = datetime.datetime.now().replace(tzinfo=None) - c[3].replace(tzinfo=None)
                                 logger_task.info('File %s was not delivered, transfer was submitted at %s which is %s hours from now' % (test, c[3], (diff.seconds/3600)))
-                                if diff.seconds/3600 >= 4:
+                                if diff.seconds/3600 >= 12:
                                     logger_task.info('Problematic chunk found, status will be changed to ready for rewriting')
                                     restart_transfer(logger_task, t[0], c[1], c[2])
                         
