@@ -63,15 +63,15 @@ def main():
         for r in runs_list:
             running_processes = get_running_processes()
             
-            if len(running_processes) > 15 and len(running_processes) <= 20:
-                logger.info('Reached maximum of running processes, sleep 15 seconds')
-                time.sleep(15)
-            if len(running_processes) > 20:
+            if len(running_processes) > 10 and len(running_processes) <= 15:
                 logger.info('Reached maximum of running processes, sleep 30 seconds')
                 time.sleep(30)
-            if len(running_processes) > 25:
+            if len(running_processes) > 15:
                 logger.info('Reached maximum of running processes, sleep 60 seconds')
                 time.sleep(60)
+            if len(running_processes) > 20:
+                logger.info('Reached maximum of running processes, sleep 120 seconds')
+                time.sleep(120)
             
             command = 'python check_job_panda_status_run.py -t %s -r %s' % (t.id, r[0])
             logger.info('Going to run command %s' % command)
