@@ -98,12 +98,6 @@ def main():
             logger.info(STDERRFILE)
             PRODSOFT = j.task.soft
             logger.info(PRODSOFT)
-            try:
-                file_year = j.file.split('/')[5]
-                logger.info(file_year)
-            except:
-                logger.error('Error while splitting file to get year')
-                sys.exit(1)
                 
             ProdPathAndName = j.task.home + j.task.path + j.task.soft
         
@@ -111,7 +105,7 @@ def main():
             job.VO = 'vo.compass.cern.ch'
             job.taskID = j.task.id
             job.jobDefinitionID   = 0
-            job.jobName           = '%(prodName)s-%(fileYear)s--%(runNumber)s-%(runChunk)s-%(prodSlt)s-%(phastVer)s' % {'prodName': j.task.production, 'fileYear': file_year, 'runNumber': j.run_number, 'runChunk': j.chunk_number, 'prodSlt': j.task.prodslt, 'phastVer': j.task.phastver}
+            job.jobName           = '%(prodName)s-%(fileYear)s--%(runNumber)s-%(runChunk)s-%(prodSlt)s-%(phastVer)s' % {'prodName': j.task.production, 'fileYear': j.task.year, 'runNumber': j.run_number, 'runChunk': j.chunk_number, 'prodSlt': j.task.prodslt, 'phastVer': j.task.phastver}
             job.transformation    = j.task.type # payload (can be URL as well)
             job.destinationDBlock = datasetName
             job.destinationSE     = destName
