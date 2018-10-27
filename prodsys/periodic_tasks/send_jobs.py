@@ -120,7 +120,7 @@ def main():
                 job.parentID = j.panda_id
             head, tail = os.path.split(j.file)
             
-            cdbServer = cdbServerArr[random.randrange(2)]
+            cdbServer = cdbServerArr[random.randrange(len(cdbServerArr))]
             
             # logs, and all files generated during execution will be placed in log (except output file)
             #job.jobParameters='source /afs/cern.ch/project/eos/installation/compass/etc/setup.sh;export EOS_MGM_URL=root://eoscompass.cern.ch;export PATH=/afs/cern.ch/project/eos/installation/compass/bin:$PATH;ppwd=$(pwd);echo $ppwd;export TMPMDSTFILE=%(TMPMDSTFILE)s;export TMPHISTFILE=%(TMPHISTFILE)s;export TMPRICHFILE=%(TMPRICHFILE)s;coralpath=%(ProdPathAndName)s/coral;echo $coralpath;cd -P $coralpath;export coralpathsetup=$coralpath"/setup.sh";echo $coralpathsetup;source $coralpathsetup;cd $ppwd;$CORAL/../phast/coral/coral.exe %(ProdPathAndName)s/template.opt;xrdcp -np $ppwd/%(TMPMDSTFILE)s xroot://eoscompass.cern.ch//eos/compass/%(prodName)s/mDST/%(TMPMDSTFILE)s;xrdcp -np $ppwd/%(TMPHISTFILE)s xroot://eoscompass.cern.ch//eos/compass/%(prodName)s/histos/%(TMPHISTFILE)s;metadataxml=$(ls metadata-*);echo $metadataxml;cp $metadataxml $metadataxml.PAYLOAD;' % {'TMPMDSTFILE': TMPMDSTFILE, 'TMPHISTFILE': TMPHISTFILE, 'TMPRICHFILE': TMPRICHFILE, 'input_file': input_file, 'ProdPathAndName': ProdPathAndName, 'prodName': prodName}
