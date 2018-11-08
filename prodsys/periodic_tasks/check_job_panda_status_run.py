@@ -44,9 +44,7 @@ def main():
         sys.exit()
     
     logger.info('Getting jobs from PanDA table')
-    jobs_list_panda_active = Jobsactive4.objects.using('schedconfig').filter(taskid=args.task).filter(jobname__istartswith='%s-%s--%s-' % (t.production, t.year, args.run_number)).filter(jobstatus='running').values()
-    jobs_list_panda_archived = Jobsarchived4.objects.using('schedconfig').filter(taskid=args.task).filter(jobname__istartswith='%s-%s--%s-' % (t.production, t.year, args.run_number)).filter(Q(jobstatus='cancelled') | Q(jobstatus='finished') | Q(jobstatus='failed')).values()
-    jobs_list_panda = jobs_list_panda_active.union(jobs_list_panda_archived)
+    jobs_list_panda = Jobsarchived4.objects.using('schedconfig').filter(taskid=args.task).filter(jobname__istartswith='%s-%s--%s-' % (t.production, t.year, args.run_number)).filter(Q(jobstatus='cancelled') | Q(jobstatus='finished') | Q(jobstatus='failed')).values()
     logger.info('Got list of %s jobs' % len(jobs_list_panda))
     
     for j in jobs_list:            
@@ -56,17 +54,6 @@ def main():
                 
                 j_update = Job.objects.get(panda_id=p['pandaid'])
                 today = timezone.now()
-                
-                if p['jobstatus'] == 'running':
-                    j_update.status = 'running'
-                    j_update.date_updated = today
-                    try:
-                        j_update.save()
-                        logger.info('Job %s with PandaID %s updated' % (j_update.id, j_update.panda_id)) 
-                    except IntegrityError as e:
-                        logger.exception('Unique together catched, was not saved')
-                    except DatabaseError as e:
-                        logger.exception('Something went wrong while saving: %s' % e.message)
                 
                 if p['jobstatus'] == 'cancelled':
                     j_update.status = 'defined'
@@ -79,7 +66,7 @@ def main():
                     except DatabaseError as e:
                         logger.exception('Something went wrong while saving: %s' % e.message)
                     
-                if p['jobstatus'] == 'running' or p['jobstatus'] == 'finished' or p['jobstatus'] == 'failed':
+                if p['jobstatus'] == 'finished' or p['jobstatus'] == 'failed':
                     logger.info('Going to update status of job %s from %s to %s' % (j_update.file, j['status'], p['jobstatus']))
                 
                     j_update.status = p['jobstatus']
@@ -109,20 +96,6 @@ def main():
                     except DatabaseError as e:
                         logger.exception('Something went wrong while saving: %s' % e.message)
                 
-                if p['jobstatus'] == 'running' and j_update.task.status == 'send':
-                    logger.info('Going to update status of task %s from send to running' % j_update.task.name)
-                    t_update = Task.objects.get(id=j_update.task.id)
-                    t_update.status = 'running'
-                    t_update.date_updated = today
-                
-                    try:
-                        t_update.save()
-                        logger.info('Task %s updated' % t_update.name) 
-                    except IntegrityError as e:
-                        logger.exception('Unique together catched, was not saved')
-                    except DatabaseError as e:
-                        logger.exception('Something went wrong while saving: %s' % e.message)
-            
     logger.info('done')
 
 if __name__ == "__main__":

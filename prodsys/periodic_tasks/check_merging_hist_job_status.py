@@ -45,14 +45,11 @@ def main():
         
         for j in jobs_list:
             j_check = None
-            try:
-                j_check = Jobsactive4.objects.using('schedconfig').get(pandaid=j['panda_id_merging_histos'])
-            except:
-                j_check = Jobsarchived4.objects.using('schedconfig').get(pandaid=j['panda_id_merging_histos'])
+            j_check = Jobsarchived4.objects.using('schedconfig').get(pandaid=j['panda_id_merging_histos'])
             
             if j['status_merging_histos'] != j_check.jobstatus:
                 logger.info('Getting jobs for PandaID=%s' % j_check.pandaid)
-                if j_check.jobstatus == 'running' or j_check.jobstatus == 'finished' or j_check.jobstatus == 'failed':
+                if j_check.jobstatus == 'finished' or j_check.jobstatus == 'failed':
                     today = datetime.datetime.today()
                     logger.info('Going to update jobs with PandaID=%s to status %s' % (j_check.pandaid, j_check.jobstatus))
                     if j_check.jobstatus == 'failed':
@@ -62,8 +59,6 @@ def main():
                             jobs_list_update = Job.objects.filter(panda_id_merging_histos=j_check.pandaid).update(status_merging_histos='manual check is needed', date_updated=today)
                         else:
                             jobs_list_update = Job.objects.filter(panda_id_merging_histos=j_check.pandaid).update(status_merging_histos=j_check.jobstatus, date_updated=today)
-                    elif j_check.jobstatus == 'running':
-                        jobs_list_update = Job.objects.filter(panda_id_merging_histos=j_check.pandaid).update(status_merging_histos=j_check.jobstatus, date_updated=today)
                     elif j_check.jobstatus == 'finished':
                         jobs_list_update = Job.objects.filter(panda_id_merging_histos=j_check.pandaid).update(status_merging_histos=j_check.jobstatus, status_castor_histos='ready', date_updated=today)
     

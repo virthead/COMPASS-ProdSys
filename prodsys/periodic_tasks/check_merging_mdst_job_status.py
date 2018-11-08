@@ -45,14 +45,11 @@ def main():
         
         for j in jobs_list:
             j_check = None
-            try:
-                j_check = Jobsactive4.objects.using('schedconfig').get(pandaid=j['panda_id_merging_mdst'])
-            except:
-                j_check = Jobsarchived4.objects.using('schedconfig').get(pandaid=j['panda_id_merging_mdst'])
+            j_check = Jobsarchived4.objects.using('schedconfig').get(pandaid=j['panda_id_merging_mdst'])
                 
             if j['status_merging_mdst'] != j_check.jobstatus:
                 logger.info('Getting jobs for PandaID=%s' % j_check.pandaid)
-                if j_check.jobstatus == 'running' or j_check.jobstatus == 'finished' or j_check.jobstatus == 'failed':
+                if j_check.jobstatus == 'finished' or j_check.jobstatus == 'failed':
                     today = datetime.datetime.today()
                     logger.info('Going to update jobs with PandaID=%s to status %s' % (j_check.pandaid, j_check.jobstatus))
                     if j_check.jobstatus == 'failed':
