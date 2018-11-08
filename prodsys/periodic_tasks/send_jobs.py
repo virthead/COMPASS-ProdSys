@@ -205,7 +205,22 @@ def main():
                 
                     try:
                         j_update.save()
-                        logger.info('Job %s with PandaID %s updated at %s' % (j.id, x[0], today)) 
+                        logger.info('Job %s with PandaID %s updated at %s' % (j.id, x[0], today))
+                        
+                        if j_update.task.status == 'send':
+                            logger.info('Going to update status of task %s from send to running' % j_update.task.name)
+                            t_update = Task.objects.get(id=j_update.task.id)
+                            t_update.status = 'running'
+                            t_update.date_updated = today
+                        
+                            try:
+                                t_update.save()
+                                logger.info('Task %s updated' % t_update.name) 
+                            except IntegrityError as e:
+                                logger.exception('Unique together catched, was not saved')
+                            except DatabaseError as e:
+                                logger.exception('Something went wrong while saving: %s' % e.message)
+                        
                     except IntegrityError as e:
                         logger.exception('Unique together catched, was not saved')
                     except DatabaseError as e:
