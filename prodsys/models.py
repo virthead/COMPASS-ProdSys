@@ -29,6 +29,7 @@ class Task(models.Model):
         ('cancelled', 'cancelled'),
         ('done', 'done'),
         ('archive', 'archive'),
+        ('archiving', 'archiving'),
         ('archived', 'archived'),
         )
     
