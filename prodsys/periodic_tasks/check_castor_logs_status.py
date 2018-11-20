@@ -44,7 +44,7 @@ def exec_remote_cmd(cmd):
         return run(cmd)
 
 def check_files_on_castor():
-    logger.info('Getting productions with castor histos status sent')
+    logger.info('Getting productions castor status archiving')
     tasks_list = list(Task.objects.all().exclude(site='BW_COMPASS_MCORE').filter(status='archiving').values_list('production', 'path', 'soft').distinct())
     logger.info('Got list of %s productions' % len(tasks_list))
     
