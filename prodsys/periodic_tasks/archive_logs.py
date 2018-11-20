@@ -52,7 +52,7 @@ def exec_remote_cmd(cmd):
 
 def archive_logs():
     logger.info('Getting tasks with status archive')
-    tasks_list = list(Task.objects.all().exclude(site='BW_COMPASS_MCORE').filter(status='archive').values_list('production', 'path', 'soft').distinct())
+    tasks_list = list(Task.objects.all().exclude(site='BW_COMPASS_MCORE').filter(id=86).filter(status='archive').values_list('production', 'path', 'soft').distinct())
     logger.info('Got list of %s productions' % len(tasks_list))
     access_denied = False
     for t in tasks_list:
@@ -95,7 +95,7 @@ def archive_logs():
                 access_denied = True
                 break
             
-            logger.info('Going to check if tar for run %s exist in /tmp' % run_number)
+            logger.info('Going to check if tar for run %s exists in /tmp' % run_number)
             cmd = 'ls /tmp/%(Prod)s.%(run_number)s.tar' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'run_number': run_number}
             logger.info(cmd)
             result = exec_remote_cmd(cmd)
