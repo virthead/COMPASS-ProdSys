@@ -120,7 +120,7 @@ def archive_logs():
             runs_tarred_prod += 1
             runs_tarred += 1
         
-        logger.info('%s of %s runs of production %s were archived and moved to EOS' % (runs_tarred_prod, len(runs_list), t[0])) 
+        logger.info('%s of %s runs of production %s were archived and moved to EOS' % (runs_tarred, len(runs_list), t[0])) 
         
         if runs_tarred_prod < len(runs_list):
             continue
