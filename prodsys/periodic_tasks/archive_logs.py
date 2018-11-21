@@ -3,7 +3,6 @@
 
 import sys, os
 import commands
-import datetime
 from django.utils import timezone
 import pytz
 from django.conf import settings
@@ -30,7 +29,6 @@ from utils import check_process, getRotatingFileHandler
 logger = logging.getLogger('periodic_tasks_logger')
 getRotatingFileHandler(logger, 'periodic_tasks.archive_logs.log')
 
-today = datetime.datetime.today()
 logger.info('Starting %s' % __file__)
 
 pid = str(os.getpid())
@@ -60,7 +58,7 @@ def archive_logs():
             break
         
         logger.info('Getting runs for task %s' % t[0])
-        runs_list = Job.objects.filter(task__production=t[0]).values_list('run_number', flat=True).distinct()
+        runs_list = Job.objects.filter(task__production=t[0]).filter(status_logs_archived='no').values_list('run_number', flat=True).distinct()
         logger.info('Got list of %s runs' % len(runs_list))
         if len(runs_list) == 0:
             logger.info('No runs found')
@@ -81,7 +79,8 @@ def archive_logs():
                 logger.info('Session expired, exiting')
                 break
             if result.find('No such file or directory') == -1:
-                logger.info('Tar file for run %s exists, continue' % run_number)
+                logger.info('Tar file for run %s exists, going to update chunks and continue' % run_number)
+                jobs_update = Job.objects.filter(task__production=t[0]).filter(run_number=run_number).update(status_logs_archived='yes', date_updated=timezone.now())
                 runs_tarred_prod += 1
                 continue
             
@@ -211,8 +210,7 @@ def archive_logs():
         
         if result.succeeded:
             logger.info('Successfully sent to Castor %s' % f_from)
-            today = datetime.datetime.today()
-            task_update = Task.objects.filter(production=t[0]).update(status='archiving', date_updated=today)
+            task_update = Task.objects.filter(production=t[0]).update(status='archiving', date_updated=timezone.now())
             logger.info(result)
         else:
             logger.info('Error sending to Castor %s' % f_from)
