@@ -3,7 +3,7 @@
 
 import sys, os
 import commands
-import datetime
+from django.utils import timezone
 from django.conf import settings
 import logging
 from django.core.wsgi import get_wsgi_application
@@ -18,14 +18,13 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "compass.settings")
 application = get_wsgi_application()
 
 from django.db.models import Q
-from prodsys.models import Task
+from prodsys.models import Task, Job
 
 from utils import check_process, getRotatingFileHandler
 
 logger = logging.getLogger('periodic_tasks_logger')
 getRotatingFileHandler(logger, 'periodic_tasks.check_castor_logs_status.log')
 
-today = datetime.datetime.today()
 logger.info('Starting %s' % __file__)
 
 pid = str(os.getpid())
@@ -65,7 +64,8 @@ def check_files_on_castor():
                     if r['permissions'][0] == 'm':
                         logger.info ('Going to update tasks of production %s as migrated' % t[0])
                         try:
-                            task_update = Task.objects.filter(production=t[0]).update(status='archived', date_updated=today)
+                            jobs_update = Job.objects.filter(task__production=t[0]).update(status_logs_castor='yes', date_updated=timezone.now())
+                            task_update = Task.objects.filter(production=t[0]).update(status='archived', date_updated=timezone.now())
                             logger.info('Tasks status changed to archived for production %s' % t[0])
                         except:
                             logger.error('Failed to update tasks for production' % t[0])
@@ -75,7 +75,7 @@ def check_files_on_castor():
                         if r['size'] == '0':
                             logger.info('Problematic file found, status will be changed to archive for rewriting')
                             try:
-                                task_update = Task.objects.filter(production=t[0]).update(status='archive', date_updated=today)
+                                task_update = Task.objects.filter(production=t[0]).update(status='archive', date_updated=timezone.now())
                                 logger.info('Tasks status changed to archive for production %s' % t[0])
                             except:
                                 logger.error('Failed to update tasks for production' % t[0])
