@@ -50,7 +50,7 @@ def exec_remote_cmd(cmd):
 
 def archive_logs():
     logger.info('Getting tasks with status archive')
-    tasks_list = list(Task.objects.all().exclude(site='BW_COMPASS_MCORE').filter(status='archive').values_list('production', 'path', 'soft').distinct()[:5])
+    tasks_list = list(Task.objects.all().exclude(site='BW_COMPASS_MCORE').exclude(type='mass production').filter(status='archive').values_list('production', 'path', 'soft').distinct()[:5])
     logger.info('Got list of %s productions' % len(tasks_list))
     access_denied = False
     for t in tasks_list:
@@ -75,8 +75,9 @@ def archive_logs():
             logger.info(cmd)
             result = exec_remote_cmd(cmd)
             logger.info(result)
-            if result.find('Permission denied') != -1:
-                logger.info('Session expired, exiting')
+            if result.find('Permission denied') != -1 or result.find('Input/output error') != -1:
+                logger.info('Error, exiting')
+                access_denied = True
                 break
             if result.find('No such file or directory') == -1:
                 logger.info('Tar file for run %s exists, going to update chunks and continue' % run_number)
@@ -89,8 +90,8 @@ def archive_logs():
             logger.info(cmd)
             result = exec_remote_cmd(cmd)
             logger.info(result)
-            if result.find('Permission denied') != -1:
-                logger.info('Session expired, exiting')
+            if result.find('Permission denied') != -1 or result.find('Input/output error') != -1:
+                logger.info('Error, exiting')
                 access_denied = True
                 break
             
@@ -99,8 +100,9 @@ def archive_logs():
             logger.info(cmd)
             result = exec_remote_cmd(cmd)
             logger.info(result)
-            if result.find('Permission denied') != -1:
-                logger.info('Session expired, exiting')
+            if result.find('Permission denied') != -1 or result.find('Input/output error') != -1:
+                logger.info('Error, exiting')
+                access_denied = True
                 break
             if result.find('No such file or directory') == -1:
                 logger.info('Tar file for run %s exists' % run_number)
@@ -113,8 +115,9 @@ def archive_logs():
             logger.info(cmd)
             result = exec_remote_cmd(cmd)
             logger.info(result)
-            if result.find('Permission denied') != -1:
-                logger.info('Session expired, exiting')
+            if result.find('Permission denied') != -1 or result.find('Input/output error') != -1:
+                logger.info('Error, exiting')
+                access_denied = True
                 break
             
             runs_tarred_prod += 1
@@ -133,8 +136,9 @@ def archive_logs():
         logger.info(cmd)
         result = exec_remote_cmd(cmd)
         logger.info(result)
-        if result.find('Permission denied') != -1:
-            logger.info('Session expired, exiting')
+        if result.find('Permission denied') != -1 or result.find('Input/output error') != -1:
+            logger.info('Error, exiting')
+            access_denied = True
             break
         if result.find('No such file or directory') == -1:
             logger.info('Tar file for production %s exists, going to copy it to Castor' % t[0])
@@ -148,8 +152,8 @@ def archive_logs():
             logger.info(cmd)
             result = exec_remote_cmd(cmd)
             logger.info(result)
-            if result.find('Permission denied') != -1:
-                logger.info('Session expired, exiting')
+            if result.find('Permission denied') != -1 or result.find('Input/output error') != -1:
+                logger.info('Error, exiting')
                 access_denied = True
                 break
               
@@ -162,8 +166,9 @@ def archive_logs():
             logger.info(cmd)
             result = exec_remote_cmd(cmd)
             logger.info(result)
-            if result.find('Permission denied') != -1:
-                logger.info('Session expired, exiting')
+            if result.find('Permission denied') != -1 or result.find('Input/output error') != -1:
+                logger.info('Error, exiting')
+                access_denied = True
                 break
             if result.find('No such file or directory') == -1:
                 logger.info('Tar file for production %s exists' % t[0])
@@ -176,8 +181,9 @@ def archive_logs():
             logger.info(cmd)
             result = exec_remote_cmd(cmd)
             logger.info(result)
-            if result.find('Permission denied') != -1:
-                logger.info('Session expired, exiting')
+            if result.find('Permission denied') != -1 or result.find('Input/output error') != -1:
+                logger.info('Error, exiting')
+                access_denied = True
                 break
             
             logger.info('Check if final tarz for %s exists on EOS' % t[0])
@@ -185,8 +191,9 @@ def archive_logs():
             logger.info(cmd)
             result = exec_remote_cmd(cmd)
             logger.info(result)
-            if result.find('Permission denied') != -1:
-                logger.info('Session expired, exiting')
+            if result.find('Permission denied') != -1 or result.find('Input/output error') != -1:
+                logger.info('Error, exiting')
+                access_denied = True
                 break
             if result.find('No such file or directory') == -1:
                 logger.info('Tar file for production %s exists, going to copy it to Castor' % t[0])
@@ -204,8 +211,8 @@ def archive_logs():
         cmd = f_from + ' ' + f_to
         logger.info(cmd)
         result = exec_remote_cmd(cmd)
-        if result.find('Permission denied') != -1:
-            logger.info('Session expired, exiting')
+        if result.find('Permission denied') != -1 or result.find('Input/output error') != -1:
+            logger.info('Error, exiting')
             sys.exit(0)
         
         if result.succeeded:
