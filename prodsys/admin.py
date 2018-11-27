@@ -279,7 +279,7 @@ class JobAdmin(admin.ModelAdmin):
     def task_name(self, instance):
         return instance.task.name
     
-    actions = [JobsResend, JobsResendMergingMDST, JobsResendMergingHIST, JobsResendXCheck, JobsResendMergingEVTDMP, ]
+    actions = [JobsResend, JobsResendMergingMDST, JobsResendMergingHIST, JobsResendXCheck, JobsResendMergingEVTDMP, JobsResendArchiveLogs, ]
 
 admin.site.register(Task, TaskAdmin)
 admin.site.register(Job, JobAdmin)
