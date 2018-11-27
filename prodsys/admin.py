@@ -60,6 +60,16 @@ def JobsResendMergingEVTDMP(modeladmin, request, queryset):
 
 JobsResendMergingEVTDMP.short_description = 'Resend merging eventdump of selected jobs'
 
+def JobsResendArchiveLogs(modeladmin, request, queryset):
+    today = datetime.datetime.today()
+    for q in queryset:
+        jobs_list = Job.objects.all().filter(task=q.task).filter(run_number=q.run_number).update(status_logs_archived='no',
+                        status_logs_castor='no',
+                        date_updated=today)
+        task_list = Task.objects.all().filter(task=q.task).update(status='archive', date_updated=today)
+
+JobsResendArchiveLogs.short_description = 'Resend archive logs of selected jobs'
+
 class TaskAdmin(admin.ModelAdmin):
     model = Task
     list_display = ('name', 'production', 'site', 'type', 'prodslt', 'phastver', 'status', 'jobs', 
@@ -260,10 +270,10 @@ class JobAdmin(admin.ModelAdmin):
                     'panda_id_merging_histos', 'attempt_merging_histos', 'status_merging_histos', 'chunk_number_merging_histos',
                     'panda_id_merging_evntdmp', 'attempt_merging_evntdmp', 'status_merging_evntdmp', 'chunk_number_merging_evntdmp', 'status_x_check_evntdmp',
                     'status_castor_mdst', 'status_castor_histos', 'status_castor_evntdmp',
-                    'status_logs_deleted'
+                    'status_logs_deleted', 'status_logs_archived'
                     )
     list_filter = ('status', 'status_merging_mdst', 'status_x_check', 'status_merging_histos', 'status_merging_evntdmp', 'status_x_check_evntdmp',
-                   'status_logs_deleted')
+                   'status_logs_deleted', 'status_logs_archived')
     search_fields = ['task__name', 'file', 'run_number']
     
     def task_name(self, instance):
