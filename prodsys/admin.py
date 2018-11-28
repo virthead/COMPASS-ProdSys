@@ -8,65 +8,59 @@ from .models import Task, Job
 
 from django.utils.html import format_html
 
-import datetime
+from django.utils import timezone
 
 def JobsResend(modeladmin, request, queryset):
-    today = datetime.datetime.today()
     queryset.update(status='failed', status_merging_mdst=None, chunk_number_merging_mdst=-1, status_x_check='no',
                     status_merging_histos=None,
                     status_merging_evntdmp=None, chunk_number_merging_evntdmp=-1, status_x_check_evntdmp='no',
                     status_castor_mdst=None, status_castor_histos=None, status_castor_evntdmp=None, 
-                    date_updated=today)
+                    date_updated=timezone.now())
         
 JobsResend.short_description = 'Resend selected jobs'
 
 def JobsResendMergingMDST(modeladmin, request, queryset):
-    today = datetime.datetime.today()
     for q in queryset:
         jobs_list = Job.objects.all().filter(task=q.task).filter(run_number=q.run_number).update(status_merging_mdst='ready', 
                         chunk_number_merging_mdst=-1, status_x_check='no', 
                         status_merging_histos=None, 
                         status_merging_evntdmp=None, chunk_number_merging_evntdmp=-1,
                         status_castor_mdst=None, status_castor_histos=None, status_castor_evntdmp=None, 
-                        date_updated=today)
+                        date_updated=timezone.now())
 
 JobsResendMergingMDST.short_description = 'Resend merging mdst of selected jobs'
 
 def JobsResendMergingHIST(modeladmin, request, queryset):
-    today = datetime.datetime.today()
     for q in queryset:
         jobs_list = Job.objects.all().filter(task=q.task).filter(run_number=q.run_number).update(status_merging_histos='ready', 
                         status_castor_mdst=None, status_castor_histos=None, status_castor_evntdmp=None, 
-                        date_updated=today)
+                        date_updated=timezone.now())
 
 JobsResendMergingHIST.short_description = 'Resend merging hist of selected jobs'
 
 def JobsResendXCheck(modeladmin, request, queryset):
-    today = datetime.datetime.today()
     for q in queryset:
         jobs_list = Job.objects.all().filter(task=q.task).filter(run_number=q.run_number).update(status_x_check='no', 
                         status_castor_mdst=None, status_castor_histos=None, status_castor_evntdmp=None, 
-                        date_updated=today)
+                        date_updated=timezone.now())
 
 JobsResendXCheck.short_description = 'Resend x-check of selected jobs'
 
 def JobsResendMergingEVTDMP(modeladmin, request, queryset):
-    today = datetime.datetime.today()
     for q in queryset:
         jobs_list = Job.objects.all().filter(task=q.task).filter(run_number=q.run_number).update(status_merging_evntdmp='ready',
                         chunk_number_merging_evntdmp=-1, status_x_check_evntdmp='no',
                         status_castor_evntdmp=None, 
-                        date_updated=today)
+                        date_updated=timezone.now())
 
 JobsResendMergingEVTDMP.short_description = 'Resend merging eventdump of selected jobs'
 
 def JobsResendArchiveLogs(modeladmin, request, queryset):
-    today = datetime.datetime.today()
     for q in queryset:
         jobs_list = Job.objects.all().filter(task=q.task).filter(run_number=q.run_number).update(status_logs_archived='no',
                         status_logs_castor='no',
-                        date_updated=today)
-        task_list = Task.objects.all().filter(task=q.task).update(status='archive', date_updated=today)
+                        date_updated=timezone.now())
+        task_list = Task.objects.all().filter(id=q.task.id).update(status='archive', date_updated=timezone.now())
 
 JobsResendArchiveLogs.short_description = 'Resend archive logs of selected jobs'
 
