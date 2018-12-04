@@ -165,7 +165,7 @@ def archive_logs():
         if empty_file_found:
             continue
         
-        logger.info('Ready to create tar for production' % t[0])
+        logger.info('Ready to create tar for production %s' % t[0])
         
         logger.info('Going to create final tarz file for production %s' % t[0])
         if t[3] == 'mass production':
