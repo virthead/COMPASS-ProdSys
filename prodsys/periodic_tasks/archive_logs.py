@@ -139,7 +139,33 @@ def archive_logs():
         if len(runs_list) > 0:
             continue
         
-        logger.info('All runs of %s are in tars, ready to create tar for production' % t[0])
+        logger.info('All runs of %s are in tars, going to check if empty files were generated' % t[0])
+        cmd = 'ls -al /eos/experiment/compass/%(Path)s%(Soft)s/logFiles/%(Prod)s.*.tar' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
+        logger.info(cmd)
+        result = exec_remote_cmd(cmd)
+        logger.info(result)
+        if result.find('Permission denied') != -1 or result.find('Input/output error') != -1:
+            logger.info('Error, exiting')
+            access_denied = True
+            break
+          
+        if not result.succeeded:
+            logger.info('Error reading directory, skipping')
+            continue
+        
+        reader = csv.DictReader(result.splitlines(), delimiter = ' ', skipinitialspace = True, fieldnames = ['permissions', 'links', 'owner', 'group', 'size', 'date1', 'date2', 'time', 'name'])
+        empty_file_found = False
+        for r in reader:
+            if r['size'] == '0':
+                run_number = r['name'][r['name'].find('.') + 1:r['name'].find('.tar')]
+                logger.info('Empy file found for run: %s, going to resend archiving' % run_number)
+                jobs_update = Job.objects.filter(task__production=t[0]).filter(run_number=run_number).update(status_logs_archived='no', date_updated=timezone.now())
+                empty_file_found = True
+        
+        if empty_file_found:
+            continue
+        
+        logger.info('Ready to create tar for production' % t[0])
         
         logger.info('Going to create final tarz file for production %s' % t[0])
         if t[3] == 'mass production':
