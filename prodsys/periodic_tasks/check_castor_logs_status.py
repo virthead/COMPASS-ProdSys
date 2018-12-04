@@ -44,13 +44,19 @@ def exec_remote_cmd(cmd):
 
 def check_files_on_castor():
     logger.info('Getting productions castor status archiving')
-    tasks_list = list(Task.objects.all().exclude(site='BW_COMPASS_MCORE').filter(status='archiving').values_list('production', 'path', 'soft').distinct())
+    tasks_list = list(Task.objects.all().exclude(site='BW_COMPASS_MCORE').filter(status='archiving').values_list('production', 'path', 'soft', 'type', 'year').distinct())
     logger.info('Got list of %s productions' % len(tasks_list))
     
     for t in tasks_list:
         logger.info('Going to check file migration status on Castor')
-        file = '%s_logFiles.tarz' % t[2]
-        file_and_path = '/castor/cern.ch/user/n/na58dst1/prodlogs/testproductions/' + file
+        path = '/castor/cern.ch/user/n/na58dst1/prodlogs/'
+        if t[3] == 'mass production':
+            path = path + '%s/' % t[4] 
+            file = '%s_logFiles.tarz' % t[0]
+            file_and_path = path + file
+        else:
+            file = '%s_logFiles.tarz' % t[2]
+            file_and_path = path + 'testproductions/' + file
         cmd = 'nsls -l ' + file_and_path
         logger.info(cmd)
         result = exec_remote_cmd(cmd)

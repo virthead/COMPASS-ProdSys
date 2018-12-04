@@ -50,7 +50,7 @@ def exec_remote_cmd(cmd):
 
 def archive_logs():
     logger.info('Getting tasks with status archive')
-    tasks_list = list(Task.objects.all().exclude(site='BW_COMPASS_MCORE').exclude(type='mass production').filter(status='archive').values_list('production', 'path', 'soft').distinct()[:5])
+    tasks_list = list(Task.objects.all().exclude(site='BW_COMPASS_MCORE').filter(status='archive').values_list('production', 'path', 'soft', 'type', 'year').distinct()[:5])
     logger.info('Got list of %s productions' % len(tasks_list))
     access_denied = False
     for t in tasks_list:
@@ -142,7 +142,10 @@ def archive_logs():
         logger.info('All runs of %s are in tars, ready to create tar for production' % t[0])
         
         logger.info('Going to create final tarz file for production %s' % t[0])
-        cmd = 'tar -cvzf /tmp/%(Soft)s_logFiles.tarz /eos/experiment/compass/%(Path)s%(Soft)s/logFiles/%(Prod)s.*.tar' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
+        if t[3] == 'mass production':
+            cmd = 'tar -cvzf /tmp/%(Prod)s_logFiles.tarz /eos/experiment/compass/%(Path)s%(Soft)s/logFiles/%(Prod)s.*.tar' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
+        else:
+            cmd = 'tar -cvzf /tmp/%(Soft)s_logFiles.tarz /eos/experiment/compass/%(Path)s%(Soft)s/logFiles/%(Prod)s.*.tar' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
         logger.info(cmd)
         result = exec_remote_cmd(cmd)
         logger.info(result)
@@ -156,7 +159,10 @@ def archive_logs():
             continue
         
         logger.info('Going to check if final tar for production %s exists in /tmp' % t[0])
-        cmd = 'ls /tmp/%(Soft)s_logFiles.tarz' % {'Soft': t[2]}
+        if t[3] == 'mass production':
+            cmd = 'ls /tmp/%(Prod)s_logFiles.tarz' % {'Prod': t[0]}
+        else:
+            cmd = 'ls /tmp/%(Soft)s_logFiles.tarz' % {'Soft': t[2]}
         logger.info(cmd)
         result = exec_remote_cmd(cmd)
         logger.info(result)
@@ -171,7 +177,10 @@ def archive_logs():
             continue
 
         logger.info('Going to move file from /tmp to EOS')
-        cmd = 'mv /tmp/%(Soft)s_logFiles.tarz /eos/experiment/compass/%(Path)s%(Soft)s/logFiles/%(Soft)s_logFiles.tarz' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
+        if t[3] == 'mass production':
+            cmd = 'mv /tmp/%(Prod)s_logFiles.tarz /eos/experiment/compass/%(Path)s%(Soft)s/logFiles/%(Prod)s_logFiles.tarz' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
+        else:
+            cmd = 'mv /tmp/%(Soft)s_logFiles.tarz /eos/experiment/compass/%(Path)s%(Soft)s/logFiles/%(Soft)s_logFiles.tarz' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
         logger.info(cmd)
         result = exec_remote_cmd(cmd)
         logger.info(result)
@@ -182,7 +191,10 @@ def archive_logs():
         
         logger.info('Check if final tarz for %s exists on EOS' % t[0])
         path = '/eos/experiment/compass/%(Path)s%(Soft)s/logFiles/' % {'Path': t[1], 'Soft': t[2]}
-        file = '%(Soft)s_logFiles.tarz' % {'Soft': t[2]}
+        if t[3] == 'mass production':
+            file = '%(Prod)s_logFiles.tarz' % {'Prod': t[0]}
+        else:
+            file = '%(Soft)s_logFiles.tarz' % {'Soft': t[2]}
         cmd = 'ls -al %s%s' % (path, file)
         logger.info(cmd)
         result = exec_remote_cmd(cmd)
@@ -208,21 +220,27 @@ def archive_logs():
             continue
         
         logger.info('Going to send file to Castor')        
-        f_from = 'xrdcp -N -f root://eoscompass.cern.ch//eos/experiment/compass/%(Path)s%(Soft)s/logFiles/%(Soft)s_logFiles.tarz' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
-        f_to = 'root://castorpublic.cern.ch//castor/cern.ch/user/n/na58dst1/prodlogs/testproductions/%(Soft)s_logFiles.tarz' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
-        cmd = f_from + ' ' + f_to
+        p_from = 'xrdcp -N -f root://eoscompass.cern.ch//eos/experiment/compass/%(Path)s%(Soft)s/logFiles/' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
+        if t[3] == 'mass production':
+            f_name = '%(Prod)s_logFiles.tarz' % {'Prod': t[0]}
+            p_to = 'root://castorpublic.cern.ch//castor/cern.ch/user/n/na58dst1/prodlogs/%(Year)s/' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'Year': t[4]}
+        else:
+            f_name = '%(Soft)s_logFiles.tarz' % {'Soft': t[2]}
+            p_to = 'root://castorpublic.cern.ch//castor/cern.ch/user/n/na58dst1/prodlogs/testproductions/' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
+            
+        cmd = p_from + f_name + ' ' + p_to + f_name
         logger.info(cmd)
         result = exec_remote_cmd(cmd)
         if result.find('Permission denied') != -1 or result.find('Input/output error') != -1:
             logger.info('Error, exiting')
             sys.exit(0)
-        
+         
         if result.succeeded:
-            logger.info('Successfully sent to Castor %s' % f_from)
+            logger.info('Successfully sent to Castor %s' % f_name)
             task_update = Task.objects.filter(production=t[0]).update(status='archiving', date_updated=timezone.now())
             logger.info(result)
         else:
-            logger.info('Error sending to Castor %s' % f_from)
+            logger.info('Error sending to Castor %s' % f_name)
             logger.error(result)
             
     logger.info('done')
