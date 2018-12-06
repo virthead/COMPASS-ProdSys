@@ -61,9 +61,11 @@ class Task(models.Model):
     files_home = models.CharField(max_length=300, null=True, blank=True, help_text='For BlueWaters only')
     max_attempts = models.IntegerField(default=5)
     status = models.CharField(max_length=300, choices=status_choices, default='draft')
-    date_added =  models.DateTimeField()
+    date_added = models.DateTimeField()
     date_updated = models.DateTimeField()
     comment = models.TextField(null=True, blank=True)
+    date_processing_start = models.DateTimeField(null=True, blank=True)
+    date_processing_finish = models.DateTimeField(null=True, blank=True)
     
     def __unicode__(self):
         return self.name
