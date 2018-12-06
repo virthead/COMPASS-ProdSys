@@ -208,7 +208,6 @@ def main():
                             logger.info('Going to update status of task %s from send to running' % j_update.task.name)
                             t_update = Task.objects.get(id=j_update.task.id)
                             t_update.status = 'running'
-                            t_update.date_processing_start = timezone.now()
                             t_update.date_updated = timezone.now()
                         
                             try:
