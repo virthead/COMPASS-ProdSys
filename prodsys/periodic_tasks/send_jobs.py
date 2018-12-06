@@ -3,7 +3,7 @@
 
 import sys, os
 import commands
-import datetime
+from django.utils import timezone
 from django.conf import settings
 import logging
 from django.core.wsgi import get_wsgi_application
@@ -28,7 +28,6 @@ from utils import check_process, getRotatingFileHandler
 logger = logging.getLogger('periodic_tasks_logger')
 getRotatingFileHandler(logger, 'periodic_tasks.send_jobs.log')
 
-today = datetime.datetime.today()
 logger.info('Starting %s' % __file__)
 
 logger.info('Setting environment for PanDA client')
@@ -194,25 +193,23 @@ def main():
             logger.info(s)
             for x in o:
                 logger.info("PandaID=%s" % x[0])
-                today = datetime.datetime.today()
-                
                 if x[0] != 0 and x[0] != 'NULL':
                     j_update = Job.objects.get(id=j.id)
                     j_update.panda_id = x[0]
                     j_update.status = 'sent'
                     j_update.attempt = j_update.attempt + 1
-                    j_update.date_updated = today
+                    j_update.date_updated = timezone.now()
                 
                     try:
                         j_update.save()
-                        logger.info('Job %s with PandaID %s updated at %s' % (j.id, x[0], today))
+                        logger.info('Job %s with PandaID %s updated at %s' % (j.id, x[0], timezone.now()))
                         
                         if j_update.task.status == 'send':
                             logger.info('Going to update status of task %s from send to running' % j_update.task.name)
                             t_update = Task.objects.get(id=j_update.task.id)
                             t_update.status = 'running'
-                            t_update.date_processing_start = today
-                            t_update.date_updated = today
+                            t_update.date_processing_start = timezone.now()
+                            t_update.date_updated = timezone.now()
                         
                             try:
                                 t_update.save()
