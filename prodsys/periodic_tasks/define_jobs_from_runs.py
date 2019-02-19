@@ -46,7 +46,7 @@ def exec_remote_cmd(cmd):
         return run(cmd)
 
 def define_jobs_from_runs():
-    years_in_text_files = [2015, 2016, 2017]
+    years_in_text_files = [2015, 2016, 2017, 2018]
     
     logger.info('Getting tasks with status ready')
     tasks_list = Task.objects.all().filter(status='ready').filter(files_source='runs list')
