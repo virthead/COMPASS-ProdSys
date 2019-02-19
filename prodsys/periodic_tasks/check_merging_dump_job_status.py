@@ -45,7 +45,10 @@ def main():
         
         for j in jobs_list:
             j_check = None
-            j_check = Jobsarchived4.objects.using('schedconfig').get(pandaid=j['panda_id_merging_evntdmp'])
+            try:
+                j_check = Jobsarchived4.objects.using('schedconfig').get(pandaid=j['panda_id_merging_evntdmp'])
+            except:
+                continue
                 
             if j['status_merging_evntdmp'] != j_check.jobstatus:
                 logger.info('Getting jobs for PandaID=%s' % j_check.pandaid)
