@@ -11,7 +11,9 @@ class Task(models.Model):
         ('test production', 'test production'),
         ('mass production', 'mass production'),
         ('technical production', 'technical production'),
-        ('DDD filtering', 'DDD filtering')        
+        ('DDD filtering', 'DDD filtering'),
+        ('MC generation', 'MC generation'),
+        ('MC reconstruction', 'MC reconstruction')
         )
     
     site_choices = (
