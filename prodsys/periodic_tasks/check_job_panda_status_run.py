@@ -55,7 +55,7 @@ def main():
                 j_update = Job.objects.get(panda_id=p['pandaid'])
                 today = timezone.now()
                 
-                if p['jobstatus'] == 'cancelled':
+                if p['jobstatus'] == 'cancelled' or p['jobstatus'] == 'closed':
                     j_update.status = 'defined'
                     j_update.date_updated = today
                     try:

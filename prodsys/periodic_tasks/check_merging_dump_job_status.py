@@ -52,10 +52,10 @@ def main():
                 
             if j['status_merging_evntdmp'] != j_check.jobstatus:
                 logger.info('Getting jobs for PandaID=%s' % j_check.pandaid)
-                if j_check.jobstatus == 'finished' or j_check.jobstatus == 'failed':
+                if j_check.jobstatus == 'finished' or j_check.jobstatus == 'failed' or j_check.jobstatus == 'closed':
                     today = datetime.datetime.today()
                     logger.info('Going to update jobs with PandaID=%s to status %s' % (j_check.pandaid, j_check.jobstatus))
-                    if j_check.jobstatus == 'failed':
+                    if j_check.jobstatus == 'failed' or j_check.jobstatus == 'closed':
                         # refer to pilot's COMPASSExperiment PilotErrors for more details
                         if j_check.piloterrorcode == 1235 or j_check.piloterrorcode == 1237:
                             logger.info('%s, job status will be updated to manual check is needed' % j_check.piloterrordiag)
