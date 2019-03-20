@@ -55,7 +55,7 @@ def main():
                 j_update = Job.objects.get(panda_id=p['pandaid'])
                 today = timezone.now()
                 
-                if p['jobstatus'] == 'cancelled' or p['jobstatus'] == 'closed':
+                if p['jobstatus'] == 'cancelled':
                     j_update.status = 'defined'
                     j_update.date_updated = today
                     try:
@@ -66,6 +66,17 @@ def main():
                     except DatabaseError as e:
                         logger.exception('Something went wrong while saving: %s' % e.message)
                     
+                if p['jobstatus'] == 'closed':
+                    j_update.status = 'staged'
+                    j_update.date_updated = today
+                    try:
+                        j_update.save()
+                        logger.info('Job %s with PandaID %s updated' % (j_update.id, j_update.panda_id)) 
+                    except IntegrityError as e:
+                        logger.exception('Unique together catched, was not saved')
+                    except DatabaseError as e:
+                        logger.exception('Something went wrong while saving: %s' % e.message)
+                
                 if p['jobstatus'] == 'finished' or p['jobstatus'] == 'failed':
                     logger.info('Going to update status of job %s from %s to %s' % (j_update.file, j['status'], p['jobstatus']))
                 
