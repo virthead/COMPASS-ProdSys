@@ -67,7 +67,7 @@ def main():
                         logger.exception('Something went wrong while saving: %s' % e.message)
                     
                 if p['jobstatus'] == 'closed':
-                    j_update.status = 'staged'
+                    j_update.status = 'failed'
                     j_update.date_updated = today
                     try:
                         j_update.save()
