@@ -44,6 +44,11 @@ def main():
         logger.info('Got list of %s files' % len(filelist))
         count_added = 0
         for l in filelist:
+            qs = Job.objects.filter(task=t, file=l)
+            if qs.exists():
+                logger.info('Such task and job already exist in the system, skipping')
+                continue
+            
             logger.info('Going go define a job for %s ' % l)
             runNumber = ''
             runNumber = l[l.rfind('-') + 1:l.find('.raw')]
