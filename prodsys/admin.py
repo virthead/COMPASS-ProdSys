@@ -7,8 +7,8 @@ from django.db.models import Count
 from .models import Task, Job
 
 from django.utils.html import format_html
-
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 def JobsResend(modeladmin, request, queryset):
     queryset.update(status='failed', status_merging_mdst=None, chunk_number_merging_mdst=-1, status_x_check='no',
@@ -255,7 +255,152 @@ class TaskAdmin(admin.ModelAdmin):
                     jobs_finished = j['total']
         
         return format_html('<div style=white-space:nowrap;display:inline-block;>ready: {}, sent: {}, failed: {}, finished: {}</div>', jobs_ready, jobs_sent, jobs_failed, jobs_finished)
-    
+
+class StatusMergingMDSTListFilter(admin.SimpleListFilter):
+    title = _('status merging mdst')
+    parameter_name = 'status_merging_mdst'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('ready', _('ready')),
+            ('sent', _('sent')),
+            ('finished', _('finished')),
+            ('failed', _('failed')),
+            ('-', _('-')),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'ready':
+            return queryset.filter(status_merging_mdst='ready')
+        if self.value() == 'sent':
+            return queryset.filter(status_merging_mdst='sent')
+        if self.value() == 'finished':
+            return queryset.filter(status_merging_mdst='finished')
+        if self.value() == 'failed':
+            return queryset.filter(status_merging_mdst='failed')
+        if self.value() == '-':
+            return queryset.filter(status_merging_mdst__isnull=True)
+        
+class StatusMergingHISTListFilter(admin.SimpleListFilter):
+    title = _('status merging histos')
+    parameter_name = 'status_merging_histos'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('ready', _('ready')),
+            ('sent', _('sent')),
+            ('finished', _('finished')),
+            ('failed', _('failed')),
+            ('-', _('-')),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'ready':
+            return queryset.filter(status_merging_histos='ready')
+        if self.value() == 'sent':
+            return queryset.filter(status_merging_histos='sent')
+        if self.value() == 'finished':
+            return queryset.filter(status_merging_histos='finished')
+        if self.value() == 'failed':
+            return queryset.filter(status_merging_histos='failed')
+        if self.value() == '-':
+            return queryset.filter(status_merging_histos__isnull=True)
+
+class StatusMergingDUMPListFilter(admin.SimpleListFilter):
+    title = _('status merging evntdmp')
+    parameter_name = 'status_merging_evntdmp'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('ready', _('ready')),
+            ('sent', _('sent')),
+            ('finished', _('finished')),
+            ('failed', _('failed')),
+            ('-', _('-')),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'ready':
+            return queryset.filter(status_merging_evntdmp='ready')
+        if self.value() == 'sent':
+            return queryset.filter(status_merging_evntdmp='sent')
+        if self.value() == 'finished':
+            return queryset.filter(status_merging_evntdmp='finished')
+        if self.value() == 'failed':
+            return queryset.filter(status_merging_evntdmp='failed')
+        if self.value() == '-':
+            return queryset.filter(status_merging_evntdmp__isnull=True)
+        
+class StatusXCheckFilter(admin.SimpleListFilter):
+    title = _('status x check')
+    parameter_name = 'status_x_check'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('yes', _('yes')),
+            ('no', _('no')),
+            ('manual check is needed', _('manual check is needed')),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'yes':
+            return queryset.filter(status_x_check='yes')
+        if self.value() == 'no':
+            return queryset.filter(status_x_check='no')
+        if self.value() == 'manual check is needed':
+            return queryset.filter(status_x_check='manual check is needed')
+        
+class StatusXCheckDUMPFilter(admin.SimpleListFilter):
+    title = _('status x check evntdmp')
+    parameter_name = 'status_x_check_evntdmp'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('yes', _('yes')),
+            ('no', _('no')),
+            ('manual check is needed', _('manual check is needed')),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'yes':
+            return queryset.filter(status_x_check_evntdmp='yes')
+        if self.value() == 'no':
+            return queryset.filter(status_x_check_evntdmp='no')
+        if self.value() == 'manual check is needed':
+            return queryset.filter(status_x_check_evntdmp='manual check is needed')
+
+class StatusLogsDeletedFilter(admin.SimpleListFilter):
+    title = _('status logs deleted')
+    parameter_name = 'status_logs_deleted'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('yes', _('yes')),
+            ('no', _('no')),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'yes':
+            return queryset.filter(status_logs_deleted='yes')
+        if self.value() == 'no':
+            return queryset.filter(status_logs_deleted='no')
+        
+class StatusLogsArchivedFilter(admin.SimpleListFilter):
+    title = _('status logs archived')
+    parameter_name = 'status_logs_archived'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('yes', _('yes')),
+            ('no', _('no')),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'yes':
+            return queryset.filter(status_logs_archived='yes')
+        if self.value() == 'no':
+            return queryset.filter(status_logs_archived='no')
+
 class JobAdmin(admin.ModelAdmin):
     model = Job
     list_display = ('task_name', 'file', 'number_of_events', 'run_number', 'chunk_number', 'panda_id', 'attempt', 'status', 
@@ -266,8 +411,8 @@ class JobAdmin(admin.ModelAdmin):
                     'status_castor_mdst', 'status_castor_histos', 'status_castor_evntdmp',
                     'status_logs_deleted', 'status_logs_archived'
                     )
-    list_filter = ('status', 'status_merging_mdst', 'status_x_check', 'status_merging_histos', 'status_merging_evntdmp', 'status_x_check_evntdmp',
-                   'status_logs_deleted', 'status_logs_archived')
+    list_filter = ('status', StatusMergingMDSTListFilter, StatusXCheckFilter, StatusMergingHISTListFilter, StatusMergingDUMPListFilter, 
+                   StatusXCheckDUMPFilter, StatusLogsDeletedFilter, StatusLogsArchivedFilter)
     search_fields = ['task__name', 'file', 'run_number']
     
     def task_name(self, instance):
