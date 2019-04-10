@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
+from django.conf.global_settings import INTERNAL_IPS
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -26,7 +27,7 @@ SECRET_KEY = '*****'
 DEBUG = False
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'vm221-123.jinr.ru', '159.93.221.123']
-
+INTERNAL_IPS = ['159.93.45.70']
 
 # Application definition
 
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_celery_beat',
     'django_celery_results',
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -52,6 +54,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'schedconfig.tools.sslAuth.SSLClientAuthMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -235,5 +238,9 @@ LOGGING = {
             'handlers': ['periodic_tasks_logfile'],
             'level': 'INFO'
         },
+#         'django.db.backends': {
+#             'handlers': ['debug_logfile'],
+#             'level': 'DEBUG',
+#         },        
     }
 }
