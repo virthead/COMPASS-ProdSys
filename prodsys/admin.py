@@ -9,6 +9,7 @@ from .models import Task, Job
 from django.utils.html import format_html
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django_admin_listfilter_dropdown.filters import DropdownFilter, ChoiceDropdownFilter, RelatedDropdownFilter
 
 def JobsResend(modeladmin, request, queryset):
     queryset.update(status='failed', status_merging_mdst=None, chunk_number_merging_mdst=-1, status_x_check='no',
@@ -256,6 +257,11 @@ class TaskAdmin(admin.ModelAdmin):
         
         return format_html('<div style=white-space:nowrap;display:inline-block;>ready: {}, sent: {}, failed: {}, finished: {}</div>', jobs_ready, jobs_sent, jobs_failed, jobs_finished)
 
+class TaskCustomFilter(RelatedDropdownFilter):
+    def choices(self, cl):
+        self.lookup_choices = Task.objects.exclude(status='archived').values_list('id', 'name').order_by('-id')
+        return super(RelatedDropdownFilter, self).choices(cl)
+    
 class StatusMergingMDSTListFilter(admin.SimpleListFilter):
     title = _('status merging mdst')
     parameter_name = 'status_merging_mdst'
@@ -403,7 +409,7 @@ class StatusLogsArchivedFilter(admin.SimpleListFilter):
 
 class JobAdmin(admin.ModelAdmin):
     model = Job
-    list_display = ('task_name', 'file', 'number_of_events', 'run_number', 'chunk_number', 'panda_id', 'attempt', 'status', 
+    list_display = ('file', 'number_of_events', 'run_number', 'chunk_number', 'panda_id', 'attempt', 'status', 
                     'panda_id_merging_mdst', 'attempt_merging_mdst', 'status_merging_mdst',
                     'chunk_number_merging_mdst', 'status_x_check',
                     'panda_id_merging_histos', 'attempt_merging_histos', 'status_merging_histos', 'chunk_number_merging_histos',
@@ -411,9 +417,9 @@ class JobAdmin(admin.ModelAdmin):
                     'status_castor_mdst', 'status_castor_histos', 'status_castor_evntdmp',
                     'status_logs_deleted', 'status_logs_archived'
                     )
-    list_filter = ('status', StatusMergingMDSTListFilter, StatusXCheckFilter, StatusMergingHISTListFilter, StatusMergingDUMPListFilter, 
+    list_filter = (('task_id', TaskCustomFilter), 'status', StatusMergingMDSTListFilter, StatusXCheckFilter, StatusMergingHISTListFilter, StatusMergingDUMPListFilter, 
                    StatusXCheckDUMPFilter, StatusLogsDeletedFilter, StatusLogsArchivedFilter)
-    search_fields = ['task_name', 'file', 'run_number']
+    search_fields = ['file', 'run_number']
     
     actions = [JobsResend, JobsResendMergingMDST, JobsResendMergingHIST, JobsResendXCheck, JobsResendMergingEVTDMP, JobsResendArchiveLogs, ]
 
