@@ -56,6 +56,7 @@ def main():
             chunkNumber = l[l.find('cdr') + 3:l.rfind('-')]
             j = Job(
                 task = t,
+                task_name = t.name,
                 file = l,
                 run_number = runNumber,
                 chunk_number = chunkNumber,
