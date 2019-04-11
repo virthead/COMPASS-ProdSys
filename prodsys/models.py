@@ -88,6 +88,7 @@ class Job(models.Model):
         )
     
     task = models.ForeignKey(Task, on_delete=models.DO_NOTHING)
+    task_name = models.CharField(max_length=300, null=True, blank=True)
     file = models.CharField(max_length=300)
     number_of_events = models.IntegerField(default=-1)
     attempt = models.IntegerField(default=0)
