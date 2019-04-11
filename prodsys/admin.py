@@ -413,10 +413,7 @@ class JobAdmin(admin.ModelAdmin):
                     )
     list_filter = ('status', StatusMergingMDSTListFilter, StatusXCheckFilter, StatusMergingHISTListFilter, StatusMergingDUMPListFilter, 
                    StatusXCheckDUMPFilter, StatusLogsDeletedFilter, StatusLogsArchivedFilter)
-    search_fields = ['task__name', 'file', 'run_number']
-    
-    def task_name(self, instance):
-        return instance.task.name
+    search_fields = ['task_name', 'file', 'run_number']
     
     actions = [JobsResend, JobsResendMergingMDST, JobsResendMergingHIST, JobsResendXCheck, JobsResendMergingEVTDMP, JobsResendArchiveLogs, ]
 
