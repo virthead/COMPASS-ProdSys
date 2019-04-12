@@ -99,8 +99,8 @@ class TaskAdmin(admin.ModelAdmin):
                     jobs_finished = j['total']
                 jobs_all += j['total']
         
-        return format_html('<div style=white-space:nowrap;display:inline-block;>all: {}, staged: {}, sent: {}, failed: {}, check: {}, finished: {}</div>', jobs_all, jobs_staged, jobs_sent, jobs_failed, jobs_mcin, jobs_finished)
-        
+        return format_html('<div style=white-space:nowrap;display:inline-block;><a href="/compass-prodsys/admin/prodsys/job/?q=&task_id__id__exact={}" target="_blank">all</a>: {}, staged: {}, sent: {}, failed: {}, check: {}, finished: {}</div>', obj.id, jobs_all, jobs_staged, jobs_sent, jobs_failed, jobs_mcin, jobs_finished)
+    
     def merging_mdst(self, obj):
         jobs_ready = 0
         jobs_sent = 0
