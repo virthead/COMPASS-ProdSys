@@ -120,7 +120,6 @@ def define_jobs_from_runs():
                                 
                                 j = Job(
                                     task = t,
-                                    task_name = t.name,
                                     file = bw_file,
                                     number_of_events = number_of_events,
                                     run_number = runNumber,
@@ -136,7 +135,6 @@ def define_jobs_from_runs():
                                 
                                 j = Job(
                                     task = t,
-                                    task_name = t.name,
                                     file = l['name'],
                                     number_of_events = number_of_events,
                                     run_number = runNumber,
@@ -213,7 +211,6 @@ def define_jobs_from_runs():
                                 
                                 j = Job(
                                     task = t,
-                                    task_name = t.name,
                                     file = bw_file,
                                     run_number = runNumber,
                                     chunk_number = chunkNumber,
@@ -228,7 +225,6 @@ def define_jobs_from_runs():
                                 
                                 j = Job(
                                     task = t,
-                                    task_name = t.name,
                                     file = l,
                                     run_number = runNumber,
                                     chunk_number = chunkNumber,
