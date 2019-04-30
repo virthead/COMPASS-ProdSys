@@ -58,7 +58,7 @@ def get_number_of_events():
             break
         
         logger.info('Getting jobs with number_of_events=-1 for task %s' % t.name)
-        jobs_list = Job.objects.filter(task=t).filter(number_of_events=-1).order_by('run_number')
+        jobs_list = Job.objects.filter(task=t).filter(number_of_events_attempt__lt=1).filter(number_of_events=-1).order_by('run_number')
         logger.info('Got list of %s jobs' % len(jobs_list))
         
         i = 0
@@ -99,7 +99,16 @@ def get_number_of_events():
                     except DatabaseError as e:
                         logger.exception('Something went wrong while saving: %s' % e.message)
                 except:
-                    logger.error('Noninteger result, skipping')
+                    logger.error('Noninteger result, going to update attempt number and skip')
+                    j_update = Job.objects.get(id=j.id)
+                    j_update.number_of_events_attempt=j_update.number_of_events_attempt + 1
+                    try:
+                        j_update.save()
+                        logger.info('Job %s updated' % (j_update.id)) 
+                    except IntegrityError as e:
+                        logger.exception('Unique together catched, was not saved')
+                    except DatabaseError as e:
+                        logger.exception('Something went wrong while saving: %s' % e.message)
                     continue
             
             i += 1
