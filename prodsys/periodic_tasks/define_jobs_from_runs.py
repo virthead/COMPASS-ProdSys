@@ -107,6 +107,10 @@ def define_jobs_from_runs():
                             except:
                                 logger.info('Number of events %s is not integer, setting -1' % l['events'])
                             
+                            if number_of_events == 0:
+                                logger.info('0 events in the file, skipping')
+                                continue
+                            
                             logger.info('Check that task and job are unique')
                             
                             if t.site == 'BW_COMPASS_MCORE':
