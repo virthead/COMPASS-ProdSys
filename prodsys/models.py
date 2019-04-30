@@ -90,6 +90,7 @@ class Job(models.Model):
     task = models.ForeignKey(Task, on_delete=models.DO_NOTHING)
     file = models.CharField(max_length=300)
     number_of_events = models.IntegerField(default=-1)
+    number_of_events_attempt = models.IntegerField(default=0)
     attempt = models.IntegerField(default=0)
     status = models.CharField(max_length=50, choices=status_choices, default='defined')
     run_number = models.IntegerField(default=0)
