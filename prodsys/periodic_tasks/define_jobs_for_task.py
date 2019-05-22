@@ -12,6 +12,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../')) # fix me in c
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "compass.settings")
 application = get_wsgi_application()
 
+from django.db.models import Q
 from prodsys.models import Task, Job
 
 from utils import check_process, getRotatingFileHandler
@@ -30,7 +31,7 @@ if check_process(__file__, pid):
 
 def main():
     logger.info('Getting tasks with status ready')
-    td = Task.objects.all().filter(status='ready').filter(files_source='files list')
+    td = Task.objects.all().filter(Q(type='test production') | Q(type='mass production') | Q(type='technical production') | Q(type='DDD filtering')).filter(status='ready').filter(files_source='files list')
     logger.info('Got list of %s tasks' % len(td))
     for t in td:
         logger.info('Going to define jobs for %s' % t)
