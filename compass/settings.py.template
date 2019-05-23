@@ -171,6 +171,14 @@ COMPASS_HOST = '*****'
 COMPASS_USER = '*****'
 COMPASS_PASS = '*****'
 
+CASTOR_HOME_ROOT = 'root://castorpublic.cern.ch/'
+CASTOR_COMPASS_HOME = '/castor/cern.ch/compass/'
+
+EOS_HOME_ROOT = 'root://eoscompass.cern.ch/'
+EOS_COMPASS_HOME = '/eos/experiment/compass/'
+
+FTS_SERVER = 'https://fts3-pilot.cern.ch:8446'
+
 LOGGING_DIR = '/var/log/compass_prodsys/'
 
 LOGGING = {
