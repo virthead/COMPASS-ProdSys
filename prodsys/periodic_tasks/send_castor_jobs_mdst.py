@@ -96,7 +96,7 @@ def copy_to_castor():
             
             logger.info('Going to build copy list')
             for c in merged_chunks_list:
-                f_from = 'fts-transfer-submit -s https://fts3-pilot.cern.ch:8446 -o root://eoscompass.cern.ch//eos/experiment/compass/%(prodPath)s%(prodSoft)s/mDST/mDST-%(runNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'prodPath': t.path, 'prodSoft': t.soft, 'runNumber': r, 'prodSlt': t.prodslt, 'phastVer': t.phastver}
+                f_from = 'fts-transfer-submit -s %(ftsServer)s -o %(eosHomeRoot)s%(eosCompassHome)s%(prodPath)s%(prodSoft)s/mDST/mDST-%(runNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'prodPath': t.path, 'prodSoft': t.soft, 'runNumber': r, 'prodSlt': t.prodslt, 'phastVer': t.phastver, 'ftsServer': settings.FTS_SERVER, 'eosHomeRoot':settings.EOS_HOME_ROOT, 'eosCompassHome': settings.EOS_COMPASS_HOME}
                 if format(c, '03d') != '000':
                     f_from = f_from + '.' + format(c, '03d')
                 
@@ -104,7 +104,7 @@ def copy_to_castor():
                 if t.type == 'mass production':
                     oracle_dst = '/oracle_dst/'
                     
-                f_to = 'root://castorpublic.cern.ch//castor/cern.ch/compass/%(prodPath)s%(oracleDst)s%(prodSoft)s/mDST/mDST-%(runNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'prodPath': t.path, 'prodSoft': t.soft, 'runNumber': r, 'prodSlt': t.prodslt, 'phastVer': t.phastver, 'oracleDst': oracle_dst}
+                f_to = '%(castorHomeRoot)s%(castorCompassHome)s%(prodPath)s%(oracleDst)s%(prodSoft)s/mDST/mDST-%(runNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'prodPath': t.path, 'prodSoft': t.soft, 'runNumber': r, 'prodSlt': t.prodslt, 'phastVer': t.phastver, 'oracleDst': oracle_dst, 'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'castorCompassHome': settings.CASTOR_COMPASS_HOME}
                     
                 if format(c, '03d') != '000':
                     f_to = f_to + '.' + format(c, '03d')
