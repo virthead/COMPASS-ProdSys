@@ -157,8 +157,8 @@ STATIC_ROOT = '/srv/compass/static'
 
 ADMIN_SITE_HEADER = "COMPASS ProdSys administration"
 
-PANDA_URL = 'http://*****:980/server/panda'
-PANDA_URL_SSL = 'https://*****:943/server/panda'
+PANDA_URL = 'http://*****:25080/server/panda'
+PANDA_URL_SSL = 'https://*****:25443/server/panda'
 X509_USER_PROXY = '/tmp/x509up_u0'
 
 PROXY_USER_ID = '*****'
