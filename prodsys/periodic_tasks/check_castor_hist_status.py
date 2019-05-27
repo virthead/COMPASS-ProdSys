@@ -115,7 +115,7 @@ def check_files_on_castor():
                         logger.info('Transfer request was performed in more than 1 hours ago, going to restart it')
                         restart_transfer(logger_task, t[0], c[1], c[2])
         else:
-            logger_task.info('Error reading files on castor for task %s' % t)
+            logger_task.info('Error reading files on castor for task %s' % t[0])
             logger_task.error(result)
     
         logger_task.info('done')
