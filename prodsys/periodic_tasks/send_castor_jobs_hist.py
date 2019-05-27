@@ -40,18 +40,28 @@ env.hosts.append(settings.COMPASS_HOST)
 env.user = settings.COMPASS_USER
 env.password = settings.COMPASS_PASS
 
-#            f_from = 'xrdcp -N -f root://eoscompass.cern.ch//eos/experiment/compass/%(prodPath)s%(prodSoft)s/histos/histsum-%(runNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'prodPath': t.path, 'prodSoft': t.soft, 'runNumber': r, 'prodSlt': t.prodslt, 'phastVer': t.phastver}
-#            f_to = 'root://castorpublic.cern.ch//castor/cern.ch/compass/%(prodPath)s%(prodSoft)s/histos/histsum-%(runNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'prodPath': t.path, 'prodSoft': t.soft, 'runNumber': r, 'prodSlt': t.prodslt, 'phastVer': t.phastver}
-
-
 def exec_remote_cmd(cmd):
     with hide('output','running','warnings'), sett(warn_only=True):
         return run(cmd)
 
 def copy_to_castor():
+    logger.info('Going to create proxy first')
+    cmd = 'voms-proxy-init --cert ~/.globus/na58dst1.cer.pem --key ~/.globus/na58dst1.key.pem --voms vo.compass.cern.ch:/vo.compass.cern.ch/Role=production --valid 96:00'
+    logger.info(cmd)
+    result = exec_remote_cmd(cmd)
+    if result.find('Permission denied') != -1 or result.find('open denied') != -1:
+        logger.info('Session expired, exiting')
+        session_expired = True
+    
+    if result.succeeded:
+        logger.info('Successfully created new proxy')
+        logger.info(result)
+    else:
+        logger.info('Error sending to castor run number %s merging chunk number %s' % (r, chunk))
+        logger.error(result)
+    
     logger.info('Getting tasks with status send and running')
     tasks_list = Task.objects.all().exclude(site='BW_COMPASS_MCORE').filter(Q(status='send') | Q(status='running') | Q(status='paused') | Q(status='done'))
-#    tasks_list = Task.objects.all().filter(name='bpc_stage3_mu-')
     logger.info('Got list of %s tasks' % len(tasks_list))
     
     for t in tasks_list:
@@ -70,7 +80,7 @@ def copy_to_castor():
             
             logger.info('Going to build copy list')
             for c in merged_chunks_list:
-                f_from = 'xrdcp -N -f root://eoscompass.cern.ch//eos/experiment/compass/%(prodPath)s%(prodSoft)s/histos/histsum-%(runNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'prodPath': t.path, 'prodSoft': t.soft, 'runNumber': r, 'prodSlt': t.prodslt, 'phastVer': t.phastver}
+                f_from = 'fts-transfer-submit -s %(ftsServer)s -o %(eosHomeRoot)s%(eosCompassHome)s%(prodPath)s%(prodSoft)s/histos/histsum-%(runNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'prodPath': t.path, 'prodSoft': t.soft, 'runNumber': r, 'prodSlt': t.prodslt, 'phastVer': t.phastver, 'ftsServer': settings.FTS_SERVER, 'eosHomeRoot':settings.EOS_HOME_ROOT, 'eosCompassHome': settings.EOS_COMPASS_HOME}
                 if format(c, '03d') != '000':
                     f_from = f_from + '.' + format(c, '03d')
                 
@@ -78,7 +88,7 @@ def copy_to_castor():
                 if t.type == 'mass production':
                     oracle_dst = '/oracle_dst/'
                 
-                f_to = 'root://castorpublic.cern.ch//castor/cern.ch/compass/%(prodPath)s%(oracleDst)s%(prodSoft)s/histos/histsum-%(runNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'prodPath': t.path, 'prodSoft': t.soft, 'runNumber': r, 'prodSlt': t.prodslt, 'phastVer': t.phastver, 'oracleDst': oracle_dst}
+                f_to = '%(castorHomeRoot)s%(castorCompassHome)s%(prodPath)s%(oracleDst)s%(prodSoft)s/histos/histsum-%(runNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'prodPath': t.path, 'prodSoft': t.soft, 'runNumber': r, 'prodSlt': t.prodslt, 'phastVer': t.phastver, 'oracleDst': oracle_dst, 'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'castorCompassHome': settings.CASTOR_COMPASS_HOME}
                 if format(c, '03d') != '000':
                     f_to = f_to + '.' + format(c, '03d')
                 

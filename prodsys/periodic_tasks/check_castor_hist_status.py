@@ -43,6 +43,15 @@ def exec_remote_cmd(cmd):
     with hide('output','running','warnings'), sett(warn_only=True):
         return run(cmd)
 
+def restart_transfer(logger, task, run_number, chunk_number):
+    try:
+        j_update = Job.objects.filter(task=task, run_number=run_number, chunk_number_merging_hist=chunk_number).update(status_castor_hist='ready', date_updated=today)
+        logger.info('Job status_castor_hist changed to ready for task %s run number %s chunk number %s' % (task, run_number, chunk_number))
+    except:
+        logger.error('Failed to update jobs for task %s run number %s chunk number %s' % (task, run_number, chunk_number))
+    
+    return True
+
 def check_files_on_castor():
     logger.info('Getting productions with castor histos status sent')
     tasks_list = Job.objects.filter(status_castor_histos='sent').values_list('task_id', 'task__path', 'task__soft', 'task__prodslt', 'task__phastver', 'task__type').distinct()
@@ -55,7 +64,7 @@ def check_files_on_castor():
         logger_task.info('Starting')
         
         logger_task.info('Getting histos with castor histos status sent for task id %s' % t[0])
-        chunks_list = Job.objects.filter(task__id=t[0]).filter(status_castor_histos='sent').values_list('task_id', 'run_number', 'chunk_number_merging_histos').distinct()
+        chunks_list = Job.objects.filter(task__id=t[0]).filter(status_castor_histos='sent').values_list('task_id', 'run_number', 'chunk_number_merging_histos', 'date_updated').distinct()
         logger_task.info('Got list of %s chunks' % len(chunks_list))
         
         logger_task.info('Going to request list of files on castor for task %s' % t[0])
@@ -70,12 +79,14 @@ def check_files_on_castor():
             reader = csv.DictReader(result.splitlines(), delimiter = ' ', skipinitialspace = True, fieldnames = ['permissions', 'links', 'owner', 'group', 'size', 'date1', 'date2', 'time', 'name'])
             logger_task.info('Successfully read files on castor for task %s' % t[0])
             for c in chunks_list:
+                found = False
                 test = 'histsum-%(runNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'runNumber': c[1], 'prodSlt': t[3], 'phastVer': t[4]}
                 if format(int(c[2]), '03d') != '000':
                     test = test + '.' + str(format(c[2], '03d'))
                 
                 for r in reader:
-                    if r['name'].find(test) != -1:
+                    if r['name'] == test:
+                        found = True
                         logger_task.info(r)
                         logger_task.info('Found "%s" for task id %s run number %s chunk number %s, %s' % (r['permissions'][0], t[0], c[1], c[2], test))
                         if r['permissions'][0] == 'm':
@@ -89,14 +100,20 @@ def check_files_on_castor():
                             logger_task.info ('Chunk not yet migrated')
                             
                             if r['size'] == '0':
-                                logger_task.info('Problematic chunk found, status will be changed to ready for rewriting')
-                                try:
-                                    j_update = Job.objects.filter(task=t[0], run_number=c[1], chunk_number_merging_histos=c[2]).update(status_castor_histos='ready', date_updated=today)
-                                    logger_task.info('Job status_castor_histos changed to ready for task %s run number %s chunk number %s' % (t[0], c[1], c[2]))
-                                except:
-                                    logger_task.error('Failed to update jobs for task %s run number %s chunk number %s' % (t[0], c[1], c[2]))
+                                diff = datetime.datetime.now().replace(tzinfo=None) - c[3].replace(tzinfo=None)
+                                logger_task.info('File %s was not delivered, transfer was submitted at %s which is %s hours from now' % (test, c[3], (diff.seconds/3600)))
+                                if diff.seconds/3600 >= 12:
+                                    logger_task.info('Problematic chunk found, status will be changed to ready for rewriting')
+                                    restart_transfer(logger_task, t[0], c[1], c[2])
                         
                         break
+                
+                if found is False:
+                    diff = datetime.datetime.now().replace(tzinfo=None) - c[3].replace(tzinfo=None)
+                    logger_task.info('File %s was not delivered, transfer was submitted at %s which is %s hours from now' % (test, c[3], (diff.seconds/3600)))
+                    if diff.seconds/3600 >= 1:
+                        logger.info('Transfer request was performed in more than 1 hours ago, going to restart it')
+                        restart_transfer(logger_task, t[0], c[1], c[2])
         else:
             logger_task.info('Error reading files on castor for task %s' % t)
             logger_task.error(result)
