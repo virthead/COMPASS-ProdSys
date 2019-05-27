@@ -45,7 +45,7 @@ def exec_remote_cmd(cmd):
 
 def restart_transfer(logger, task, run_number, chunk_number):
     try:
-        j_update = Job.objects.filter(task=task, run_number=run_number, chunk_number_merging_hist=chunk_number).update(status_castor_hist='ready', date_updated=today)
+        j_update = Job.objects.filter(task=task, run_number=run_number, chunk_number_merging_histos=chunk_number).update(status_castor_histos='ready', date_updated=today)
         logger.info('Job status_castor_hist changed to ready for task %s run number %s chunk number %s' % (task, run_number, chunk_number))
     except:
         logger.error('Failed to update jobs for task %s run number %s chunk number %s' % (task, run_number, chunk_number))
