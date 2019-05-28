@@ -67,7 +67,7 @@ def copy_to_castor():
     tasks_list = []
     if not session_expired:
         logger.info('Getting tasks with status send and running')
-        tasks_list = Task.objects.all().exclude(site='BW_COMPASS_MCORE').filter(Q(status='send') | Q(status='running') | Q(status='paused') | Q(status='done'))
+        tasks_list = Task.objects.all().exclude(site='BW_COMPASS_MCORE').filter(Q(status='send') | Q(status='running'))
 #        tasks_list = Task.objects.all().filter(name='bpc_stage3_mu-')
         logger.info('Got list of %s tasks' % len(tasks_list))
     

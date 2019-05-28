@@ -61,7 +61,7 @@ def copy_to_castor():
         logger.error(result)
     
     logger.info('Getting tasks with status send and running')
-    tasks_list = Task.objects.all().exclude(site='BW_COMPASS_MCORE').filter(Q(status='send') | Q(status='running') | Q(status='paused') | Q(status='done'))
+    tasks_list = Task.objects.all().exclude(site='BW_COMPASS_MCORE').filter(Q(status='send') | Q(status='running'))
     logger.info('Got list of %s tasks' % len(tasks_list))
     
     for t in tasks_list:
