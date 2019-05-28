@@ -12,6 +12,7 @@ from _mysql import NULL
 from fabric.api import env, run, execute, settings as sett, hide
 from fabric.context_managers import shell_env, cd
 import csv
+import re
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../')) # fix me in case of using outside the project
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "compass.settings")
@@ -67,6 +68,7 @@ def define_jobs_from_runs():
                 logger.info('Text files with data exist for %s year' % t.year)
                 
                 lines_read = 0
+                lines_skipped = 0
                 count_added = 0
                 for r in runs_list:
                     r = r.strip()
@@ -76,6 +78,7 @@ def define_jobs_from_runs():
                     logger.info(result)
                     if result.succeeded:
                         logger.info('Files list was generated')
+                        result = re.sub("\t", "", result)
                         reader = csv.DictReader(result.splitlines(), delimiter = ' ', skipinitialspace = True, fieldnames = ['pattern', 'run_number', 'name', 'events'])
                         
                         reader_lines_count = int(sum(1 for row in csv.DictReader(result.splitlines()))) + 1
@@ -109,6 +112,7 @@ def define_jobs_from_runs():
                             
                             if number_of_events == 0:
                                 logger.info('0 events in the file, skipping')
+                                lines_skipped += 1
                                 continue
                             
                             logger.info('Check that task and job are unique')
@@ -155,9 +159,10 @@ def define_jobs_from_runs():
                             except DatabaseError as e:
                                 logger.exception('Something went wrong while saving: %s' % e.message)
                     
-                logger.info('Lines read %s' % lines_read)
-                logger.info('Added %s jobs' % count_added)
-                if count_added == lines_read:
+                logger.info('Lines read: %s' % lines_read)
+                logger.info('Lines skipped: %s' % lines_skipped)
+                logger.info('Added jobs: %s' % count_added)
+                if count_added == lines_read - lines_skipped:
                     logger.info('Going to update task status to jobs defined')
                     t_edit = Task.objects.get(id=t.id)
                     t_edit.status = 'jobs ready'
@@ -244,7 +249,8 @@ def define_jobs_from_runs():
                             except DatabaseError as e:
                                 logger.exception('Something went wrong while saving: %s' % e.message)
                     
-                logger.info('Added %s jobs' % count_added)
+                logger.info('Lines read: %s' % lines_read)
+                logger.info('Added jobs: %s' % count_added)
                 if count_added == lines_read:
                     logger.info('Going to update task status to jobs defined')
                     t_edit = Task.objects.get(id=t.id)
