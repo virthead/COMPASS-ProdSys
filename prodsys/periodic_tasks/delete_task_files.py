@@ -67,7 +67,7 @@ def delete_task_files():
                     continue
                 
             logger.info('Going to delete directory %s' % dir)
-            cmd = 'rm -rf %(eosCompassHome)s%(prodPath)s%(prodSoft)s/%(dir)s' % {'eosCompassHome': settings.EOS_COMPASS_HOME, 'prodPath': t.path, 'prodSoft': t.soft, 'dir': dir}
+            cmd = 'rm -rf %(eosCompassHome)s%(prodPath)s%(prodSoft)s/%(dir)s' % {'eosCompassHome': settings.EOS_HOME, 'prodPath': t.path, 'prodSoft': t.soft, 'dir': dir}
             logger.info(cmd)
             result = exec_remote_cmd(cmd)
             logger.info(result)
@@ -76,7 +76,7 @@ def delete_task_files():
                 break
            
             logger.info('Going to check if log files of %s exist' % dir)
-            cmd = 'ls %(eosCompassHome)s%(prodPath)s%(prodSoft)s/%(dir)s' % {'eosCompassHome': settings.EOS_COMPASS_HOME, 'prodPath': t.path, 'prodSoft': t.soft, 'dir': dir}
+            cmd = 'ls %(eosCompassHome)s%(prodPath)s%(prodSoft)s/%(dir)s' % {'eosCompassHome': settings.EOS_HOME, 'prodPath': t.path, 'prodSoft': t.soft, 'dir': dir}
             logger.info(cmd)
             result = exec_remote_cmd(cmd)
             logger.info(result)
