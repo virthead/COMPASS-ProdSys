@@ -68,6 +68,7 @@ class Task(models.Model):
     comment = models.TextField(null=True, blank=True)
     date_processing_start = models.DateTimeField(null=True, blank=True)
     date_processing_finish = models.DateTimeField(null=True, blank=True)
+    status_files_deleted = models.CharField(max_length=5, default='no')
     
     def __unicode__(self):
         return self.name
