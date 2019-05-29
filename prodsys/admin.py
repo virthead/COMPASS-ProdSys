@@ -71,7 +71,8 @@ class TaskAdmin(admin.ModelAdmin):
                     'merging_mdst', 'x_check_mdst', 
                     'merging_hist', 
                     'merging_evntdmp', 'x_check_evntdmp', 
-                    'castor_mdst', 'castor_hist', 'castor_dump')
+                    'castor_mdst', 'castor_hist', 'castor_dump',
+                    'status_files_deleted')
     search_fields = ['name', 'production', 'soft', 'status']
     
     add_exclude = ('date_updated', 'date_processing_start', 'date_processing_finish', 'status_files_deleted', )
