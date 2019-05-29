@@ -87,7 +87,6 @@ def delete_task_files():
                 logger.info('%s dir was deleted' % dir)
                 dirs[dir] = 1
         
-            
         i += 1
         
         problem_occured = False
