@@ -74,6 +74,17 @@ class TaskAdmin(admin.ModelAdmin):
                     'castor_mdst', 'castor_hist', 'castor_dump')
     search_fields = ['name', 'production', 'soft', 'status']
     
+    add_exclude = ('date_updated', 'date_processing_start', 'date_processing_finish', )
+    edit_exclude = ('date_added', 'date_processing_start', 'date_processing_finish', )
+
+    def add_view(self, *args, **kwargs):
+        self.exclude = getattr(self, 'add_exclude', ())
+        return super(TaskAdmin, self).add_view(*args, **kwargs)
+
+    def change_view(self, *args, **kwargs):
+        self.exclude = getattr(self, 'edit_exclude', ())
+        return super(TaskAdmin, self).change_view(*args, **kwargs)
+        
     def jobs(self, obj):
         jobs_all = 0
         jobs_staged = 0
