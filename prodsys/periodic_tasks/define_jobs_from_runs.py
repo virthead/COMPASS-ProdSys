@@ -183,7 +183,7 @@ def define_jobs_from_runs():
                         continue
                     
                     r = r.strip()
-                    cmd = '/eos/user/n/na58dst1/production/GetFileList.pl %s' % r
+                    cmd = '%s %s' % (settings.GET_FILE_LIST_PL, r)
                     logger.info(cmd)
                     result = exec_remote_cmd(cmd)
                     logger.info(result)

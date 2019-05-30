@@ -122,7 +122,7 @@ def prepare_on_castor():
                     logger.info('In runs list branch')
                     
                     logger.info('Going to generate file with files list for run number %s' % run_number)
-                    cmd = '/eos/user/n/na58dst1/production/GetFileList.pl %s' % run_number
+                    cmd = '%s %s' % (settings.GET_FILE_LIST_PL, run_number)
                     logger.info(cmd)
                     result = exec_remote_cmd(cmd)
                     logger.info(result)

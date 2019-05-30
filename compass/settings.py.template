@@ -157,18 +157,22 @@ STATIC_ROOT = '/srv/compass/static'
 
 ADMIN_SITE_HEADER = "COMPASS ProdSys administration"
 
-PANDA_URL = 'http://*****:25080/server/panda'
-PANDA_URL_SSL = 'https://*****:25443/server/panda'
+PANDA_URL = 'http://pandawms.jinr.ru:25080/server/panda'
+PANDA_URL_SSL = 'https://pandawms.jinr.ru:25443/server/panda'
 X509_USER_PROXY = '/tmp/x509up_u0'
 
+PROXY_HOST = 'pandawms.jinr.ru'
 PROXY_USER_ID = '*****'
 PROXY_PASSWORD = '*****'
 
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_IMPORTS = ('prodsys.tasks')
 
-COMPASS_HOST = '*****'
-COMPASS_USER = '*****'
+GET_FILE_LIST_PL = '/eos/user/n/na58dst1/production/GetFileList.pl'
+GET_NUMBER_OF_EVENTS_PL = '/eos/user/n/na58dst1/production/GetEventNumber.pl'
+
+COMPASS_HOST = 'lxplus.cern.ch'
+COMPASS_USER = 'na58dst1'
 COMPASS_PASS = '*****'
 
 CASTOR_HOME_ROOT = 'root://castorpublic.cern.ch/'

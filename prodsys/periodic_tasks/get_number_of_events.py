@@ -69,7 +69,7 @@ def get_number_of_events():
             number_of_events = 0
             result = ''
             try:
-                cmd = '/eos/user/n/na58dst1/production/GetEventNumber.pl %s' % j.file[j.file.rfind('/') + 1:]
+                cmd = '%s %s' % (settings.GET_NUMBER_OF_EVENTS_PL, j.file[j.file.rfind('/') + 1:])
                 logger.info(cmd)
                 result = exec_remote_cmd(cmd)
                 logger.info(result)
