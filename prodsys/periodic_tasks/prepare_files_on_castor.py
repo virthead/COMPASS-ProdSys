@@ -69,6 +69,27 @@ def prepare_on_castor():
                 except DatabaseError as e:
                     logger.exception('Something went wrong while saving: %s' % e.message)
         
+        logger.info('Getting MC generation tasks with status send and running')
+        tasks_list = Task.objects.all().filter(type='MC generation').filter(Q(status='send') | Q(status='running'))
+        logger.info('Got list of %s tasks' % len(tasks_list))
+        for t in tasks_list:
+            logger.info('Going to update jobs for %s task to staged' % t)
+            jobs_list = Job.objects.filter(task=t).filter(status='defined').update(status='staged', date_updated=timezone.now())
+            logger.info('Job status of task %s was changed to staged' % t)
+            
+            if not t.date_processing_start:
+                logger.info('Going to update date_processing_start of %s task' % t)
+                t_update = Task.objects.get(id=t.id)
+                t_update.date_processing_start=timezone.now()
+                t_update.date_updated = timezone.now()
+                try:
+                    t_update.save()
+                    logger.info('Task %s updated' % t_update.name) 
+                except IntegrityError as e:
+                    logger.exception('Unique together catched, was not saved')
+                except DatabaseError as e:
+                    logger.exception('Something went wrong while saving: %s' % e.message)
+        
         logger.info('Getting tasks with status send and running for all sites except BlueWaters')
         tasks_list = Task.objects.all().exclude(site='BW_COMPASS_MCORE').filter(Q(status='send') | Q(status='running'))
         logger.info('Got list of %s tasks' % len(tasks_list))
