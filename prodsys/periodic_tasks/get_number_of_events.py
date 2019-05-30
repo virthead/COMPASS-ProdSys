@@ -49,7 +49,7 @@ def exec_remote_cmd(cmd):
 
 def get_number_of_events():
     logger.info('Getting tasks with status jobs ready or send of running')
-    tasks_list = Task.objects.all().exclude(type='MC generation').filter(Q(status='jobs ready') | Q(status='send') | Q(status='running')).order_by('-id')
+    tasks_list = Task.objects.all().filter(Q(status='jobs ready') | Q(status='send') | Q(status='running')).order_by('-id')
     logger.info('Got list of %s tasks' % len(tasks_list))
     
     access_denied = False
