@@ -107,6 +107,8 @@ def define_jobs_from_runs_mcgen():
                     localGeneratorFile.text = file_name_dat
                 for eventsPerChunk in new_settings_xml.iter('eventsPerChunk'):
                     number_of_events = eventsPerChunk.text
+                for outputPath in new_settings_xml.iter('outputPath'):
+                    outputPath.text = ''
                 
 #                logger.info(ET.tostring(new_settings_xml, 'utf-8').decode())
                 i += 1
@@ -163,8 +165,6 @@ def define_jobs_from_runs_mcgen():
                 except DatabaseError as e:
                     logger.exception('Something went wrong while saving: %s' % e.message)
                 
-            break
-        
         logger.info('Chunks to generate: %s' % chunks_to_generate)
         logger.info('Chunks generated: %s' % chunks_generated)
         if chunks_to_generate == chunks_generated:
