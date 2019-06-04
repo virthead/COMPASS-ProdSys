@@ -37,7 +37,7 @@ if check_process(__file__, pid):
 
 def main():
     logger.info('Getting jobs of 2016 with number of events = -1 and number of events attempt > 0')
-    jobs_list = Job.objects.all().filter(task__year=2016).filter(number_of_events=-1).filter(number_of_events_attempt__gt=0).order_by('id')
+    jobs_list = Job.objects.all().filter(task__year=2016).filter(Q(task__period='P01') | Q(task__period='P02') | Q(task__period='P03') | Q(task__period='P04') | Q(task__period='P05') | Q(task__period='P06')).filter(number_of_events=-1).filter(number_of_events_attempt__gt=0).order_by('id')
     logger.info('Got list of %s jobs' % len(jobs_list))
     
     i = 0

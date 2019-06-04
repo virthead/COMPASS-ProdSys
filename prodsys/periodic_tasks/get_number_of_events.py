@@ -66,6 +66,11 @@ def get_number_of_events():
             if i > max_check_amount:
                 break
             
+            if j.task.year == 2016 and (j.task.period == 'P01' or j.task.period == 'P02' or j.task.period == 'P03' or j.task.period == 'P04' or j.task.period == 'P05' or j.task.period == 'P06'):
+                logger.info('Job %s is from unscrambled period, going to update number of attempt and skip' % j.file)
+                j_update = Job.objects.filter(id=j.id).update(number_of_events_attempt=j.number_of_events_attempt + 1)
+                continue
+            
             number_of_events = 0
             result = ''
             try:
