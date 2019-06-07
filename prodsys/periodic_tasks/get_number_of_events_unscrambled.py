@@ -36,8 +36,8 @@ if check_process(__file__, pid):
     sys.exit(0)
 
 def main():
-    logger.info('Getting jobs of 2016 with number of events = -1 and number of events attempt > 0')
-    jobs_list = Job.objects.all().filter(task__year=2016).filter(Q(task__period='P01') | Q(task__period='P02') | Q(task__period='P03') | Q(task__period='P04') | Q(task__period='P05') | Q(task__period='P06')).filter(number_of_events=-1).filter(number_of_events_attempt__gt=0).order_by('id')
+    logger.info('Getting jobs of 2016 with number of events = -1 and number of events attempt = 1')
+    jobs_list = Job.objects.all().filter(task__year=2016).filter(Q(task__period='P01') | Q(task__period='P02') | Q(task__period='P03') | Q(task__period='P04') | Q(task__period='P05') | Q(task__period='P06')).filter(number_of_events=-1).filter(number_of_events_attempt=1).order_by('id')
     logger.info('Got list of %s jobs' % len(jobs_list))
     
     i = 0
@@ -47,10 +47,13 @@ def main():
             break
             
         logger.info('Going to get PanDA job for job %s' % j.file)
+        j_panda = None
         try:
             j_panda = Jobsarchived4.objects.using('schedconfig').filter(pandaid=j.panda_id).filter(jobstatus='finished').get()
         except:
-            logger.info('Job %s has not processed yet' % j.file)
+            logger.info('Job %s has not processed yet, going to update number of attempts and skip' % j.file)
+#            j_update = Job.objects.filter(id=j.id).update(number_of_events_attempt=j.number_of_events_attempt + 1)
+            continue
             
         logger.info('Got number of events from PanDA job: %s, going to update the job' % j_panda.nevents)
         
