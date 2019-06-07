@@ -111,7 +111,6 @@ def define_jobs_from_runs_mcgen():
                     outputPath.text = ''
                 
 #                logger.info(ET.tostring(new_settings_xml, 'utf-8').decode())
-                i += 1
                 
                 logger.info('Going to save generated file %s at /tmp' % file_name_xml)
                 new_settings_data = '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>\n' + ET.tostring(new_settings_xml)
@@ -164,6 +163,8 @@ def define_jobs_from_runs_mcgen():
                     logger.exception('Unique together catched, was not saved')
                 except DatabaseError as e:
                     logger.exception('Something went wrong while saving: %s' % e.message)
+                
+                i += 1
                 
         logger.info('Chunks to generate: %s' % chunks_to_generate)
         logger.info('Chunks generated: %s' % chunks_generated)
