@@ -181,6 +181,7 @@ CASTOR_HOME_LOGS = '/castor/cern.ch/user/n/na58dst1/prodlogs/'
 
 EOS_HOME_ROOT = 'root://eoscompass.cern.ch/'
 EOS_HOME = '/eos/experiment/compass/'
+EOS_HOME_LOGS = 'generalprod/testcoral/PanDALogs/'
 
 FTS_SERVER = 'https://fts3-pilot.cern.ch:8446'
 
