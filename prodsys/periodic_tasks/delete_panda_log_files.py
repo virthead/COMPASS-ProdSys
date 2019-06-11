@@ -68,7 +68,7 @@ def delete_panda_log_files():
             
             if t.type != 'DDD filtering':
                 logger.info('Going to delete log files of mdst merging job for run number %s' % run_number)
-                cmd = 'rm /eos/experiment/compass/generalprod/testcoral/PanDALogs/%(Production)s-merge-%(runNumber)s-*.job.log.tgz' % {'Path': t.path, 'Production': t.production, 'runNumber': run_number}
+                cmd = 'rm %(eosHome)s%(eosHomeLogs)s%(Production)s-merge-%(runNumber)s-*.job.log.tgz' % {'eosHome': settings.EOS_HOME, 'eosHomeLogs': settings.EOS_HOME_LOGS, 'Path': t.path, 'Production': t.production, 'runNumber': run_number}
                 logger.info(cmd)
                 result = exec_remote_cmd(cmd)
                 logger.info(result)
@@ -77,7 +77,7 @@ def delete_panda_log_files():
                     break
                 
                 logger.info('Going to check if log files of mdst merging job for run number %s exist' % run_number)
-                cmd = 'ls /eos/experiment/compass/generalprod/testcoral/PanDALogs/%(Production)s-merge-%(runNumber)s-*.job.log.tgz' % {'Path': t.path, 'Production': t.production, 'runNumber': run_number}
+                cmd = 'ls %(eosHome)s%(eosHomeLogs)s%(Production)s-merge-%(runNumber)s-*.job.log.tgz' % {'eosHome': settings.EOS_HOME, 'eosHomeLogs': settings.EOS_HOME_LOGS, 'Path': t.path, 'Production': t.production, 'runNumber': run_number}
                 logger.info(cmd)
                 result = exec_remote_cmd(cmd)
                 logger.info(result)
@@ -89,7 +89,7 @@ def delete_panda_log_files():
                     mdst = True
         
                 logger.info('Going to delete log files of hist merging job for run number %s' % run_number)
-                cmd = 'rm /eos/experiment/compass/generalprod/testcoral/PanDALogs/%(Production)s-merge-hist-%(runNumber)s-*.job.log.tgz' % {'Path': t.path, 'Production': t.production, 'runNumber': run_number}
+                cmd = 'rm %(eosHome)s%(eosHomeLogs)s%(Production)s-merge-hist-%(runNumber)s-*.job.log.tgz' % {'eosHome': settings.EOS_HOME, 'eosHomeLogs': settings.EOS_HOME_LOGS, 'Path': t.path, 'Production': t.production, 'runNumber': run_number}
                 logger.info(cmd)
                 result = exec_remote_cmd(cmd)
                 logger.info(result)
@@ -98,7 +98,7 @@ def delete_panda_log_files():
                     break
                 
                 logger.info('Going to check if log files of hist merging job for run number %s exist' % run_number)
-                cmd = 'ls /eos/experiment/compass/generalprod/testcoral/PanDALogs/%(Production)s-merge-hist-%(runNumber)s-*.job.log.tgz' % {'Path': t.path, 'Production': t.production, 'runNumber': run_number}
+                cmd = 'ls %(eosHome)s%(eosHomeLogs)s%(Production)s-merge-hist-%(runNumber)s-*.job.log.tgz' % {'eosHome': settings.EOS_HOME, 'eosHomeLogs': settings.EOS_HOME_LOGS, 'Path': t.path, 'Production': t.production, 'runNumber': run_number}
                 logger.info(cmd)
                 result = exec_remote_cmd(cmd)
                 logger.info(result)
@@ -114,7 +114,7 @@ def delete_panda_log_files():
                 hist = True
                 
             logger.info('Going to delete log files of dump merging job for run number %s' % run_number)
-            cmd = 'rm /eos/experiment/compass/generalprod/testcoral/PanDALogs/%(Production)s-merge-dump-%(runNumber)s-*.job.log.tgz' % {'Path': t.path, 'Production': t.production, 'runNumber': run_number}
+            cmd = 'rm %(eosHome)s%(eosHomeLogs)s%(Production)s-merge-dump-%(runNumber)s-*.job.log.tgz' % {'eosHome': settings.EOS_HOME, 'eosHomeLogs': settings.EOS_HOME_LOGS, 'Path': t.path, 'Production': t.production, 'runNumber': run_number}
             logger.info(cmd)
             result = exec_remote_cmd(cmd)
             logger.info(result)
@@ -123,7 +123,7 @@ def delete_panda_log_files():
                 break
             
             logger.info('Going to check if log files of dump merging job for run number %s exist' % run_number)
-            cmd = 'ls /eos/experiment/compass/generalprod/testcoral/PanDALogs/%(Production)s-merge-dump-%(runNumber)s-*.job.log.tgz' % {'Path': t.path, 'Production': t.production, 'runNumber': run_number}
+            cmd = 'ls %(eosHome)s%(eosHomeLogs)s%(Production)s-merge-dump-%(runNumber)s-*.job.log.tgz' % {'eosHome': settings.EOS_HOME, 'eosHomeLogs': settings.EOS_HOME_LOGS, 'Path': t.path, 'Production': t.production, 'runNumber': run_number}
             logger.info(cmd)
             result = exec_remote_cmd(cmd)
             logger.info(result)
@@ -135,7 +135,7 @@ def delete_panda_log_files():
                 dump = True
             
             logger.info('Going to delete log files of prod job for run number %s' % run_number)
-            cmd = 'rm /eos/experiment/compass/generalprod/testcoral/PanDALogs/%(Production)s-%(runNumber)s-*.job.log.tgz' % {'Path': t.path, 'Production': t.production, 'runNumber': run_number}
+            cmd = 'rm %(eosHome)s%(eosHomeLogs)s%(Production)s-%(runNumber)s-*.job.log.tgz' % {'eosHome': settings.EOS_HOME, 'eosHomeLogs': settings.EOS_HOME_LOGS, 'Path': t.path, 'Production': t.production, 'runNumber': run_number}
             logger.info(cmd)
             result = exec_remote_cmd(cmd)
             logger.info(result)
@@ -144,7 +144,7 @@ def delete_panda_log_files():
                 break
             
             logger.info('Going to check if log files of prod job for run number %s exist' % run_number)
-            cmd = 'ls /eos/experiment/compass/generalprod/testcoral/PanDALogs/%(Production)s-%(runNumber)s-*.job.log.tgz' % {'Path': t.path, 'Production': t.production, 'runNumber': run_number}
+            cmd = 'ls %(eosHome)s%(eosHomeLogs)s%(Production)s-%(runNumber)s-*.job.log.tgz' % {'eosHome': settings.EOS_HOME, 'eosHomeLogs': settings.EOS_HOME_LOGS, 'Path': t.path, 'Production': t.production, 'runNumber': run_number}
             logger.info(cmd)
             result = exec_remote_cmd(cmd)
             logger.info(result)

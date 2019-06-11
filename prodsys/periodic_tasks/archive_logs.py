@@ -70,7 +70,7 @@ def archive_logs():
                 break
                 
             logger.info('Going to tar run %s' % run_number)
-            cmd = 'tar -cvzf /tmp/%(Prod)s.%(run_number)s.tar /eos/experiment/compass/%(Path)s%(Soft)s/logFiles/%(Prod)s.*%(run_number)s-*.gz' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'run_number': run_number}
+            cmd = 'tar -cvzf /tmp/%(Prod)s.%(run_number)s.tar %(eosHome)s%(Path)s%(Soft)s/logFiles/%(Prod)s.*%(run_number)s-*.gz' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'run_number': run_number, 'eosHome': settings.EOS_HOME}
             logger.info(cmd)
             result = exec_remote_cmd(cmd)
             logger.info(result)
@@ -95,7 +95,7 @@ def archive_logs():
                 continue
             
             logger.info('Going to move file from /tmp to EOS')
-            cmd = 'mv /tmp/%(Prod)s.%(run_number)s.tar /eos/experiment/compass/%(Path)s%(Soft)s/logFiles/%(Prod)s.%(run_number)s.tar' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'run_number': run_number}
+            cmd = 'mv /tmp/%(Prod)s.%(run_number)s.tar %(eosHome)s%(Path)s%(Soft)s/logFiles/%(Prod)s.%(run_number)s.tar' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'run_number': run_number, 'eosHome': settings.EOS_HOME}
             logger.info(cmd)
             result = exec_remote_cmd(cmd)
             logger.info(result)
@@ -105,7 +105,7 @@ def archive_logs():
                 break
             
             logger.info('Going to check if tar for run %s exists on EOS' % run_number)
-            path = '/eos/experiment/compass/%(Path)s%(Soft)s/logFiles/' % {'Path': t[1], 'Soft': t[2]}
+            path = '%(eosHome)s%(Path)s%(Soft)s/logFiles/' % {'eosHome': settings.EOS_HOME, 'Path': t[1], 'Soft': t[2]}
             file = '%(Prod)s.%(run_number)s.tar' % {'Prod': t[0], 'run_number': run_number}
             cmd = 'ls -al %s%s' % (path, file)
             logger.info(cmd)
@@ -140,7 +140,7 @@ def archive_logs():
             continue
         
         logger.info('All runs of %s are in tars, going to check if empty files were generated' % t[0])
-        cmd = 'ls -al /eos/experiment/compass/%(Path)s%(Soft)s/logFiles/%(Prod)s.*.tar' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
+        cmd = 'ls -al %(eosHome)s%(Path)s%(Soft)s/logFiles/%(Prod)s.*.tar' % {'eosHome': settings.EOS_HOME, 'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
         logger.info(cmd)
         result = exec_remote_cmd(cmd)
         logger.info(result)
@@ -169,9 +169,9 @@ def archive_logs():
         
         logger.info('Going to create final tarz file for production %s' % t[0])
         if t[3] == 'mass production':
-            cmd = 'tar -cvzf /tmp/%(Prod)s_logFiles.tarz /eos/experiment/compass/%(Path)s%(Soft)s/logFiles/%(Prod)s.*.tar' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
+            cmd = 'tar -cvzf /tmp/%(Prod)s_logFiles.tarz %(eosHome)s%(Path)s%(Soft)s/logFiles/%(Prod)s.*.tar' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'eosHome': settings.EOS_HOME}
         else:
-            cmd = 'tar -cvzf /tmp/%(Soft)s_logFiles.tarz /eos/experiment/compass/%(Path)s%(Soft)s/logFiles/%(Prod)s.*.tar' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
+            cmd = 'tar -cvzf /tmp/%(Soft)s_logFiles.tarz %(eosHome)s%(Path)s%(Soft)s/logFiles/%(Prod)s.*.tar' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'eosHome': settings.EOS_HOME}
         logger.info(cmd)
         result = exec_remote_cmd(cmd)
         logger.info(result)
@@ -204,9 +204,9 @@ def archive_logs():
 
         logger.info('Going to move file from /tmp to EOS')
         if t[3] == 'mass production':
-            cmd = 'mv /tmp/%(Prod)s_logFiles.tarz /eos/experiment/compass/%(Path)s%(Soft)s/logFiles/%(Prod)s_logFiles.tarz' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
+            cmd = 'mv /tmp/%(Prod)s_logFiles.tarz %(eosHome)s%(Path)s%(Soft)s/logFiles/%(Prod)s_logFiles.tarz' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'eosHome': settings.EOS_HOME}
         else:
-            cmd = 'mv /tmp/%(Soft)s_logFiles.tarz /eos/experiment/compass/%(Path)s%(Soft)s/logFiles/%(Soft)s_logFiles.tarz' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
+            cmd = 'mv /tmp/%(Soft)s_logFiles.tarz %(eosHome)s%(Path)s%(Soft)s/logFiles/%(Soft)s_logFiles.tarz' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'eosHome': settings.EOS_HOME}
         logger.info(cmd)
         result = exec_remote_cmd(cmd)
         logger.info(result)
@@ -216,7 +216,7 @@ def archive_logs():
             break
         
         logger.info('Check if final tarz for %s exists on EOS' % t[0])
-        path = '/eos/experiment/compass/%(Path)s%(Soft)s/logFiles/' % {'Path': t[1], 'Soft': t[2]}
+        path = '%(eosHome)s%(Path)s%(Soft)s/logFiles/' % {'eosHome': settings.EOS_HOME, 'Path': t[1], 'Soft': t[2]}
         if t[3] == 'mass production':
             file = '%(Prod)s_logFiles.tarz' % {'Prod': t[0]}
         else:
@@ -246,13 +246,13 @@ def archive_logs():
             continue
         
         logger.info('Going to send file to Castor')        
-        p_from = 'xrdcp -N -f root://eoscompass.cern.ch//eos/experiment/compass/%(Path)s%(Soft)s/logFiles/' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
+        p_from = 'xrdcp -N -f %(eosHomeRoot)s%(eosHome)s%(Path)s%(Soft)s/logFiles/' % {'eosHomeRoot':settings.EOS_HOME_ROOT, 'eosHome': settings.EOS_HOME, 'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
         if t[3] == 'mass production':
             f_name = '%(Prod)s_logFiles.tarz' % {'Prod': t[0]}
-            p_to = 'root://castorpublic.cern.ch//castor/cern.ch/user/n/na58dst1/prodlogs/%(Year)s/' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'Year': t[4]}
+            p_to = '%(castorHomeRoot)s%(castorHomeLogs)s%(Year)s/' % {'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'castorLogs': settings.CASTOR_HOME_LOGS, 'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'Year': t[4]}
         else:
             f_name = '%(Soft)s_logFiles.tarz' % {'Soft': t[2]}
-            p_to = 'root://castorpublic.cern.ch//castor/cern.ch/user/n/na58dst1/prodlogs/testproductions/' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
+            p_to = '%(castorHomeRoot)s%(castorHomeLogs)stestproductions/' % {'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'castorLogs': settings.CASTOR_HOME_LOGS, 'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
             
         cmd = p_from + f_name + ' ' + p_to + f_name
         logger.info(cmd)

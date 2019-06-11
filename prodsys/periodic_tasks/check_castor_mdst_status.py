@@ -73,7 +73,7 @@ def check_files_on_castor():
         oracle_dst = ''
         if t[5] == 'mass production':
             oracle_dst = '/oracle_dst/'
-        cmd = 'nsls -l /castor/cern.ch/compass/%(prodPath)s%(oracleDst)s%(prodSoft)s/mDST/' % {'prodPath': t[1], 'prodSoft': t[2], 'oracleDst': oracle_dst}
+        cmd = 'nsls -l %(castorHome)s%(prodPath)s%(oracleDst)s%(prodSoft)s/mDST/' % {'castorHome': settings.CASTOR_HOME, 'prodPath': t[1], 'prodSoft': t[2], 'oracleDst': oracle_dst}
         logger_task.info(cmd)
         result = exec_remote_cmd(cmd)
         if result.succeeded:

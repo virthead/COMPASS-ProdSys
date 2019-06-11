@@ -49,7 +49,7 @@ def check_files_on_castor():
     
     for t in tasks_list:
         logger.info('Going to check file migration status on Castor')
-        path = '/castor/cern.ch/user/n/na58dst1/prodlogs/'
+        path = settings.CASTOR_HOME_LOGS
         if t[3] == 'mass production':
             path = path + '%s/' % t[4] 
             file = '%s_logFiles.tarz' % t[0]
