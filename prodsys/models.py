@@ -64,7 +64,7 @@ class Task(models.Model):
     max_attempts = models.IntegerField(default=5)
     status = models.CharField(max_length=300, choices=status_choices, default='draft')
     date_added = models.DateTimeField()
-    date_updated = models.DateTimeField()
+    date_updated = models.DateTimeField(null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
     date_processing_start = models.DateTimeField(null=True, blank=True)
     date_processing_finish = models.DateTimeField(null=True, blank=True)
