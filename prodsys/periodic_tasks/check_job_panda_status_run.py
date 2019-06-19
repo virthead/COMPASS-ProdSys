@@ -52,12 +52,12 @@ def main():
             if p['pandaid'] == j['panda_id'] and p['jobstatus'] != j['status']:
                 logger.info('Status in PanDA is %s, status in ProdSys is %s' % (p['jobstatus'], j['status']))
                 
-                j_update = Job.objects.get(panda_id=p['pandaid'])
                 today = timezone.now()
+                j_update = Job.objects.get(panda_id=p['pandaid'])
+                j_update.date_updated = today
                 
                 if p['jobstatus'] == 'cancelled':
-                    j_update.status = 'defined'
-                    j_update.date_updated = today
+                    j_update.status = 'failed'
                     try:
                         j_update.save()
                         logger.info('Job %s with PandaID %s updated' % (j_update.id, j_update.panda_id)) 
@@ -68,7 +68,6 @@ def main():
                     
                 if p['jobstatus'] == 'closed':
                     j_update.status = 'failed'
-                    j_update.date_updated = today
                     try:
                         j_update.save()
                         logger.info('Job %s with PandaID %s updated' % (j_update.id, j_update.panda_id)) 
@@ -81,7 +80,6 @@ def main():
                     logger.info('Going to update status of job %s from %s to %s' % (j_update.file, j['status'], p['jobstatus']))
                 
                     j_update.status = p['jobstatus']
-                    j_update.date_updated = today
                 
                     if p['jobstatus'] == 'failed':
                         # refer to pilot's COMPASSExperiment PilotErrors for more details
