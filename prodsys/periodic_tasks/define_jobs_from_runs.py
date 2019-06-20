@@ -72,7 +72,7 @@ def define_jobs_from_runs():
                 count_added = 0
                 for r in runs_list:
                     r = r.strip()
-                    cmd = 'grep -rnw /cvmfs/compass.cern.ch/production/ORACLE_DB_TO_TXT/%s* -e \'%s.raw\'' % (t.year, r)
+                    cmd = 'grep -nw /cvmfs/compass.cern.ch/production/ORACLE_DB_TO_TXT/%s* -e \'%s.raw\'' % (t.year, r)
                     logger.info(cmd)
                     result = exec_remote_cmd(cmd)
                     logger.info(result)
