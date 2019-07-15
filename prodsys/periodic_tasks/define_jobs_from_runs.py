@@ -72,7 +72,7 @@ def define_jobs_from_runs():
                 count_added = 0
                 for r in runs_list:
                     r = r.strip()
-                    cmd = 'grep -nw /cvmfs/compass.cern.ch/production/ORACLE_DB_TO_TXT/%s* -e \'%s.raw\'' % (t.year, r)
+                    cmd = 'grep -rnw /cvmfs/compass.cern.ch/production/ORACLE_DB_TO_TXT/%s* -e \'%s.raw\'' % (t.year, r)
                     logger.info(cmd)
                     result = exec_remote_cmd(cmd)
                     logger.info(result)
@@ -163,7 +163,7 @@ def define_jobs_from_runs():
                 logger.info('Lines skipped: %s' % lines_skipped)
                 logger.info('Added jobs: %s' % count_added)
                 if count_added == lines_read - lines_skipped:
-                    logger.info('Going to update task status to jobs defined')
+                    logger.info('Going to update task status to jobs ready')
                     t_edit = Task.objects.get(id=t.id)
                     t_edit.status = 'jobs ready'
                     try:
@@ -252,7 +252,7 @@ def define_jobs_from_runs():
                 logger.info('Lines read: %s' % lines_read)
                 logger.info('Added jobs: %s' % count_added)
                 if count_added == lines_read:
-                    logger.info('Going to update task status to jobs defined')
+                    logger.info('Going to update task status to jobs ready')
                     t_edit = Task.objects.get(id=t.id)
                     t_edit.status = 'jobs ready'
                     try:
