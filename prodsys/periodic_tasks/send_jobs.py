@@ -97,6 +97,8 @@ def main():
             logger.info(PRODSOFT)
             MCGENFILE = 'mcr%s-%s' % (format(j.chunk_number, '05d'), j.run_number)
             logger.info(MCGENFILE)
+            MCGENFILEOUT = 'mcr%s-%s_run000.tgeant' % (format(j.chunk_number, '05d'), j.run_number)
+            logger.info(MCGENFILEOUT)
                 
             ProdPathAndName = j.task.home + j.task.path + j.task.soft
         
@@ -126,12 +128,14 @@ def main():
                 if j.task.site == 'BW_COMPASS_MCORE':
                     job.jobParameters='ppwd=$(pwd);export COMPASS_SW_PREFIX=/scratch/sciteam/criedl/projectdata/;export COMPASS_SW_PATH=%(prodPath)s;export COMPASS_PROD_NAME=%(prodName)s;export TMPRAWFILE=%(TMPRAWFILE)s;export TMPMDSTFILE=%(TMPMDSTFILE)s;export TMPHISTFILE=%(TMPHISTFILE)s;export TMPRICHFILE=%(TMPRICHFILE)s;export prodSlt=%(prodSlt)s;export EVTDUMPFILE=%(EVTDUMPFILE)s;export PRODSOFT=%(PRODSOFT)s;cp %(input_file)s .;coralpath=%(ProdPathAndName)s/coral;cd -P $coralpath;export coralpathsetup=$coralpath"/setup.sh";source $coralpathsetup;cd $ppwd;$CORAL/../phast/coral/coral.exe %(ProdPathAndName)s/%(template)s;if [ ! -s testevtdump.raw ]; then echo "PanDA message: the file is empty">testevtdump.raw; fi;cp payload_stderr.txt payload_stderr.out;cp payload_stdout.txt payload_stdout.out;gzip payload_stderr.out;gzip payload_stdout.out;rm %(tail)s' % {'TMPRAWFILE': TMPRAWFILE, 'TMPMDSTFILE': TMPMDSTFILE, 'TMPHISTFILE': TMPHISTFILE, 'TMPRICHFILE': TMPRICHFILE, 'PRODSOFT': PRODSOFT, 'input_file': j.file, 'ProdPathAndName': ProdPathAndName, 'prodPath': j.task.path, 'prodName': j.task.production, 'template': j.task.template, 'tail': tail, 'prodSlt': j.task.prodslt, 'EVTDUMPFILE': EVTDUMPFILE, 'STDOUTFILE': STDOUTFILE, 'STDERRFILE': STDERRFILE}
                 else:
-                    job.jobParameters='export EOS_MGM_URL=root://eoscompass.cern.ch;ppwd=$(pwd);export COMPASS_SW_PREFIX=/eos/experiment/compass/;export COMPASS_SW_PATH=%(prodPath)s;export COMPASS_PROD_NAME=%(prodName)s;export TMPRAWFILE=%(TMPRAWFILE)s;export TMPMDSTFILE=%(TMPMDSTFILE)s;export TMPHISTFILE=%(TMPHISTFILE)s;export TMPRICHFILE=%(TMPRICHFILE)s;export prodSlt=%(prodSlt)s;export EVTDUMPFILE=%(EVTDUMPFILE)s;export PRODSOFT=%(PRODSOFT)s;coralpath=%(ProdPathAndName)s/coral;cd -P $coralpath;export coralpathsetup=$coralpath"/setup.sh";source $coralpathsetup;cd $ppwd;export CDBSERVER=%(cdbServer)s;xrdcp -N -f root://castorpublic.cern.ch/%(input_file)s\?svcClass=compasscdr .;$CORAL/../phast/coral/coral.exe %(ProdPathAndName)s/%(template)s;if [ ! -s testevtdump.raw ]; then echo "PanDA message: the file is empty">testevtdump.raw; fi;cp payload_stderr.txt payload_stderr.out;cp payload_stdout.txt payload_stdout.out;gzip payload_stderr.out;gzip payload_stdout.out;rm %(tail)s' % {'TMPRAWFILE': TMPRAWFILE, 'TMPMDSTFILE': TMPMDSTFILE, 'TMPHISTFILE': TMPHISTFILE, 'TMPRICHFILE': TMPRICHFILE, 'PRODSOFT': PRODSOFT, 'input_file': j.file, 'ProdPathAndName': ProdPathAndName, 'prodPath': j.task.path, 'prodName': j.task.production, 'template': j.task.template, 'tail': tail, 'prodSlt': j.task.prodslt, 'EVTDUMPFILE': EVTDUMPFILE, 'STDOUTFILE': STDOUTFILE, 'STDERRFILE': STDERRFILE, 'cdbServer': cdbServer}
+                    job.jobParameters='export EOS_MGM_URL=%(eosHomeRoot)s;ppwd=$(pwd);export COMPASS_SW_PREFIX=%(eosHome)s;export COMPASS_SW_PATH=%(prodPath)s;export COMPASS_PROD_NAME=%(prodName)s;export TMPRAWFILE=%(TMPRAWFILE)s;export TMPMDSTFILE=%(TMPMDSTFILE)s;export TMPHISTFILE=%(TMPHISTFILE)s;export TMPRICHFILE=%(TMPRICHFILE)s;export prodSlt=%(prodSlt)s;export EVTDUMPFILE=%(EVTDUMPFILE)s;export PRODSOFT=%(PRODSOFT)s;coralpath=%(ProdPathAndName)s/coral;cd -P $coralpath;export coralpathsetup=$coralpath"/setup.sh";source $coralpathsetup;cd $ppwd;export CDBSERVER=%(cdbServer)s;xrdcp -N -f %(castorHomeRoot)s%(input_file)s\?svcClass=compasscdr .;$CORAL/../phast/coral/coral.exe %(ProdPathAndName)s/%(template)s;if [ ! -s testevtdump.raw ]; then echo "PanDA message: the file is empty">testevtdump.raw; fi;cp payload_stderr.txt payload_stderr.out;cp payload_stdout.txt payload_stdout.out;gzip payload_stderr.out;gzip payload_stdout.out;rm %(tail)s' % {'TMPRAWFILE': TMPRAWFILE, 'TMPMDSTFILE': TMPMDSTFILE, 'TMPHISTFILE': TMPHISTFILE, 'TMPRICHFILE': TMPRICHFILE, 'PRODSOFT': PRODSOFT, 'input_file': j.file, 'ProdPathAndName': ProdPathAndName, 'prodPath': j.task.path, 'prodName': j.task.production, 'template': j.task.template, 'tail': tail, 'prodSlt': j.task.prodslt, 'EVTDUMPFILE': EVTDUMPFILE, 'STDOUTFILE': STDOUTFILE, 'STDERRFILE': STDERRFILE, 'cdbServer': cdbServer, 'eosHomeRoot':settings.EOS_HOME_ROOT, 'eosHome': settings.EOS_HOME, 'castorHomeRoot': settings.CASTOR_HOME_ROOT}
             if j.task.type == 'DDD filtering':
-                job.jobParameters='export EOS_MGM_URL=root://eoscompass.cern.ch;ppwd=$(pwd);export COMPASS_SW_PREFIX=/eos/experiment/compass/;export COMPASS_SW_PATH=%(prodPath)s;export COMPASS_PROD_NAME=%(prodName)s;export TMPRAWFILE=%(TMPRAWFILE)s;export TMPMDSTFILE=%(TMPMDSTFILE)s;export TMPHISTFILE=%(TMPHISTFILE)s;export TMPRICHFILE=%(TMPRICHFILE)s;export prodSlt=%(prodSlt)s;export EVTDUMPFILE=%(EVTDUMPFILE)s;export PRODSOFT=%(PRODSOFT)s;coralpath=%(ProdPathAndName)s/coral;cd -P $coralpath;export coralpathsetup=$coralpath"/setup.sh";source $coralpathsetup;cd $ppwd;xrdcp -N -f root://castorpublic.cern.ch/%(input_file)s\?svcClass=compasscdr .;$CORAL/src/DaqDataDecoding/examples/how-to/ddd --filter-CAL --out=testevtdump.raw %(TMPRAWFILE)s;if [ ! -s testevtdump.raw ]; then echo "PanDA message: the file is empty">testevtdump.raw; fi;cp payload_stderr.txt payload_stderr.out;cp payload_stdout.txt payload_stdout.out;gzip payload_stderr.out;gzip payload_stdout.out;rm %(tail)s' % {'TMPRAWFILE': TMPRAWFILE, 'TMPMDSTFILE': TMPMDSTFILE, 'TMPHISTFILE': TMPHISTFILE, 'TMPRICHFILE': TMPRICHFILE, 'PRODSOFT': PRODSOFT, 'input_file': j.file, 'ProdPathAndName': ProdPathAndName, 'prodPath': j.task.path, 'prodName': j.task.production, 'template': j.task.template, 'tail': tail, 'prodSlt': j.task.prodslt, 'EVTDUMPFILE': EVTDUMPFILE, 'STDOUTFILE': STDOUTFILE, 'STDERRFILE': STDERRFILE}
+                job.jobParameters='export EOS_MGM_URL=%(eosHomeRoot)s;ppwd=$(pwd);export COMPASS_SW_PREFIX=%(eosHome)s;export COMPASS_SW_PATH=%(prodPath)s;export COMPASS_PROD_NAME=%(prodName)s;export TMPRAWFILE=%(TMPRAWFILE)s;export TMPMDSTFILE=%(TMPMDSTFILE)s;export TMPHISTFILE=%(TMPHISTFILE)s;export TMPRICHFILE=%(TMPRICHFILE)s;export prodSlt=%(prodSlt)s;export EVTDUMPFILE=%(EVTDUMPFILE)s;export PRODSOFT=%(PRODSOFT)s;coralpath=%(ProdPathAndName)s/coral;cd -P $coralpath;export coralpathsetup=$coralpath"/setup.sh";source $coralpathsetup;cd $ppwd;xrdcp -N -f %(castorHomeRoot)s%(input_file)s\?svcClass=compasscdr .;$CORAL/src/DaqDataDecoding/examples/how-to/ddd --filter-CAL --out=testevtdump.raw %(TMPRAWFILE)s;if [ ! -s testevtdump.raw ]; then echo "PanDA message: the file is empty">testevtdump.raw; fi;cp payload_stderr.txt payload_stderr.out;cp payload_stdout.txt payload_stdout.out;gzip payload_stderr.out;gzip payload_stdout.out;rm %(tail)s' % {'TMPRAWFILE': TMPRAWFILE, 'TMPMDSTFILE': TMPMDSTFILE, 'TMPHISTFILE': TMPHISTFILE, 'TMPRICHFILE': TMPRICHFILE, 'PRODSOFT': PRODSOFT, 'input_file': j.file, 'ProdPathAndName': ProdPathAndName, 'prodPath': j.task.path, 'prodName': j.task.production, 'template': j.task.template, 'tail': tail, 'prodSlt': j.task.prodslt, 'EVTDUMPFILE': EVTDUMPFILE, 'STDOUTFILE': STDOUTFILE, 'STDERRFILE': STDERRFILE, 'eosHomeRoot':settings.EOS_HOME_ROOT, 'eosHome': settings.EOS_HOME, 'castorHomeRoot': settings.CASTOR_HOME_ROOT}
             if j.task.type == 'MC generation':
-                job.jobParameters='export EOS_MGM_URL=%(eosHomeRoot)s;ppwd=$(pwd);export COMPASS_SW_PREFIX=%(eosHome)s;export COMPASS_SW_PATH=%(prodPath)s;export COMPASS_PROD_NAME=%(prodName)s;export MCGENFILE=%(MCGENFILE)s;export prodSlt=%(prodSlt)s;export PRODSOFT=%(PRODSOFT)s;tgeantpath=%(ProdPathAndName)s/tgeant;cd -P $tgeantpath;export tgeantpathsetup=%(prodHome)s"sw/environment.sh";source $tgeantpathsetup;cd $ppwd;xrdcp -N -f %(eosHomeRoot)s%(input_file)s\?svcClass=compasscdr .;tgeantpath/bin/TGEANT %(MCGENFILE)s;cp payload_stderr.txt payload_stderr.out;cp payload_stdout.txt payload_stdout.out;gzip payload_stderr.out;gzip payload_stdout.out;rm %(tail)s' % {'eosHomeRoot':settings.EOS_HOME_ROOT, 'eosHome': settings.EOS_HOME, 'MCGENFILE': MCGENFILE, 'PRODSOFT': PRODSOFT, 'input_file': j.file, 'ProdPathAndName': ProdPathAndName, 'prodPath': j.task.path, 'prodName': j.task.production, 'template': j.task.template, 'tail': tail, 'prodSlt': j.task.prodslt, 'prodHome': j.task.home, 'STDOUTFILE': STDOUTFILE, 'STDERRFILE': STDERRFILE}
-    
+                job.jobParameters='export EOS_MGM_URL=%(eosHomeRoot)s;ppwd=$(pwd);export COMPASS_SW_PREFIX=%(eosHome)s;export COMPASS_SW_PATH=%(prodPath)s;export COMPASS_PROD_NAME=%(prodName)s;export MCGENFILE=%(MCGENFILE)s;export MCGENFILEOUT=%(MCGENFILEOUT)s;export prodSlt=%(prodSlt)s;export PRODSOFT=%(PRODSOFT)s;tgeantpath=%(ProdPathAndName)s/tgeant;cd -P $tgeantpath;export tgeantpathsetup=%(prodHome)s"sw/environment.sh";source $tgeantpathsetup;cd $ppwd;xrdcp -N -f %(eosHomeRoot)s%(input_file)s .;xrdcp -N -f %(eosHomeRoot)s%(eosHome)smc/%(prodPath)s%(prodSoft)s/o_data/mcr00002-274495.dat .;$tgeantpath/bin/TGEANT %(MCGENFILE)s.xml;cp payload_stderr.txt payload_stderr.out;cp payload_stdout.txt payload_stdout.out;gzip payload_stderr.out;gzip payload_stdout.out;pwd;ls;rm %(tail)s;rm mcr00002-274495.dat;ls' % {'MCGENFILE': MCGENFILE, 'MCGENFILEOUT': MCGENFILEOUT, 'PRODSOFT': PRODSOFT, 'input_file': j.file, 'ProdPathAndName': ProdPathAndName, 'prodPath': j.task.path, 'prodName': j.task.production, 'template': j.task.template, 'tail': tail, 'prodSlt': j.task.prodslt, 'prodHome': j.task.home, 'STDOUTFILE': STDOUTFILE, 'STDERRFILE': STDERRFILE, 'eosHomeRoot':settings.EOS_HOME_ROOT, 'eosHome': settings.EOS_HOME, 'prodPath': j.task.path, 'prodSoft': j.task.soft}
+                job.currentPriority   = 10000
+                job.computingSite     = 'CERN_COMPASS_TEST'
+
     #     fileIRaw = FileSpec()
     #     fileIRaw.lfn = "%s" % (input_file)
     #     fileIRaw.destinationDBlock = job.destinationDBlock
@@ -139,7 +143,7 @@ def main():
     #     fileIRaw.dataset           = job.destinationDBlock
     #     fileIRaw.type = 'input'
     #     job.addFile(fileIRaw)
-        
+            
             fileOstdout = FileSpec()
             fileOstdout.lfn = "payload_stdout.out.gz"
             fileOstdout.destinationDBlock = job.destinationDBlock
@@ -147,7 +151,7 @@ def main():
             fileOstdout.dataset           = job.destinationDBlock
             fileOstdout.type = 'output'
             job.addFile(fileOstdout)
-        
+            
             fileOstderr = FileSpec()
             fileOstderr.lfn = "payload_stderr.out.gz"
             fileOstderr.destinationDBlock = job.destinationDBlock
@@ -155,7 +159,7 @@ def main():
             fileOstderr.dataset           = job.destinationDBlock
             fileOstderr.type = 'output'
             job.addFile(fileOstderr)
-        
+            
             fileOLog = FileSpec()
             fileOLog.lfn = "%(prodName)s-%(runNumber)s-%(runChunk)s-%(prodSlt)s-%(phastVer)s.job.log.tgz" % {'prodName': j.task.production, 'runNumber': j.run_number, 'runChunk': j.chunk_number, 'prodSlt': j.task.prodslt, 'phastVer': j.task.phastver}
             fileOLog.destinationDBlock = job.destinationDBlock
@@ -163,7 +167,7 @@ def main():
             fileOLog.dataset           = job.destinationDBlock
             fileOLog.type = 'log'
             job.addFile(fileOLog)
-    
+            
             if j.task.type == 'test production' or j.task.type == 'mass production' or j.task.type == 'technical production':
                 fileOmDST = FileSpec()
                 fileOmDST.lfn = "%s" % (TMPMDSTFILE)
@@ -192,7 +196,7 @@ def main():
             
             if j.task.type == 'MC generation':
                 fileODat = FileSpec()
-                fileODat.lfn = "%s" % (MCGENFILE)
+                fileODat.lfn = "%s" % (MCGENFILEOUT)
                 fileODat.destinationDBlock = job.destinationDBlock
                 fileODat.destinationSE     = job.destinationSE
                 fileODat.dataset           = job.destinationDBlock
