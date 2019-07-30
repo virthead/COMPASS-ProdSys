@@ -185,6 +185,8 @@ EOS_HOME_LOGS = 'generalprod/testcoral/PanDALogs/'
 
 FTS_SERVER = 'https://fts3-pilot.cern.ch:8446'
 
+CVMFS_ORACLE_DB = '/cvmfs/compass.cern.ch/ORACLE_DB/ORACLE_DB_TXT/'
+
 LOGGING_DIR = '/var/log/compass_prodsys/'
 
 LOGGING = {
