@@ -1,7 +1,7 @@
 import re
 
 def _dictify_dn(dn):
-    ret = dict()
+    ret = {}
     zip_list = [x.split('=') for x in dn.split(',') if '=' in x]
 
     for attr, value in zip_list:
@@ -14,11 +14,11 @@ def _dictify_dn(dn):
 
 def user_dict_from_dn(dn):
     d = _dictify_dn(dn)
-    ret = dict()
+    ret = {}
 
-    first_name, last_name = filter(lambda x: ' ' in x, d['CN'])[-1].split(' ')
-    ret['last_name'] = last_name
-    ret['first_name'] = first_name
+    name = filter(lambda x: ' ' in x, d['CN'])[-1].split(' ')
+    ret['last_name'] = name[0]
+    ret['first_name'] = name[1]
 
     # Letters, digits and @/./+/-/_ only.
     username = dn.replace('=', '-').replace(' ', '_').replace(',', '__')

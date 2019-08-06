@@ -19,7 +19,7 @@ except ImportError:
     from django.contrib.auth.models import User
 
 logging.basicConfig()
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('debug_logger')
 
 class SSLClientAuthBackend(object):
     @staticmethod
