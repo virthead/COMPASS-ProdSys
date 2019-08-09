@@ -18,7 +18,9 @@ class Task(models.Model):
     
     site_choices = (
         ('CERN_COMPASS_PROD', 'CERN_COMPASS_PROD'),
-        ('BW_COMPASS_MCORE', 'BW_COMPASS_MCORE')
+        ('BW_COMPASS_MCORE', 'BW_COMPASS_MCORE'),
+        ('STAMPEDE_COMPASS_MCORE', 'STAMPEDE_COMPASS_MCORE'),
+        ('FRONTERA_COMPASS_MCORE', 'FRONTERA_COMPASS_MCORE')
         )
     
     status_choices = (
@@ -60,7 +62,7 @@ class Task(models.Model):
     template = models.CharField(choices=template_choices, max_length=50, default='template.opt')
     files_source = models.CharField(choices=files_source_choices, max_length=50, default='files list')
     filelist = models.TextField(null=True)
-    files_home = models.CharField(max_length=300, null=True, blank=True, help_text='For BlueWaters only')
+    files_home = models.CharField(max_length=300, null=True, blank=True, help_text='For HPC only')
     max_attempts = models.IntegerField(default=5)
     status = models.CharField(max_length=300, choices=status_choices, default='draft')
     date_added = models.DateTimeField()
