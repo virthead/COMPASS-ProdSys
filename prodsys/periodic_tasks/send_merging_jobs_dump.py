@@ -54,7 +54,7 @@ def send_merging_job(task, files_list, merge_chunk_number):
     input_files_rm = ''
     for j in files_list:
         TMPDUMPFILE = 'evtdump%(prodSlt)s-%(runChunk)s-%(runNumber)s.raw' % {'runNumber': j.run_number, 'runChunk': j.chunk_number, 'prodSlt': j.task.prodslt}
-        if j.task.site == 'BW_COMPASS_MCORE':
+        if j.task.site == 'BW_COMPASS_MCORE' or j.task.site == 'STAMPEDE_COMPASS_MCORE' or j.task.site == 'FRONTERA_COMPASS_MCORE':
             input_files_copy += ' cp $dumpspath/' + TMPDUMPFILE + ' .;'
         else:
             input_files_copy += ' xrdcp -N -f $dumpspath/' + TMPDUMPFILE + ' .;'
@@ -68,7 +68,7 @@ def send_merging_job(task, files_list, merge_chunk_number):
     logger.info(MERGEDDUMPFILE)
     PRODSOFT = task.soft
     ProdPathAndName = task.home + task.path + task.soft
-    if j.task.site == 'BW_COMPASS_MCORE':
+    if j.task.site == 'BW_COMPASS_MCORE' or j.task.site == 'STAMPEDE_COMPASS_MCORE' or j.task.site == 'FRONTERA_COMPASS_MCORE':
         dumpsPath = task.files_home_prefix + task.path + task.soft + '/evtdump/slot' + str(task.prodslt)
     else:
         dumpsPath = settings.EOS_HOME_ROOT + settings.EOS_HOME + task.path + task.soft + '/evtdump/slot' + str(task.prodslt)

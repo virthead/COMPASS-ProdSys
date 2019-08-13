@@ -69,7 +69,7 @@ def send_merging_job(task, files_list, merge_chunk_number):
     TMPHISTFILE = MERGEDHISTFILE
     PRODSOFT = task.soft
     ProdPathAndName = task.home + task.path + task.soft
-    if j.task.site == 'BW_COMPASS_MCORE':
+    if j.task.site == 'BW_COMPASS_MCORE' or j.task.site == 'STAMPEDE_COMPASS_MCORE' or j.task.site == 'FRONTERA_COMPASS_MCORE':
         histPath = task.files_home_prefix + task.path + task.soft + '/TRAFDIC'
     else:
         histPath = settings.EOS_HOME_ROOT + settings.EOS_HOME + task.path + task.soft + '/TRAFDIC'
@@ -90,7 +90,7 @@ def send_merging_job(task, files_list, merge_chunk_number):
     if j.status_merging_histos == 'failed':
         job.parentID = j.panda_id_merging_histos
     
-    if j.task.site == 'BW_COMPASS_MCORE':
+    if j.task.site == 'BW_COMPASS_MCORE' or j.task.site == 'STAMPEDE_COMPASS_MCORE' or j.task.site == 'FRONTERA_COMPASS_MCORE':
         job.jobParameters='ppwd=$(pwd);ppwd=$(pwd);export COMPASS_SW_PREFIX=%(filesHomePrefix)s;export COMPASS_SW_PATH=%(prodPath)s;export COMPASS_PROD_NAME=%(prodName)s;export prodSlt=%(prodSlt)s;export MERGEDHISTFILE=%(MERGEDHISTFILE)s;export TMPHISTFILE=%(TMPHISTFILE)s;export PRODSOFT=%(PRODSOFT)s;coralpath=%(ProdPathAndName)s/coral;cd -P $coralpath;export coralpathsetup=$coralpath"/setup.sh";source $coralpathsetup;cd $ppwd;export histpath=%(histPath)s;%(input_files_copy)shadd -f %(MERGEDHISTFILE)s %(input_files)s;cp payload_stderr.txt payload_stderr.out;cp payload_stdout.txt payload_stdout.out;gzip payload_stderr.out;gzip payload_stdout.out;' % {'filesHomePrefix': j.task.files_home_prefix, 'MERGEDHISTFILE': MERGEDHISTFILE, 'PRODSOFT': PRODSOFT, 'input_files_copy': input_files_copy, 'input_files': input_files, 'ProdPathAndName': ProdPathAndName, 'prodPath': task.path, 'prodName': task.production, 'prodSlt': task.prodslt, 'TMPHISTFILE': TMPHISTFILE, 'histPath': histPath}
     else:
         job.jobParameters='export EOS_MGM_URL=%(eosHomeRoot)s;ppwd=$(pwd);export COMPASS_SW_PREFIX=%(eosHome)s;export COMPASS_SW_PATH=%(prodPath)s;export COMPASS_PROD_NAME=%(prodName)s;export prodSlt=%(prodSlt)s;export MERGEDHISTFILE=%(MERGEDHISTFILE)s;export TMPHISTFILE=%(TMPHISTFILE)s;export PRODSOFT=%(PRODSOFT)s;coralpath=%(ProdPathAndName)s/coral;cd -P $coralpath;export coralpathsetup=$coralpath"/setup.sh";source $coralpathsetup;cd $ppwd;export histpath=%(histPath)s;%(input_files_copy)shadd -f %(MERGEDHISTFILE)s %(input_files)s;cp payload_stderr.txt payload_stderr.out;cp payload_stdout.txt payload_stdout.out;gzip payload_stderr.out;gzip payload_stdout.out;' % {'MERGEDHISTFILE': MERGEDHISTFILE, 'PRODSOFT': PRODSOFT, 'input_files_copy': input_files_copy, 'input_files': input_files, 'ProdPathAndName': ProdPathAndName, 'prodPath': task.path, 'prodName': task.production, 'prodSlt': task.prodslt, 'TMPHISTFILE': TMPHISTFILE, 'histPath': histPath, 'eosHomeRoot':settings.EOS_HOME_ROOT, 'eosHome': settings.EOS_HOME}
