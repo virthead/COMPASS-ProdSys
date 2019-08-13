@@ -48,13 +48,13 @@ def exec_remote_cmd(cmd):
 
 def prepare_on_castor():
     with cd('/tmp'):
-        logger.info('Getting tasks with status send and running for BlueWaters')
-        tasks_list = Task.objects.all().filter(site='BW_COMPASS_MCORE').filter(Q(status='send') | Q(status='running'))
+        logger.info('Getting tasks with status send and running for HPC')
+        tasks_list = Task.objects.all().filter(Q(site='BW_COMPASS_MCORE') | Q(site='STAMPEDE_COMPASS_MCORE') | Q(site='FRONTERA_COMPASS_MCORE')).filter(Q(status='send') | Q(status='running'))
         logger.info('Got list of %s tasks' % len(tasks_list))
         for t in tasks_list:
-            logger.info('Going to update jobs for %s task on BlueWaters to staged' % t)
+            logger.info('Going to update jobs for %s task on HPC to staged' % t)
             jobs_list = Job.objects.filter(task=t).filter(status='defined').update(status='staged', date_updated=timezone.now())
-            logger.info('Job status of task %s for BlueWaters was changed to staged' % t)
+            logger.info('Job status of task %s for HPC was changed to staged' % t)
             
             if not t.date_processing_start:
                 logger.info('Going to update date_processing_start of %s task' % t)
@@ -90,8 +90,8 @@ def prepare_on_castor():
                 except DatabaseError as e:
                     logger.exception('Something went wrong while saving: %s' % e.message)
         
-        logger.info('Getting tasks with status send and running for all sites except BlueWaters')
-        tasks_list = Task.objects.all().exclude(site='BW_COMPASS_MCORE').filter(Q(status='send') | Q(status='running'))
+        logger.info('Getting tasks with status send and running for all sites except HPC')
+        tasks_list = Task.objects.all().exclude(Q(site='BW_COMPASS_MCORE') | Q(site='STAMPEDE_COMPASS_MCORE') | Q(site='FRONTERA_COMPASS_MCORE')).filter(Q(status='send') | Q(status='running'))
         logger.info('Got list of %s tasks' % len(tasks_list))
         for t in tasks_list:
             if not t.date_processing_start:

@@ -117,18 +117,18 @@ def define_jobs_from_runs():
                             
                             logger.info('Check that task and job are unique')
                             
-                            if t.site == 'BW_COMPASS_MCORE':
-                                bw_file = t.files_home + l['name'][l['name'].rfind('/')+1:]
-                                logger.info('File for BlueWaters task was changed to %s' % bw_file)
+                            if t.site == 'BW_COMPASS_MCORE' or t.site == 'STAMPEDE_COMPASS_MCORE' or t.site == 'FRONTERA_COMPASS_MCORE':
+                                hpc_file = t.files_home + l['name'][l['name'].rfind('/')+1:]
+                                logger.info('File for HPC task was changed to %s' % hpc_file)
                                 
-                                qs = Job.objects.filter(task=t, file=bw_file)
+                                qs = Job.objects.filter(task=t, file=hpc_file)
                                 if qs.exists():
                                     logger.info('Such task and job already exist in the system, skipping')
                                     continue
                                 
                                 j = Job(
                                     task = t,
-                                    file = bw_file,
+                                    file = hpc_file,
                                     number_of_events = number_of_events,
                                     run_number = runNumber,
                                     chunk_number = chunkNumber,
@@ -210,17 +210,17 @@ def define_jobs_from_runs():
                             runNumber = l[l.find('-') + 1:l.find('.raw')]
                             chunkNumber = ''
                             chunkNumber = l[l.find('cdr') + 3:l.find('-')]
-                            if t.site == 'BW_COMPASS_MCORE':
-                                bw_file = t.files_home + l[l.rfind('/')+1:]
-                                logger.info('File for BlueWaters task was changed to %s' % bw_file)
-                                qs = Job.objects.filter(task=t, file=bw_file)
+                            if t.site == 'BW_COMPASS_MCORE' or t.site == 'STAMPEDE_COMPASS_MCORE' or t.site == 'FRONTERA_COMPASS_MCORE':
+                                hpc_file = t.files_home + l[l.rfind('/')+1:]
+                                logger.info('File for HPC task was changed to %s' % hpc_file)
+                                qs = Job.objects.filter(task=t, file=hpc_file)
                                 if qs.exists():
                                     logger.info('Such task and job already exist in the system, skipping')
                                     continue
                                 
                                 j = Job(
                                     task = t,
-                                    file = bw_file,
+                                    file = hpc_file,
                                     run_number = runNumber,
                                     chunk_number = chunkNumber,
                                     date_added = today,
