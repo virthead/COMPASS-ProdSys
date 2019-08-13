@@ -63,7 +63,7 @@ class Task(models.Model):
     files_source = models.CharField(choices=files_source_choices, max_length=50, default='files list')
     filelist = models.TextField(null=True)
     files_home = models.CharField(max_length=300, null=True, blank=True, help_text='For HPC only')
-    sw_prefix = models.CharField(max_length=300, null=True, blank=True, help_text='For HPC only')
+    files_home_prefix = models.CharField(max_length=300, null=True, blank=True, help_text='For HPC only')
     max_attempts = models.IntegerField(default=5)
     status = models.CharField(max_length=300, choices=status_choices, default='draft')
     date_added = models.DateTimeField()
