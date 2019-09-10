@@ -48,6 +48,11 @@ class Task(models.Model):
         ('runs list', 'runs list'),
         )
     
+    yes_no_choices = (
+        ('yes', 'yes'),
+        ('no', 'no'),
+        )
+    
     name = models.CharField(max_length=300)
     type = models.CharField(choices=type_choices, max_length=50, default='test production')
     site = models.CharField(choices=site_choices, max_length=50, default='CERN_COMPASS_PROD')
@@ -62,6 +67,7 @@ class Task(models.Model):
     template = models.CharField(choices=template_choices, max_length=50, default='template.opt')
     files_source = models.CharField(choices=files_source_choices, max_length=50, default='files list')
     filelist = models.TextField(null=True)
+    use_local_generator_file = models.CharField(choices=yes_no_choices, max_length=5, default='yes')
     files_home_prefix = models.CharField(max_length=300, null=True, blank=True, help_text='For HPC only')
     files_home = models.CharField(max_length=300, null=True, blank=True, help_text='For HPC only')
     max_attempts = models.IntegerField(default=5)

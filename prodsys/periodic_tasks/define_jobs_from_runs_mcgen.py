@@ -103,8 +103,9 @@ def define_jobs_from_runs_mcgen():
                     seed.text = str(i)
                 for runName in new_settings_xml.iter('runName'):
                     runName.text = file_name
-                for localGeneratorFile in new_settings_xml.iter('localGeneratorFile'):
-                    localGeneratorFile.text = './mcr00002-274495.dat'
+                if t.use_local_generator_file == 'yes':
+                    for localGeneratorFile in new_settings_xml.iter('localGeneratorFile'):
+                        localGeneratorFile.text = './mcr00002-274495.dat'
 #                    localGeneratorFile.text = settings.EOS_HOME + 'mc/' + t.path + t.soft + '/o_data/' + 'mcr00001-274495.dat' # + tail
                 for eventsPerChunk in new_settings_xml.iter('eventsPerChunk'):
                     number_of_events = eventsPerChunk.text
