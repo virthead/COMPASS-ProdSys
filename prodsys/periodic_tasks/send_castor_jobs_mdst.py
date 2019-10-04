@@ -49,7 +49,22 @@ def exec_remote_cmd(cmd):
 def copy_to_castor():
     session_expired = False
     
-    logger.info('Going to create proxy first')
+    logger.info('Going to prepare an environment')
+    cmd = 'setenv LC_ALL C; unset LANGUAGE;'
+    logger.info(cmd)
+    result = exec_remote_cmd(cmd)
+    if result.find('Permission denied') != -1 or result.find('open denied') != -1:
+        logger.info('Session expired, exiting')
+        session_expired = True
+    
+    if result.succeeded:
+        logger.info('Successfully set the environment')
+        logger.info(result)
+    else:
+        logger.info('Error setting an environment')
+        logger.error(result)
+    
+    logger.info('Going to create a proxy')
     cmd = 'voms-proxy-init --cert ~/.globus/na58dst1.cer.pem --key ~/.globus/na58dst1.key.pem --voms vo.compass.cern.ch:/vo.compass.cern.ch/Role=production --valid 96:00'
     logger.info(cmd)
     result = exec_remote_cmd(cmd)
@@ -61,13 +76,13 @@ def copy_to_castor():
         logger.info('Successfully created new proxy')
         logger.info(result)
     else:
-        logger.info('Error sending to castor run number %s merging chunk number %s' % (r, chunk))
+        logger.info('Error creating a proxy')
         logger.error(result)
     
     tasks_list = []
     if not session_expired:
         logger.info('Getting tasks with status send and running')
-        tasks_list = Task.objects.all().exclude(site='BW_COMPASS_MCORE').filter(Q(status='send') | Q(status='running'))
+        tasks_list = Task.objects.all().exclude(Q(site='BW_COMPASS_MCORE') | Q(site='STAMPEDE_COMPASS_MCORE') | Q(site='FRONTERA_COMPASS_MCORE')).filter(Q(status='send') | Q(status='running'))
 #        tasks_list = Task.objects.all().filter(name='bpc_stage3_mu-')
         logger.info('Got list of %s tasks' % len(tasks_list))
     
