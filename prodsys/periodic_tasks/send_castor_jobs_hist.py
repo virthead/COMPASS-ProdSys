@@ -46,6 +46,21 @@ def exec_remote_cmd(cmd):
 
 def copy_to_castor():
     logger.info('Going to prepare an environment')
+    cmd = 'export LC_ALL=C; unset LANGUAGE;'
+    logger.info(cmd)
+    result = exec_remote_cmd(cmd)
+    if result.find('Permission denied') != -1 or result.find('open denied') != -1:
+        logger.info('Session expired, exiting')
+        session_expired = True
+    
+    if result.succeeded:
+        logger.info('Successfully set the environment')
+        logger.info(result)
+    else:
+        logger.info('Error setting an environment')
+        logger.error(result)
+    
+    logger.info('Going to prepare an environment')
     cmd = 'setenv LC_ALL C; unset LANGUAGE;'
     logger.info(cmd)
     result = exec_remote_cmd(cmd)
