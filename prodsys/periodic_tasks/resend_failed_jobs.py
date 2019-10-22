@@ -50,6 +50,15 @@ def main():
             status_castor_mdst=None, status_castor_histos=None, status_castor_evntdmp=None, 
             date_updated=timezone.now())
         
+        logger.info('Going to update task status to sent')
+        t_edit = Task.objects.get(id=t.id)
+        t_edit.status = 'send'
+        try:
+            t_edit.save()
+            logger.info('Finished processing task %s' % t)
+        except Exception as e:
+            logger.exception('%s (%s)' % (e.message, type(e)))
+        
     logger.info('done')
 
 if __name__ == "__main__":
