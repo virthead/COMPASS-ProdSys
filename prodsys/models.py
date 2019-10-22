@@ -29,7 +29,7 @@ class Task(models.Model):
         ('jobs ready', 'jobs ready'),
         ('send', 'send'),
         ('resend', 'resend'),
-        ('resend failed', 'resend failed'),
+        ('resend staging', 'resend staging'),
         ('running', 'running'),
         ('paused', 'paused'),
         ('cancelled', 'cancelled'),

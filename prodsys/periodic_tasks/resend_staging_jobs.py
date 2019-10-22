@@ -26,7 +26,7 @@ from schedconfig.models import Jobsactive4
 from utils import check_process, getRotatingFileHandler
 
 logger = logging.getLogger('periodic_tasks_logger')
-getRotatingFileHandler(logger, 'periodic_tasks.resend_failed_jobs.log')
+getRotatingFileHandler(logger, 'periodic_tasks.resend_staging_jobs.log')
 
 logger.info('Starting %s' % __file__)
 
@@ -37,13 +37,13 @@ if check_process(__file__, pid):
     sys.exit(0)
 
 def main():
-    logger.info('Getting tasks with status resend failed')
-    tasks_list = Task.objects.all().filter(status='resend failed')
+    logger.info('Getting tasks with status resend staging')
+    tasks_list = Task.objects.all().filter(status='resend staging')
     logger.info('Got list of %s tasks' % len(tasks_list))
     
     for t in tasks_list:
-        logger.info('Getting jobs in status failed for task %s' % t)
-        jobs_list_count = Job.objects.all().filter(task=t).filter(attempt__lt=t.max_attempts).filter(status='failed').update(status='defined',
+        logger.info('Getting jobs in status staging for task %s' % t)
+        jobs_list_count = Job.objects.all().filter(task=t).filter(attempt__lt=t.max_attempts).filter(status='staging').update(status='defined',
             status_merging_mdst=None, chunk_number_merging_mdst=-1, status_x_check='no',
             status_merging_histos=None,
             status_merging_evntdmp=None, chunk_number_merging_evntdmp=-1, status_x_check_evntdmp='no',
