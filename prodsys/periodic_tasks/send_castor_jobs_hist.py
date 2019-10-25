@@ -104,7 +104,7 @@ def copy_to_castor():
             logger.info('Getting chunk numbers for run %s' % r)
             merged_chunks_list = Job.objects.filter(task=t).filter(run_number=r).filter(status_castor_histos='ready').order_by('chunk_number_merging_histos').values_list('chunk_number_merging_histos', flat=True).distinct()
             logger.info('Got list of %s chunks' % len(merged_chunks_list))
-            if len(runs_list) == 0:
+            if len(merged_chunks_list) == 0:
                 logger.info('No chunks found for archiving')
                 continue
             
