@@ -76,7 +76,7 @@ def copy_to_castor():
         logger.error(result)
     
     logger.info('Going to create a proxy')
-    cmd = 'voms-proxy-init --cert ~/.globus/na58dst1.cer.pem --key ~/.globus/na58dst1.key.pem --voms vo.compass.cern.ch:/vo.compass.cern.ch/Role=production --valid 96:00'
+    cmd = settings.VOMS_PROXY_INIT
     logger.info(cmd)
     result = exec_remote_cmd(cmd)
     if result.find('Permission denied') != -1 or result.find('open denied') != -1:

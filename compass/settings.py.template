@@ -187,6 +187,8 @@ FTS_SERVER = 'https://fts3-pilot.cern.ch:8446'
 
 CVMFS_ORACLE_DB = '/cvmfs/compass.cern.ch/ORACLE_DB/ORACLE_DB_TXT/'
 
+VOMS_PROXY_INIT = 'voms-proxy-init --cert ~/.globus/na58dst1.cer.pem --key ~/.globus/na58dst1.key.pem --voms vo.compass.cern.ch:/vo.compass.cern.ch/Role=production --valid 96:00'
+
 LOGGING_DIR = '/var/log/compass_prodsys/'
 
 LOGGING = {
