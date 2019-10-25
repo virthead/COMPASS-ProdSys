@@ -97,6 +97,9 @@ def main():
                         if t.type == 'DDD filtering':
                             j_update.status_merging_evntdmp = 'ready'
                         
+                        if t.type == 'MC generation':
+                            j_update.status_castor_mcgen = 'ready'
+                        
                     try:
                         j_update.save()
                         logger.info('Job %s with PandaID %s updated' % (j_update.id, j_update.panda_id)) 
