@@ -74,9 +74,10 @@ def check_files_on_castor():
         logger_task.info(cmd)
         result = exec_remote_cmd(cmd)
         if result.succeeded:
-            reader = csv.DictReader(result.splitlines(), delimiter = ' ', skipinitialspace = True, fieldnames = ['permissions', 'links', 'owner', 'group', 'size', 'date1', 'date2', 'time', 'name'])
             logger_task.info('Successfully read files on castor for task %s' % t[0])
             for c in chunks_list:
+                reader = csv.DictReader(result.splitlines(), delimiter = ' ', skipinitialspace = True, fieldnames = ['permissions', 'links', 'owner', 'group', 'size', 'date1', 'date2', 'time', 'name'])
+                
                 found = False
                 test = 'mcr%(chunkNumber)s-%(runNumber)s_run000.tgeant' % {'chunkNumber': format(c[2], '05d'), 'runNumber': c[1]}
                 
