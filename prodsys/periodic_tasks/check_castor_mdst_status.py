@@ -79,9 +79,9 @@ def check_files_on_castor():
         if result.succeeded:
             logger_task.info('Successfully read files on castor for task %s' % t[0])
             for c in chunks_list:
-                found = False
                 reader = csv.DictReader(result.splitlines(), delimiter = ' ', skipinitialspace = True, fieldnames = ['permissions', 'links', 'owner', 'group', 'size', 'date1', 'date2', 'time', 'name'])
                 
+                found = False
                 test = 'mDST-%(runNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'runNumber': c[1], 'prodSlt': t[3], 'phastVer': t[4]}
                 if format(int(c[2]), '03d') != '000':
                     test = test + '.' + str(format(c[2], '03d'))
