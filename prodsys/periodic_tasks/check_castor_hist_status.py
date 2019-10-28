@@ -30,7 +30,7 @@ logger.info('Starting %s' % __file__)
 
 pid = str(os.getpid())
 logger.info('pid: %s' % pid)
-if check_process('check_castor_status_hist.py', pid):
+if check_process('check_castor_hist_status.py', pid):
     logger.info('Another %s process is running, exiting' % __file__)
     sys.exit(0)
 
