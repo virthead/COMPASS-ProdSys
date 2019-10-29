@@ -94,7 +94,14 @@ class TaskAdmin(admin.ModelAdmin):
             return ModelChoiceField(queryset)
         else:
             return super(TaskAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
-            
+    
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        formfield = super(TaskAdmin, self).formfield_for_dbfield(db_field, request, **kwargs)
+        if db_field.name == 'parent_task_id':
+            formfield.widget.can_add_related = False
+            formfield.widget.can_change_related = False
+        return formfield
+        
     def jobs(self, obj):
         jobs_all = 0
         jobs_staged = 0
