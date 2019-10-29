@@ -50,7 +50,7 @@ def exec_remote_cmd(cmd):
 
 def delete_task_files():
     logger.info('Getting tasks with status=archived and status_files_deleted=no')
-    tasks_list = Task.objects.all().exclude(site='BW_COMPASS_MCORE').filter(status='archived').filter(status_files_deleted='no').order_by('-id')
+    tasks_list = Task.objects.all().exclude(Q(site='BW_COMPASS_MCORE') | Q(site='BW_STAMPEDE_MCORE') | Q(site='BW_FRONTERA_MCORE')).filter(status='archived').filter(status_files_deleted='no').order_by('-id')
     logger.info('Got list of %s tasks' % len(tasks_list))
     i = 0
     for t in tasks_list:
