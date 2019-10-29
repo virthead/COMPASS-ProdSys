@@ -50,7 +50,7 @@ def exec_remote_cmd(cmd):
 
 def archive_logs():
     logger.info('Getting tasks with status archive')
-    tasks_list = list(Task.objects.all().exclude(site='BW_COMPASS_MCORE').filter(status='archive').values_list('production', 'path', 'soft', 'type', 'year').distinct()[:5])
+    tasks_list = list(Task.objects.all().exclude(Q(site='BW_COMPASS_MCORE') | Q(site='BW_STAMPEDE_MCORE') | Q(site='BW_FRONTERA_MCORE')).filter(status='archive').values_list('production', 'path', 'soft', 'type', 'year').distinct()[:5])
     logger.info('Got list of %s productions' % len(tasks_list))
     access_denied = False
     for t in tasks_list:
@@ -68,7 +68,7 @@ def archive_logs():
             if runs_tarred >= runs_to_tar:
                 logger.info('Limit of runs to tar has reached, breaking')
                 break
-                
+            
             logger.info('Going to tar run %s' % run_number)
             cmd = 'tar -cvzf /tmp/%(Prod)s.%(run_number)s.tar %(eosHome)s%(Path)s%(Soft)s/logFiles/%(Prod)s.*%(run_number)s-*.gz' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'run_number': run_number, 'eosHome': settings.EOS_HOME}
             logger.info(cmd)
@@ -249,11 +249,11 @@ def archive_logs():
         p_from = 'xrdcp -N -f %(eosHomeRoot)s%(eosHome)s%(Path)s%(Soft)s/logFiles/' % {'eosHomeRoot':settings.EOS_HOME_ROOT, 'eosHome': settings.EOS_HOME, 'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
         if t[3] == 'mass production':
             f_name = '%(Prod)s_logFiles.tarz' % {'Prod': t[0]}
-            p_to = '%(castorHomeRoot)s%(castorHomeLogs)s%(Year)s/' % {'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'castorLogs': settings.CASTOR_HOME_LOGS, 'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'Year': t[4]}
+            p_to = '%(castorHomeRoot)s%(castorHomeLogs)s%(Year)s/' % {'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'castorHomeLogs': settings.CASTOR_HOME_LOGS, 'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'Year': t[4]}
         else:
             f_name = '%(Soft)s_logFiles.tarz' % {'Soft': t[2]}
-            p_to = '%(castorHomeRoot)s%(castorHomeLogs)stestproductions/' % {'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'castorLogs': settings.CASTOR_HOME_LOGS, 'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
-            
+            p_to = '%(castorHomeRoot)s%(castorHomeLogs)stestproductions/' % {'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'castorHomeLogs': settings.CASTOR_HOME_LOGS, 'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
+        
         cmd = p_from + f_name + ' ' + p_to + f_name
         logger.info(cmd)
         result = exec_remote_cmd(cmd)
