@@ -10,6 +10,7 @@ from django.utils.html import format_html
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_admin_listfilter_dropdown.filters import DropdownFilter, ChoiceDropdownFilter, RelatedDropdownFilter
+from django.forms import ModelChoiceField
 
 def JobsResend(modeladmin, request, queryset):
     queryset.update(status='failed', status_merging_mdst=None, chunk_number_merging_mdst=-1, status_x_check='no',
@@ -84,8 +85,16 @@ class TaskAdmin(admin.ModelAdmin):
 
     def change_view(self, *args, **kwargs):
         self.exclude = getattr(self, 'edit_exclude', ())
-        return super(TaskAdmin, self).change_view(*args, **kwargs)
         
+        return super(TaskAdmin, self).change_view(*args, **kwargs)
+    
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "parent_task_id":
+            queryset = Task.objects.filter(type='MC generation')
+            return ModelChoiceField(queryset)
+        else:
+            return super(TaskAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+            
     def jobs(self, obj):
         jobs_all = 0
         jobs_staged = 0
