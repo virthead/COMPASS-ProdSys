@@ -100,6 +100,7 @@ class TaskAdmin(admin.ModelAdmin):
         if db_field.name == 'parent_task':
             formfield.widget.can_add_related = False
             formfield.widget.can_change_related = False
+            formfield.required = False
         return formfield
         
     def jobs(self, obj):

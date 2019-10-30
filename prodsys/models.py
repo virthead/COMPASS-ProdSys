@@ -57,7 +57,7 @@ class Task(models.Model):
     
     name = models.CharField(max_length=300)
     type = models.CharField(choices=type_choices, max_length=50, default='test production')
-    parent_task = models.ForeignKey("self", null=True, blank=True)
+    parent_task = models.ForeignKey("self", blank=True, null=True)
     site = models.CharField(choices=site_choices, max_length=50, default='CERN_COMPASS_PROD')
     home = models.CharField(max_length=300, default='/cvmfs/compass.cern.ch/', help_text='mandatory leading and trailing slash')
     path = models.CharField(max_length=300, help_text='no leading slash, mandatory trailing slash')
