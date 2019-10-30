@@ -89,7 +89,7 @@ class TaskAdmin(admin.ModelAdmin):
         return super(TaskAdmin, self).change_view(*args, **kwargs)
     
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "parent_task_id":
+        if db_field.name == "parent_task":
             queryset = Task.objects.filter(type='MC generation')
             return ModelChoiceField(queryset)
         else:
@@ -97,7 +97,7 @@ class TaskAdmin(admin.ModelAdmin):
     
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         formfield = super(TaskAdmin, self).formfield_for_dbfield(db_field, request, **kwargs)
-        if db_field.name == 'parent_task_id':
+        if db_field.name == 'parent_task':
             formfield.widget.can_add_related = False
             formfield.widget.can_change_related = False
         return formfield
