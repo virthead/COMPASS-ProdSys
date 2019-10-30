@@ -57,7 +57,7 @@ class Task(models.Model):
     
     name = models.CharField(max_length=300)
     type = models.CharField(choices=type_choices, max_length=50, default='test production')
-    parent_task_id = models.ForeignKey("self", null=True, blank=True)
+    parent_task = models.ForeignKey("self", null=True, blank=True)
     site = models.CharField(choices=site_choices, max_length=50, default='CERN_COMPASS_PROD')
     home = models.CharField(max_length=300, default='/cvmfs/compass.cern.ch/', help_text='mandatory leading and trailing slash')
     path = models.CharField(max_length=300, help_text='no leading slash, mandatory trailing slash')
@@ -69,7 +69,7 @@ class Task(models.Model):
     phastver = models.IntegerField(default=7)
     template = models.CharField(choices=template_choices, max_length=50, default='template.opt')
     files_source = models.CharField(choices=files_source_choices, max_length=50, default='files list')
-    filelist = models.TextField(null=True)
+    filelist = models.TextField(null=True, blank=True)
     use_local_generator_file = models.CharField(choices=yes_no_choices, max_length=5, default='yes')
     files_home_prefix = models.CharField(max_length=300, null=True, blank=True, help_text='For HPC only, mandatory leading and trailing slash')
     files_home = models.CharField(max_length=300, null=True, blank=True, help_text='For HPC only, mandatory leading and trailing slash')
