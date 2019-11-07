@@ -44,7 +44,7 @@ def exec_remote_cmd(cmd):
 
 def check_files_on_castor():
     logger.info('Getting productions castor status archiving')
-    tasks_list = list(Task.objects.all().exclude(site='BW_COMPASS_MCORE').filter(status='archiving').values_list('production', 'path', 'soft', 'type', 'year').distinct())
+    tasks_list = list(Task.objects.all().exclude(Q(site='BW_COMPASS_MCORE') | Q(site='BW_STAMPEDE_MCORE') | Q(site='BW_FRONTERA_MCORE')).filter(status='archiving').values_list('production', 'path', 'soft', 'type', 'year').distinct())
     logger.info('Got list of %s productions' % len(tasks_list))
     
     for t in tasks_list:
@@ -54,6 +54,9 @@ def check_files_on_castor():
             path = path + '%s/' % t[4] 
             file = '%s_logFiles.tarz' % t[0]
             file_and_path = path + file
+        elif t[3] == 'MC generation':
+            file = '%s_logFiles.tarz' % t[2]
+            file_and_path = path + 'mc_prod/gen/' + file
         else:
             file = '%s_logFiles.tarz' % t[2]
             file_and_path = path + 'testproductions/' + file

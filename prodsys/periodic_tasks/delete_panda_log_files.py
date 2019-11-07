@@ -47,7 +47,7 @@ def exec_remote_cmd(cmd):
         return run(cmd)
 
 def delete_panda_log_files():
-    logger.info('Getting tasks with status done, archive and archived')
+    logger.info('Getting tasks with status archive')
     tasks_list = Task.objects.all().exclude(Q(site='BW_COMPASS_MCORE') | Q(site='BW_STAMPEDE_MCORE') | Q(site='BW_FRONTERA_MCORE')).filter(status='archive').order_by('-id')
     logger.info('Got list of %s tasks' % len(tasks_list))
     for t in tasks_list:
@@ -93,6 +93,7 @@ def delete_panda_log_files():
                     logger.info('prod log file for run %s deleted' % run_number)
                     prod = True
                 
+            if t.type == 'test production' or t.type == 'mass production' or t.type == 'technical production' or t.type == 'DDD filtering':
                 logger.info('Going to delete log files of dump merging job for run number %s' % run_number)
                 cmd = 'rm %(eosHome)s%(eosHomeLogs)s%(Production)s-merge-dump-%(runNumber)s-*.job.log.tgz' % pars
                 logger.info(cmd)
@@ -102,7 +103,6 @@ def delete_panda_log_files():
                     logger.info('Session expired, exiting')
                     break
                 
-            if t.type == 'test production' or t.type == 'mass production' or t.type == 'technical production' or t.type == 'DDD filtering':
                 logger.info('Going to check if log files of dump merging job for run number %s exist' % run_number)
                 cmd = 'ls %(eosHome)s%(eosHomeLogs)s%(Production)s-merge-dump-%(runNumber)s-*.job.log.tgz' % pars
                 logger.info(cmd)
