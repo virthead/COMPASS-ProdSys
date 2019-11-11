@@ -35,7 +35,7 @@ if check_process(__file__, pid):
 
 def main():
     logger.info('Getting tasks with status ready')
-    tasks_list = Task.objects.all().filter(type='MC reconstruction').filter(status='ready').exclude(parent_task__isnull=True).filter(files_source='runs list')
+    tasks_list = Task.objects.all().filter(type='MC reconstruction').filter(status='ready').exclude(parent_task__isnull=True)
     logger.info('Got list of %s tasks' % len(tasks_list))
     
     for t in tasks_list:
