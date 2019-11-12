@@ -42,8 +42,6 @@ env.hosts.append(settings.COMPASS_HOST)
 env.user = settings.COMPASS_USER
 env.password = settings.COMPASS_PASS
 
-dirs = {'evtdump': 0, 'mergedDump': 0, 'logFiles': 0, 'mDST.chunks': 0, 'TRAFDIC': 0}
-
 def exec_remote_cmd(cmd):
     with hide('output','running','warnings'), sett(warn_only=True):
         return run(cmd)
@@ -58,16 +56,26 @@ def delete_task_files():
             logger.info('Reached deletion limit, exiting')
             break
         
+        dirs = {}
+        mc = ''
+        if t.type == 'test production' or t.type == 'mass production' or t.type == 'technical production':
+            dirs = {'evtdump': 0, 'mergedDump': 0, 'mDST.chunks': 0, 'TRAFDIC': 0, 'logFiles': 0}
+        
+        if t.type == 'DDD filtering':
+            dirs = {'evtdump': 0, 'mergedDump': 0, 'logFiles': 0}
+            
+        if t.type == 'MC generation':
+            dirs = {'xmls': 0, 'mcgen': 0, 'logFiles': 0}
+            mc = 'mc/'
+            
+        if t.type == 'MC reconstruction':
+            dirs = {'mDST.chunks': 0, 'TRAFDIC': 0, 'logFiles': 0}
+            mc = 'mc/'
+            
         logger.info('Task %s' % t.name)
         for dir, val in dirs.iteritems():
-            if t.type == 'DDD filtering':
-                if dir == 'TRAFDIC' or dir == 'histos' or dir == 'mDST.chunks':
-                    logger.info('DDD filtering task, skipping %s' % dir)
-                    dirs[dir] = 1
-                    continue
-                
             logger.info('Going to delete directory %s' % dir)
-            cmd = 'rm -rf %(eosCompassHome)s%(prodPath)s%(prodSoft)s/%(dir)s' % {'eosCompassHome': settings.EOS_HOME, 'prodPath': t.path, 'prodSoft': t.soft, 'dir': dir}
+            cmd = 'rm -rf %(eosCompassHome)s%(mc)s%(prodPath)s%(prodSoft)s/%(dir)s' % {'eosCompassHome': settings.EOS_HOME, 'mc': mc, 'prodPath': t.path, 'prodSoft': t.soft, 'dir': dir}
             logger.info(cmd)
             result = exec_remote_cmd(cmd)
             logger.info(result)
@@ -76,7 +84,7 @@ def delete_task_files():
                 break
            
             logger.info('Going to check if log files of %s exist' % dir)
-            cmd = 'ls %(eosCompassHome)s%(prodPath)s%(prodSoft)s/%(dir)s' % {'eosCompassHome': settings.EOS_HOME, 'prodPath': t.path, 'prodSoft': t.soft, 'dir': dir}
+            cmd = 'ls %(eosCompassHome)s%(mc)s%(prodPath)s%(prodSoft)s/%(dir)s' % {'eosCompassHome': settings.EOS_HOME, 'mc': mc, 'prodPath': t.path, 'prodSoft': t.soft, 'dir': dir}
             logger.info(cmd)
             result = exec_remote_cmd(cmd)
             logger.info(result)
