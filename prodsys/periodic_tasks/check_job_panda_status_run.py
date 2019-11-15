@@ -91,7 +91,7 @@ def main():
                             j_update.status = 'manual check is needed'
                     
                     if p['jobstatus'] == 'finished':
-                        if t.type == 'test production' or t.type == 'mass production' or t.type == 'technical production':
+                        if t.type == 'test production' or t.type == 'mass production' or t.type == 'technical production' or t.type == 'MC reconstruction':
                             j_update.status_merging_mdst = 'ready'
                     
                         if t.type == 'DDD filtering':
