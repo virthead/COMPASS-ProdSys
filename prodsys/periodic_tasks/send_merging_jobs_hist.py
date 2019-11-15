@@ -84,7 +84,10 @@ def send_merging_job(task, files_list, merge_chunk_number):
     job.destinationSE     = destName
     job.currentPriority   = 5000
     job.prodSourceLabel   = 'prod_test'
-    job.computingSite     = task.site
+    if j.task.site == 'BW_COMPASS_MCORE' or j.task.site == 'STAMPEDE_COMPASS_MCORE' or j.task.site == 'FRONTERA_COMPASS_MCORE':
+        job.computingSite     = task.site + '_MERGING'
+    else:
+        job.computingSite     = task.site
     job.attemptNr = j.attempt_merging_histos + 1
     job.maxAttempt = j.task.max_attempts
     if j.status_merging_histos == 'failed':
