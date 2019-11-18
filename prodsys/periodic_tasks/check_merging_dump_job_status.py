@@ -61,7 +61,7 @@ def main():
                             logger.info('%s, job status will be updated to manual check is needed' % j_check.piloterrordiag)
                             jobs_list_update = Job.objects.filter(panda_id_merging_evntdmp=j_check.pandaid).update(status_merging_evntdmp='manual check is needed', date_updated=today)
                         else:
-                            jobs_list_update = Job.objects.filter(panda_id_merging_evntdmp=j_check.pandaid).update(status_merging_evntdmp=j_check.jobstatus, date_updated=today)
+                            jobs_list_update = Job.objects.filter(panda_id_merging_evntdmp=j_check.pandaid).update(status_merging_evntdmp='failed', date_updated=today)
                     else:
                         jobs_list_update = Job.objects.filter(panda_id_merging_evntdmp=j_check.pandaid).update(status_merging_evntdmp=j_check.jobstatus, date_updated=today)
     
