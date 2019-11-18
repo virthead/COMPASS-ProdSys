@@ -178,7 +178,7 @@ COMPASS_PASS = '*****'
 CASTOR_HOME_ROOT = 'root://castorpublic.cern.ch/'
 CASTOR_HOME = '/castor/cern.ch/compass/'
 CASTOR_HOME_LOGS = '/castor/cern.ch/user/n/na58dst1/prodlogs/'
-svcClass = 'compasscdr'
+SVCCLASS = 'compasscdr'
 
 EOS_HOME_ROOT = 'root://eoscompass.cern.ch/'
 EOS_HOME = '/eos/experiment/compass/'

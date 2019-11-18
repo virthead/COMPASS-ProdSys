@@ -148,7 +148,7 @@ def prepare_on_castor():
                         logger.info('Session expired, exiting')
                         break
                 
-                cmd1 = 'stager_get -f Run_%s.list -S %s -U %s' % (run_number, settings.svcClass, run_number)
+                cmd1 = 'stager_get -f Run_%s.list -S %s -U %s' % (run_number, settings.SVCCLASS, run_number)
                 logger.info(cmd1)
                 result1 = exec_remote_cmd(cmd1)
                 if result1.succeeded:
@@ -172,7 +172,7 @@ def prepare_on_castor():
             for run_number in runs_list:
                 logger.info('Going to request state of tag %s' % run_number)
                 
-                cmd1 = 'stager_qry -S %s -U %s' % (settings.svcClass, run_number)
+                cmd1 = 'stager_qry -S %s -U %s' % (settings.SVCCLASS, run_number)
                 logger.info(cmd1)
                 result1 = exec_remote_cmd(cmd1)
                 logger.info(result1)
