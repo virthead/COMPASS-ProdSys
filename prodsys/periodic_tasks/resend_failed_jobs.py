@@ -26,7 +26,7 @@ from schedconfig.models import Jobsactive4
 from utils import check_process, getRotatingFileHandler
 
 logger = logging.getLogger('periodic_tasks_logger')
-getRotatingFileHandler(logger, 'periodic_tasks.resend_jobs.log')
+getRotatingFileHandler(logger, 'periodic_tasks.resend_failed_jobs.log')
 
 logger.info('Starting %s' % __file__)
 

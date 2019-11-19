@@ -3,4 +3,5 @@ compass/settings.pyc
 static
 static/admin
 *.pyc
+prodsys/periodic_tasks/kill_jobs.py
 
