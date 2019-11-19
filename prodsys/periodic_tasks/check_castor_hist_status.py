@@ -54,7 +54,7 @@ def restart_transfer(logger, task, run_number, chunk_number):
 
 def check_files_on_castor():
     logger.info('Getting productions with castor histos status sent')
-    tasks_list = Job.objects.filter(status_castor_histos='sent').values_list('task_id', 'task__path', 'task__soft', 'task__prodslt', 'task__phastver', 'task__type').distinct()
+    tasks_list = Job.objects.filter(status_castor_histos='sent').values_list('task_id', 'task__path', 'task__soft', 'task__prodslt', 'task__phastver', 'task__type', 'task__year', 'task__period').distinct()
     logger.info('Got list of %s prods: %s' % (len(tasks_list), tasks_list))
     logger.info('Check details in the corresponding periodic_tasks.check_castor_hist_status_taskid.log')
     
@@ -73,11 +73,10 @@ def check_files_on_castor():
         if t[5] == 'mass production':
             oracle_dst = '/oracle_dst/'
         
-        mc = ''
         if t[5] == 'MC reconstruction':
-            mc = 'mc/'
-        
-        cmd = 'nsls -l %(castorHome)s%(mc)s%(prodPath)s%(oracleDst)s%(prodSoft)s/histos/' % {'castorHome': settings.CASTOR_HOME, 'mc': mc, 'prodPath': t[1], 'prodSoft': t[2], 'oracleDst': oracle_dst}
+            cmd = 'nsls -l %(castorHome)smc_prod/CERN/%(Year)s/%(Period)s/%(prodSoft)s/mcreco/histos/' % {'castorHome': settings.CASTOR_HOME, 'prodPath': t[1], 'prodSoft': t[2], 'Year': t[6], 'Period': t[7]}
+        else:
+            cmd = 'nsls -l %(castorHome)s%(prodPath)s%(oracleDst)s%(prodSoft)s/histos/' % {'castorHome': settings.CASTOR_HOME, 'prodPath': t[1], 'prodSoft': t[2], 'oracleDst': oracle_dst}
         logger_task.info(cmd)
         result = exec_remote_cmd(cmd)
         if result.succeeded:

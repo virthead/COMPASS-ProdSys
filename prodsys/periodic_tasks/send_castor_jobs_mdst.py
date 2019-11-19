@@ -106,6 +106,10 @@ def copy_to_castor():
         runs_list = Job.objects.filter(task=t).filter(status='finished').filter(status_merging_mdst='finished').filter(status_x_check='yes').filter(attempt_castor_mdst__lt=t.max_attempts).filter(status_castor_mdst='ready').order_by('run_number').values_list('run_number', flat=True).distinct()
         logger.info('Got list of %s runs' % len(runs_list))
         
+        oracle_dst = ''
+        if t.type == 'mass production':
+            oracle_dst = '/oracle_dst/'
+            
         mc = ''
         if t.type == 'MC reconstruction':
             mc = 'mc/'
@@ -134,14 +138,13 @@ def copy_to_castor():
                 if format(c, '03d') != '000':
                     f_from = f_from + '.' + format(c, '03d')
                 
-                oracle_dst = ''
-                if t.type == 'mass production':
-                    oracle_dst = '/oracle_dst/'
-                    
-                f_to = '%(castorHomeRoot)s%(castorHome)s%(mc)s%(prodPath)s%(oracleDst)s%(prodSoft)s/mDST/mDST-%(runNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'prodPath': t.path, 'prodSoft': t.soft, 'runNumber': r, 'prodSlt': t.prodslt, 'phastVer': t.phastver, 'oracleDst': oracle_dst, 'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'castorHome': settings.CASTOR_HOME, 'mc': mc}
-                    
+                if t.type == 'MC reconstruction':
+                    f_to = '%(castorHomeRoot)s%(castorHome)smc_prod/CERN/%(Year)s/%(Period)s/%(prodSoft)s/mcreco/mDST/mDST-%(runNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'prodPath': t.path, 'prodSoft': t.soft, 'runNumber': r, 'prodSlt': t.prodslt, 'phastVer': t.phastver, 'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'castorHome': settings.CASTOR_HOME, 'Year': t.year, 'Period': t.period}
+                else:
+                    f_to = '%(castorHomeRoot)s%(castorHome)s%(prodPath)s%(oracleDst)s%(prodSoft)s/mDST/mDST-%(runNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'prodPath': t.path, 'prodSoft': t.soft, 'runNumber': r, 'prodSlt': t.prodslt, 'phastVer': t.phastver, 'oracleDst': oracle_dst, 'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'castorHome': settings.CASTOR_HOME}
                 if format(c, '03d') != '000':
                     f_to = f_to + '.' + format(c, '03d')
+                
                 f = f_from + ' ' + f_to
                 copy_list.append([c, f])
             
