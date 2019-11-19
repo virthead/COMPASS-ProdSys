@@ -75,7 +75,10 @@ def main():
             if nEvents_run == nEvents_chunks:
                 logger.info('Number of events in merged files and run are equal')
                 logger.info('Going to update x check status of jobs of run number %s to yes' % run_number)
-                jobs_list_update = Job.objects.filter(task=t).filter(run_number=run_number).update(status_x_check='yes', status_merging_histos='ready', status_merging_evntdmp='ready', status_castor_mdst='ready', date_updated=today)
+                if t.type == 'MC reconstruction':
+                    jobs_list_update = Job.objects.filter(task=t).filter(run_number=run_number).update(status_x_check='yes', status_merging_histos='ready', status_castor_mdst='ready', date_updated=today)
+                else:
+                    jobs_list_update = Job.objects.filter(task=t).filter(run_number=run_number).update(status_x_check='yes', status_merging_histos='ready', status_merging_evntdmp='ready', status_castor_mdst='ready', date_updated=today)
             else:
                 logger.info('Number of events in merged files and run are not equal')
                 logger.info('Going to update x check status of jobs of run number %s to manual check is needed' % run_number)
