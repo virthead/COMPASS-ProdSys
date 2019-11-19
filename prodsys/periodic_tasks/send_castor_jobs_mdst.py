@@ -106,6 +106,10 @@ def copy_to_castor():
         runs_list = Job.objects.filter(task=t).filter(status='finished').filter(status_merging_mdst='finished').filter(status_x_check='yes').filter(attempt_castor_mdst__lt=t.max_attempts).filter(status_castor_mdst='ready').order_by('run_number').values_list('run_number', flat=True).distinct()
         logger.info('Got list of %s runs' % len(runs_list))
         
+        mc = ''
+        if t.type == 'MC reconstruction':
+            mc = 'mc/'
+        
         i = 0
         for r in runs_list:
             if session_expired:
@@ -126,7 +130,7 @@ def copy_to_castor():
             
             logger.info('Going to build copy list')
             for c in merged_chunks_list:
-                f_from = 'fts-transfer-submit -s %(ftsServer)s -o %(eosHomeRoot)s%(eosHome)s%(prodPath)s%(prodSoft)s/mDST/mDST-%(runNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'prodPath': t.path, 'prodSoft': t.soft, 'runNumber': r, 'prodSlt': t.prodslt, 'phastVer': t.phastver, 'ftsServer': settings.FTS_SERVER, 'eosHomeRoot':settings.EOS_HOME_ROOT, 'eosHome': settings.EOS_HOME}
+                f_from = 'fts-transfer-submit -s %(ftsServer)s -o %(eosHomeRoot)s%(eosHome)s%(mc)s%(prodPath)s%(prodSoft)s/mDST/mDST-%(runNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'prodPath': t.path, 'prodSoft': t.soft, 'runNumber': r, 'prodSlt': t.prodslt, 'phastVer': t.phastver, 'ftsServer': settings.FTS_SERVER, 'eosHomeRoot':settings.EOS_HOME_ROOT, 'eosHome': settings.EOS_HOME, 'mc': mc}
                 if format(c, '03d') != '000':
                     f_from = f_from + '.' + format(c, '03d')
                 
@@ -134,7 +138,7 @@ def copy_to_castor():
                 if t.type == 'mass production':
                     oracle_dst = '/oracle_dst/'
                     
-                f_to = '%(castorHomeRoot)s%(castorHome)s%(prodPath)s%(oracleDst)s%(prodSoft)s/mDST/mDST-%(runNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'prodPath': t.path, 'prodSoft': t.soft, 'runNumber': r, 'prodSlt': t.prodslt, 'phastVer': t.phastver, 'oracleDst': oracle_dst, 'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'castorHome': settings.CASTOR_HOME}
+                f_to = '%(castorHomeRoot)s%(castorHome)s%(mc)s%(prodPath)s%(oracleDst)s%(prodSoft)s/mDST/mDST-%(runNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'prodPath': t.path, 'prodSoft': t.soft, 'runNumber': r, 'prodSlt': t.prodslt, 'phastVer': t.phastver, 'oracleDst': oracle_dst, 'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'castorHome': settings.CASTOR_HOME, 'mc': mc}
                     
                 if format(c, '03d') != '000':
                     f_to = f_to + '.' + format(c, '03d')
