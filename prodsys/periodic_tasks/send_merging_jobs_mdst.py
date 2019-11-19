@@ -51,13 +51,17 @@ def send_merging_job(task, files_list, merge_chunk_number):
     
     input_files = ''
     input_files_copy = ''
+    mc = ''
+    if task.type == 'MC reconstruction':
+        mc = 'mc/'
+    
     for j in files_list:
         TMPMDSTFILE = 'mDST-%(runNumber)s-%(runChunk)s-%(prodSlt)s-%(phastVer)s.root' % {'runNumber': j.run_number, 'runChunk': j.chunk_number, 'prodSlt': j.task.prodslt, 'phastVer': j.task.phastver}
         input_files += ' ' + TMPMDSTFILE
         if j.task.site == 'BW_COMPASS_MCORE' or j.task.site == 'STAMPEDE_COMPASS_MCORE' or j.task.site == 'FRONTERA_COMPASS_MCORE':
             input_files_copy += ' cp ' + task.files_home_prefix + task.path + task.soft + '/mDST.chunks/' + TMPMDSTFILE + ' .;'
         else:
-            input_files_copy += ' xrdcp -N -f ' + settings.EOS_HOME_ROOT + settings.EOS_HOME + task.path + task.soft + '/mDST.chunks/' + TMPMDSTFILE + ' .;'
+            input_files_copy += ' xrdcp -N -f ' + settings.EOS_HOME_ROOT + settings.EOS_HOME + mc + task.path + task.soft + '/mDST.chunks/' + TMPMDSTFILE + ' .;'
     
     datasetName = '%(prodNameOnly)s.%(runNumber)s-%(prodSlt)s-%(phastVer)s-merging-mdst' % {'prodNameOnly': task.production, 'runNumber': j.run_number, 'prodSlt': task.prodslt, 'phastVer': task.phastver}
     logger.info(datasetName)
@@ -97,7 +101,10 @@ def send_merging_job(task, files_list, merge_chunk_number):
     if j.task.site == 'BW_COMPASS_MCORE' or j.task.site == 'STAMPEDE_COMPASS_MCORE' or j.task.site == 'FRONTERA_COMPASS_MCORE':
         job.jobParameters='ppwd=$(pwd);ppwd=$(pwd);export COMPASS_SW_PREFIX=%(filesHomePrefix)s;export COMPASS_SW_PATH=%(prodPath)s;export COMPASS_PROD_NAME=%(prodName)s;export prodSlt=%(prodSlt)s;export MERGEDHISTFILE=%(MERGEDHISTFILE)s;export MERGEDMDSTFILE=%(MERGEDMDSTFILE)s;export TMPHISTFILE=%(TMPHISTFILE)s;export PRODSOFT=%(PRODSOFT)s;coralpath=%(ProdPathAndName)s/coral;cd -P $coralpath;export coralpathsetup=$coralpath"/setup.sh";source $coralpathsetup;cd $ppwd;%(input_files_copy)sexport PHAST_mDST_MAX_SIZE=6000000000;$CORAL/../phast/phast -m -o %(MERGEDMDSTFILE)s %(input_files)s;cp payload_stderr.txt payload_stderr.out;cp payload_stdout.txt payload_stdout.out;gzip payload_stdout.out;' % {'filesHomePrefix': j.task.files_home_prefix, 'MERGEDHISTFILE': MERGEDHISTFILE, 'MERGEDMDSTFILE': MERGEDMDSTFILE, 'PRODSOFT': PRODSOFT, 'input_files_copy': input_files_copy, 'input_files': input_files, 'ProdPathAndName': ProdPathAndName, 'prodPath': task.path, 'prodName': task.production, 'prodSlt': task.prodslt, 'TMPHISTFILE': TMPHISTFILE}
     else:
-        job.jobParameters='export EOS_MGM_URL=%(eosHomeRoot)s;ppwd=$(pwd);export COMPASS_SW_PREFIX=%(eosHome)s;export COMPASS_SW_PATH=%(prodPath)s;export COMPASS_PROD_NAME=%(prodName)s;export prodSlt=%(prodSlt)s;export MERGEDHISTFILE=%(MERGEDHISTFILE)s;export MERGEDMDSTFILE=%(MERGEDMDSTFILE)s;export TMPHISTFILE=%(TMPHISTFILE)s;export PRODSOFT=%(PRODSOFT)s;coralpath=%(ProdPathAndName)s/coral;cd -P $coralpath;export coralpathsetup=$coralpath"/setup.sh";source $coralpathsetup;cd $ppwd;%(input_files_copy)sexport PHAST_mDST_MAX_SIZE=6000000000;$CORAL/../phast/phast -m -o %(MERGEDMDSTFILE)s %(input_files)s;cp payload_stderr.txt payload_stderr.out;cp payload_stdout.txt payload_stdout.out;gzip payload_stdout.out;' % {'MERGEDHISTFILE': MERGEDHISTFILE, 'MERGEDMDSTFILE': MERGEDMDSTFILE, 'PRODSOFT': PRODSOFT, 'input_files_copy': input_files_copy, 'input_files': input_files, 'ProdPathAndName': ProdPathAndName, 'prodPath': task.path, 'prodName': task.production, 'prodSlt': task.prodslt, 'TMPHISTFILE': TMPHISTFILE, 'eosHomeRoot':settings.EOS_HOME_ROOT, 'eosHome': settings.EOS_HOME}
+        if j.task.type == 'MC reconstruction':
+            job.jobParameters='export EOS_MGM_URL=%(eosHomeRoot)s;ppwd=$(pwd);export COMPASS_SW_PREFIX=%(eosHome)s;export COMPASS_SW_PATH=%(prodPath)s;export COMPASS_PROD_NAME=%(prodName)s;export prodSlt=%(prodSlt)s;export MERGEDHISTFILE=%(MERGEDHISTFILE)s;export MERGEDMDSTFILE=%(MERGEDMDSTFILE)s;export TMPHISTFILE=%(TMPHISTFILE)s;export PRODSOFT=%(PRODSOFT)s;coralpath=%(ProdPathAndName)s;cd -P $coralpath;export coralpathsetup=$coralpath"/environment.sh";source $coralpathsetup;cd $ppwd;%(input_files_copy)sexport PHAST_mDST_MAX_SIZE=6000000000;$CORAL/../phast/phast -m -o %(MERGEDMDSTFILE)s %(input_files)s;cp payload_stderr.txt payload_stderr.out;cp payload_stdout.txt payload_stdout.out;gzip payload_stdout.out;' % {'MERGEDHISTFILE': MERGEDHISTFILE, 'MERGEDMDSTFILE': MERGEDMDSTFILE, 'PRODSOFT': PRODSOFT, 'input_files_copy': input_files_copy, 'input_files': input_files, 'ProdPathAndName': ProdPathAndName, 'prodPath': task.path, 'prodName': task.production, 'prodSlt': task.prodslt, 'TMPHISTFILE': TMPHISTFILE, 'eosHomeRoot':settings.EOS_HOME_ROOT, 'eosHome': settings.EOS_HOME}
+        else:
+            job.jobParameters='export EOS_MGM_URL=%(eosHomeRoot)s;ppwd=$(pwd);export COMPASS_SW_PREFIX=%(eosHome)s;export COMPASS_SW_PATH=%(prodPath)s;export COMPASS_PROD_NAME=%(prodName)s;export prodSlt=%(prodSlt)s;export MERGEDHISTFILE=%(MERGEDHISTFILE)s;export MERGEDMDSTFILE=%(MERGEDMDSTFILE)s;export TMPHISTFILE=%(TMPHISTFILE)s;export PRODSOFT=%(PRODSOFT)s;coralpath=%(ProdPathAndName)s/coral;cd -P $coralpath;export coralpathsetup=$coralpath"/setup.sh";source $coralpathsetup;cd $ppwd;%(input_files_copy)sexport PHAST_mDST_MAX_SIZE=6000000000;$CORAL/../phast/phast -m -o %(MERGEDMDSTFILE)s %(input_files)s;cp payload_stderr.txt payload_stderr.out;cp payload_stdout.txt payload_stdout.out;gzip payload_stdout.out;' % {'MERGEDHISTFILE': MERGEDHISTFILE, 'MERGEDMDSTFILE': MERGEDMDSTFILE, 'PRODSOFT': PRODSOFT, 'input_files_copy': input_files_copy, 'input_files': input_files, 'ProdPathAndName': ProdPathAndName, 'prodPath': task.path, 'prodName': task.production, 'prodSlt': task.prodslt, 'TMPHISTFILE': TMPHISTFILE, 'eosHomeRoot':settings.EOS_HOME_ROOT, 'eosHome': settings.EOS_HOME}
 
     fileOLog = FileSpec()
     fileOLog.lfn = "%s.job.log.tgz" % (job.jobName)
