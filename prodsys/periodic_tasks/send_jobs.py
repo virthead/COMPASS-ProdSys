@@ -117,8 +117,10 @@ def main():
             job.computingSite     = j.task.site
             job.attemptNr = j.attempt + 1
             job.maxAttempt = j.task.max_attempts
-            if j.status == 'failed':
+            if j.panda_id != 0:
                 job.parentID = j.panda_id
+#            if j.status == 'failed':
+#                job.parentID = j.panda_id
             head, tail = os.path.split(j.file)
             
             cdbServer = cdbServerArr[random.randrange(len(cdbServerArr))]
