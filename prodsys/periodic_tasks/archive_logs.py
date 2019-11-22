@@ -49,6 +49,53 @@ def exec_remote_cmd(cmd):
         return run(cmd)
 
 def archive_logs():
+    session_expired = False
+    
+    logger.info('Going to prepare an environment')
+    cmd = 'export LC_ALL=C; unset LANGUAGE;'
+    logger.info(cmd)
+    result = exec_remote_cmd(cmd)
+    if result.find('Permission denied') != -1 or result.find('open denied') != -1:
+        logger.info('Session expired, exiting')
+        session_expired = True
+    
+    if result.succeeded:
+        logger.info('Successfully set the environment')
+        logger.info(result)
+    else:
+        logger.info('Error setting an environment')
+        logger.error(result)
+    
+    logger.info('Going to prepare an environment')
+    cmd = 'setenv LC_ALL C; unset LANGUAGE;'
+    logger.info(cmd)
+    result = exec_remote_cmd(cmd)
+    if result.find('Permission denied') != -1 or result.find('open denied') != -1:
+        logger.info('Session expired, exiting')
+        session_expired = True
+    
+    if result.succeeded:
+        logger.info('Successfully set the environment')
+        logger.info(result)
+    else:
+        logger.info('Error setting an environment')
+        logger.error(result)
+    
+    logger.info('Going to create a proxy')
+    cmd = settings.VOMS_PROXY_INIT
+    logger.info(cmd)
+    result = exec_remote_cmd(cmd)
+    if result.find('Permission denied') != -1 or result.find('open denied') != -1:
+        logger.info('Session expired, exiting')
+        session_expired = True
+    
+    if result.succeeded:
+        logger.info('Successfully created new proxy')
+        logger.info(result)
+    else:
+        logger.info('Error creating a proxy')
+        logger.error(result)
+    
     logger.info('Getting tasks with status archive')
     tasks_list = list(Task.objects.all().exclude(Q(site='BW_COMPASS_MCORE') | Q(site='BW_STAMPEDE_MCORE') | Q(site='BW_FRONTERA_MCORE')).filter(status='archive').values_list('production', 'path', 'soft', 'type', 'year').distinct()[:5])
     logger.info('Got list of %s productions' % len(tasks_list))
@@ -73,7 +120,7 @@ def archive_logs():
 
             logger.info('Going to tar run %s' % run_number)
             cmd = 'tar -cvzf /tmp/%(Prod)s.%(run_number)s.tar %(eosHome)s%(Path)s%(Soft)s/logFiles/%(Prod)s.*%(run_number)s-*.gz' % pars
-            if t[3] == 'MC generation':
+            if t[3] == 'MC generation' or t[3] == 'MC reconstruction':
                 cmd = 'tar -cvzf /tmp/%(Prod)s.%(run_number)s.tar %(eosHome)smc/%(Path)s%(Soft)s/logFiles/%(Prod)s.*%(run_number)s*.gz' % pars
             logger.info(cmd)
             result = exec_remote_cmd(cmd)
@@ -100,7 +147,7 @@ def archive_logs():
             
             logger.info('Going to move file from /tmp to EOS')
             cmd = 'mv /tmp/%(Prod)s.%(run_number)s.tar %(eosHome)s' % pars
-            if t[3] == 'MC generation':
+            if t[3] == 'MC generation' or t[3] == 'MC reconstruction':
                 cmd += 'mc/'
             cmd += '%(Path)s%(Soft)s/logFiles/%(Prod)s.%(run_number)s.tar' % pars
             logger.info(cmd)
@@ -113,7 +160,7 @@ def archive_logs():
             
             logger.info('Going to check if tar for run %s exists on EOS' % run_number)
             path = '%(eosHome)s' % pars
-            if t[3] == 'MC generation':
+            if t[3] == 'MC generation' or t[3] == 'MC reconstruction':
                 path += 'mc/'
             path += '%(Path)s%(Soft)s/logFiles/' % pars
             file = '%(Prod)s.%(run_number)s.tar' % pars
@@ -151,7 +198,7 @@ def archive_logs():
         
         logger.info('All runs of %s are in tars, going to check if empty files were generated' % t[0])
         cmd = 'ls -al %(eosHome)s%(Path)s%(Soft)s/logFiles/%(Prod)s.*.tar' % {'eosHome': settings.EOS_HOME, 'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
-        if t[3] == 'MC generation':
+        if t[3] == 'MC generation' or t[3] == 'MC reconstruction':
             cmd = 'ls -al %(eosHome)smc/%(Path)s%(Soft)s/logFiles/%(Prod)s.*.tar' % {'eosHome': settings.EOS_HOME, 'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
         logger.info(cmd)
         result = exec_remote_cmd(cmd)
@@ -182,7 +229,7 @@ def archive_logs():
         logger.info('Going to create final tarz file for production %s' % t[0])
         if t[3] == 'mass production':
             cmd = 'tar -cvzf /tmp/%(Prod)s_logFiles.tarz %(eosHome)s%(Path)s%(Soft)s/logFiles/%(Prod)s.*.tar' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'eosHome': settings.EOS_HOME}
-        elif t[3] == 'MC generation':
+        elif t[3] == 'MC generation' or t[3] == 'MC reconstruction':
             cmd = 'tar -cvzf /tmp/%(Soft)s_logFiles.tarz %(eosHome)smc/%(Path)s%(Soft)s/logFiles/%(Prod)s.*.tar' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'eosHome': settings.EOS_HOME}
         else:
             cmd = 'tar -cvzf /tmp/%(Soft)s_logFiles.tarz %(eosHome)s%(Path)s%(Soft)s/logFiles/%(Prod)s.*.tar' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'eosHome': settings.EOS_HOME}
@@ -219,7 +266,7 @@ def archive_logs():
         logger.info('Going to move file from /tmp to EOS')
         if t[3] == 'mass production':
             cmd = 'mv /tmp/%(Prod)s_logFiles.tarz %(eosHome)s%(Path)s%(Soft)s/logFiles/%(Prod)s_logFiles.tarz' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'eosHome': settings.EOS_HOME}
-        elif t[3] == 'MC generation':
+        elif t[3] == 'MC generation' or t[3] == 'MC reconstruction':
             cmd = 'mv /tmp/%(Soft)s_logFiles.tarz %(eosHome)smc/%(Path)s%(Soft)s/logFiles/%(Soft)s_logFiles.tarz' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'eosHome': settings.EOS_HOME}
         else:
             cmd = 'mv /tmp/%(Soft)s_logFiles.tarz %(eosHome)s%(Path)s%(Soft)s/logFiles/%(Soft)s_logFiles.tarz' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'eosHome': settings.EOS_HOME}
@@ -233,7 +280,7 @@ def archive_logs():
         
         logger.info('Check if final tarz for %s exists on EOS' % t[0])
         path = '%(eosHome)s%(Path)s%(Soft)s/logFiles/' % {'eosHome': settings.EOS_HOME, 'Path': t[1], 'Soft': t[2]}
-        if t[3] == 'MC generation':
+        if t[3] == 'MC generation' or t[3] == 'MC reconstruction':
             path = '%(eosHome)smc/%(Path)s%(Soft)s/logFiles/' % {'eosHome': settings.EOS_HOME, 'Path': t[1], 'Soft': t[2]}
         if t[3] == 'mass production':
             file = '%(Prod)s_logFiles.tarz' % {'Prod': t[0]}
@@ -264,8 +311,8 @@ def archive_logs():
             continue
         
         logger.info('Going to send file to Castor')        
-        p_from = 'xrdcp -N -f %(eosHomeRoot)s%(eosHome)s' % {'eosHomeRoot':settings.EOS_HOME_ROOT, 'eosHome': settings.EOS_HOME}
-        if t[3] == 'MC generation':
+        p_from = 'fts-transfer-submit -s %(ftsServer)s -o %(eosHomeRoot)s%(eosHome)s' % {'ftsServer': settings.FTS_SERVER, 'eosHomeRoot':settings.EOS_HOME_ROOT, 'eosHome': settings.EOS_HOME}
+        if t[3] == 'MC generation' or t[3] == 'MC reconstruction':
             p_from += 'mc/'
         p_from += '%(Path)s%(Soft)s/logFiles/' % {'Path': t[1], 'Soft': t[2]}
         if t[3] == 'mass production':
@@ -274,6 +321,9 @@ def archive_logs():
         elif t[3] == 'MC generation':
             f_name = '%(Soft)s_logFiles.tarz' % {'Soft': t[2]}
             p_to = '%(castorHomeRoot)s%(castorHomeLogs)smc_prod/gen/' % {'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'castorHomeLogs': settings.CASTOR_HOME_LOGS}
+        elif t[3] == 'MC reconstruction':
+            f_name = '%(Soft)s_logFiles.tarz' % {'Soft': t[2]}
+            p_to = '%(castorHomeRoot)s%(castorHomeLogs)smc_prod/reco/' % {'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'castorHomeLogs': settings.CASTOR_HOME_LOGS}
         else:
             f_name = '%(Soft)s_logFiles.tarz' % {'Soft': t[2]}
             p_to = '%(castorHomeRoot)s%(castorHomeLogs)stestproductions/' % {'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'castorHomeLogs': settings.CASTOR_HOME_LOGS}

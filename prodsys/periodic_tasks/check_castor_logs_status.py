@@ -57,6 +57,9 @@ def check_files_on_castor():
         elif t[3] == 'MC generation':
             file = '%s_logFiles.tarz' % t[2]
             file_and_path = path + 'mc_prod/gen/' + file
+        elif t[3] == 'MC reconstruction':
+            file = '%s_logFiles.tarz' % t[2]
+            file_and_path = path + 'mc_prod/reco/' + file
         else:
             file = '%s_logFiles.tarz' % t[2]
             file_and_path = path + 'testproductions/' + file

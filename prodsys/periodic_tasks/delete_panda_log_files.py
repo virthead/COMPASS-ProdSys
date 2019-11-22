@@ -71,7 +71,7 @@ def delete_panda_log_files():
             
             pars = {'eosHome': settings.EOS_HOME, 'eosHomeLogs': settings.EOS_HOME_LOGS, 'Path': t.path, 'Production': t.production, 'runNumber': run_number}
             
-            if t.type == 'test production' or t.type == 'mass production' or t.type == 'technical production' or t.type == 'DDD filtering' or t.type == 'MC generation':
+            if t.type == 'test production' or t.type == 'mass production' or t.type == 'technical production' or t.type == 'DDD filtering' or t.type == 'MC generation' or t.type == 'MC reconstruction':
                 logger.info('Going to delete log files of prod job for run number %s' % run_number)
                 cmd = 'rm %(eosHome)s%(eosHomeLogs)s%(Production)s-%(runNumber)s-*.job.log.tgz' % pars
                 logger.info(cmd)
@@ -115,7 +115,7 @@ def delete_panda_log_files():
                     logger.info('dump merging log file for run %s deleted' % run_number)
                     dump = True
                 
-            if t.type == 'test production' or t.type == 'mass production' or t.type == 'technical production':
+            if t.type == 'test production' or t.type == 'mass production' or t.type == 'technical production' or t.type == 'MC reconstruction':
                 logger.info('Going to delete log files of mdst merging job for run number %s' % run_number)
                 cmd = 'rm %(eosHome)s%(eosHomeLogs)s%(Production)s-merge-%(runNumber)s-*.job.log.tgz' % pars
                 logger.info(cmd)
@@ -168,6 +168,10 @@ def delete_panda_log_files():
             
             if t.type == 'MC generation':
                 if prod:
+                    all = True
+            
+            if t.type == 'MC reconstruction':
+                if prod and mdst and hist:
                     all = True
             
             if all:        
