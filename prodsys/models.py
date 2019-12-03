@@ -138,6 +138,7 @@ class Job(models.Model):
     attempt_logs_castor = models.IntegerField(default=0)
     status_castor_mcgen = models.CharField(max_length=50, null=True, blank=True)
     attempt_castor_mcgen = models.IntegerField(default=0)
+    status_panda_job_deleted = models.CharField(max_length=10, default='no')
     
     def __unicode__(self):
         return self.file

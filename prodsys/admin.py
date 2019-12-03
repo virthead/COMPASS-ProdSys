@@ -13,7 +13,7 @@ from django_admin_listfilter_dropdown.filters import DropdownFilter, ChoiceDropd
 from django.forms import ModelChoiceField
 
 def JobsResend(modeladmin, request, queryset):
-    queryset.update(status='failed', status_merging_mdst=None, chunk_number_merging_mdst=-1, status_x_check='no',
+    queryset.update(status='failed', status_panda_job_deleted='ready', status_merging_mdst=None, chunk_number_merging_mdst=-1, status_x_check='no',
                     status_merging_histos=None,
                     status_merging_evntdmp=None, chunk_number_merging_evntdmp=-1, status_x_check_evntdmp='no',
                     status_castor_mdst=None, status_castor_histos=None, status_castor_evntdmp=None, 
