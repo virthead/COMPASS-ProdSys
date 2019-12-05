@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.contrib import admin
+from django.conf import settings
 from django.db.models import Count
 
 from .models import Task, Job
@@ -438,11 +439,11 @@ class StatusLogsArchivedFilter(admin.SimpleListFilter):
 
 class JobAdmin(admin.ModelAdmin):
     model = Job
-    list_display = ('file', 'number_of_events', 'run_number', 'chunk_number', 'panda_id', 'attempt', 'status', 
-                    'panda_id_merging_mdst', 'attempt_merging_mdst', 'status_merging_mdst',
+    list_display = ('file', 'number_of_events', 'run_number', 'chunk_number', 'panda_id_link', 'attempt', 'status', 
+                    'panda_id_merging_mdst_link', 'attempt_merging_mdst', 'status_merging_mdst',
                     'chunk_number_merging_mdst', 'status_x_check',
-                    'panda_id_merging_histos', 'attempt_merging_histos', 'status_merging_histos', 'chunk_number_merging_histos',
-                    'panda_id_merging_evntdmp', 'attempt_merging_evntdmp', 'status_merging_evntdmp', 'chunk_number_merging_evntdmp', 'status_x_check_evntdmp',
+                    'panda_id_merging_histos_link', 'attempt_merging_histos', 'status_merging_histos', 'chunk_number_merging_histos',
+                    'panda_id_merging_evntdmp_link', 'attempt_merging_evntdmp', 'status_merging_evntdmp', 'chunk_number_merging_evntdmp', 'status_x_check_evntdmp',
                     'status_castor_mdst', 'status_castor_histos', 'status_castor_evntdmp',
                     'status_logs_deleted', 'status_logs_archived'
                     )
@@ -451,6 +452,18 @@ class JobAdmin(admin.ModelAdmin):
     search_fields = ['file', 'run_number']
     
     actions = [JobsResend, JobsResendMergingMDST, JobsResendMergingHIST, JobsResendXCheck, JobsResendMergingEVTDMP, JobsResendArchiveLogs, ]
-
+    
+    def panda_id_link(self, obj):
+        return format_html('<a href="{}{}{}" target="_blank">{}</a>', settings.MONITORING_HOST, settings.MONITORING_JOB, obj.panda_id, obj.panda_id)
+    
+    def panda_id_merging_mdst_link(self, obj):
+        return format_html('<a href="{}{}{}" target="_blank">{}</a>', settings.MONITORING_HOST, settings.MONITORING_JOB, obj.panda_id_merging_mdst, obj.panda_id_merging_mdst)
+    
+    def panda_id_merging_histos_link(self, obj):
+        return format_html('<a href="{}{}{}" target="_blank">{}</a>', settings.MONITORING_HOST, settings.MONITORING_JOB, obj.panda_id_merging_histos, obj.panda_id_merging_histos)
+    
+    def panda_id_merging_evntdmp_link(self, obj):
+        return format_html('<a href="{}{}{}" target="_blank">{}</a>', settings.MONITORING_HOST, settings.MONITORING_JOB, obj.panda_id_merging_evntdmp, obj.panda_id_merging_evntdmp)
+    
 admin.site.register(Task, TaskAdmin)
 admin.site.register(Job, JobAdmin)
