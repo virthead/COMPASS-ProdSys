@@ -96,5 +96,13 @@ def check_files_on_castor():
         else:
             logger.info('Error reading files on Castor for production %s' % t[0])
             logger.error(result)
+            
+            if result.find('No such file or directory') != -1:
+                logger.info('Problematic file found, status will be changed to archive for rewriting')
+                try:
+                    task_update = Task.objects.filter(production=t[0]).update(status='archive', date_updated=timezone.now())
+                    logger.info('Tasks status changed to archive for production %s' % t[0])
+                except:
+                    logger.error('Failed to update tasks for production' % t[0])
     
         logger.info('done')
