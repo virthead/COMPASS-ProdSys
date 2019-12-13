@@ -83,7 +83,8 @@ def main():
                 
                     if p['jobstatus'] == 'failed':
                         # refer to pilot's COMPASSExperiment PilotErrors for more details
-                        if p['piloterrorcode'] == 1235 or p['piloterrorcode'] == 1236 or p['piloterrorcode'] == 1237 or p['piloterrorcode'] == 1243 or p['piloterrorcode'] == 1245 or p['piloterrorcode'] == 1247 or p['piloterrorcode'] == 1251:
+                        if p['piloterrorcode'] == 1235 or p['piloterrorcode'] == 1236 or p['piloterrorcode'] == 1237 or p['piloterrorcode'] == 1243 or \
+                            p['piloterrorcode'] == 1245 or p['piloterrorcode'] == 1247 or p['piloterrorcode'] == 1251 or p['piloterrorcode'] == 1253:
                             logger.info('%s, job status will be updated to manual check is needed' % p['piloterrordiag'])
                             j_update.status = 'manual check is needed'
                         if p['piloterrorcode'] == 1165 and p['piloterrorcode'] == 'Expected output file testevtdump.raw does not exist':
