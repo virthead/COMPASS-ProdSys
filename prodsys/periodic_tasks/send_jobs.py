@@ -141,7 +141,7 @@ def main():
                           'eosHome': settings.EOS_HOME, 'eosHomeRoot':settings.EOS_HOME_ROOT,
                           'tail': tail
                           }
-                job.jobParameters = 'export EOS_MGM_URL=%(eosHomeRoot)s;ppwd=$(pwd);export COMPASS_SW_PREFIX=%(eosHome)s;export COMPASS_SW_PATH=%(prodPath)s;export COMPASS_PROD_NAME=%(prodName)s;export MCGENFILE=%(MCGENFILE)s;export MCGENFILEOUT=%(MCGENFILEOUT)s;export prodSlt=%(prodSlt)s;export PRODSOFT=%(PRODSOFT)s;tgeantpath=%(ProdPathAndName)s/tgeant;cd -P $tgeantpath;export tgeantpathsetup=%(prodHome)s"sw/environment.sh";source $tgeantpathsetup;cd $ppwd;xrdcp -N -f %(eosHomeRoot)s%(input_file)s .;' % params
+                job.jobParameters = 'export EOS_MGM_URL=%(eosHomeRoot)s;ppwd=$(pwd);export COMPASS_SW_PREFIX=%(eosHome)s;export COMPASS_SW_PATH=%(prodPath)s;export COMPASS_PROD_NAME=%(prodName)s;export MCGENFILE=%(MCGENFILE)s;export MCGENFILEOUT=%(MCGENFILEOUT)s;export prodSlt=%(prodSlt)s;export PRODSOFT=%(PRODSOFT)s;tgeantpath=%(ProdPathAndName)s/tgeant;cd -P $tgeantpath;export tgeantpathsetup=%(ProdPathAndName)s"/environment.sh";source $tgeantpathsetup;cd $ppwd;xrdcp -N -f %(eosHomeRoot)s%(input_file)s .;' % params
                 if j.task.use_local_generator_file == 'yes':
                     job.jobParameters += 'xrdcp -N -f %(eosHomeRoot)s%(eosHome)smc/%(prodPath)s%(prodSoft)s/o_data/%(MCGENFILE)s.dat .;' % params
                 job.jobParameters += '$tgeantpath/bin/TGEANT %(MCGENFILE)s.xml;cp payload_stderr.txt payload_stderr.out;cp payload_stdout.txt payload_stdout.out;gzip payload_stderr.out;gzip payload_stdout.out;rm %(tail)s;' % params
@@ -254,7 +254,7 @@ def main():
                 else:
                     logger.info('Job %s was not added to PanDA' % j.id)
             i += 1
-            
+    
     logger.info('done')
 
 if __name__ == "__main__":
