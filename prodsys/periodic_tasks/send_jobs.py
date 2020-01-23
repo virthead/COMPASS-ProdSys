@@ -81,17 +81,17 @@ def main():
             destName    = 'local' # PanDA will not try to move output data, data will be placed by pilot (based on schedconfig)
             TMPRAWFILE = j.file[j.file.rfind('/') + 1:]
             logger.info(TMPRAWFILE)
-            TMPMDSTFILE = 'mDST-%(runNumber)s-%(runChunk)s-%(prodSlt)s-%(phastVer)s.root' % {'input_file': j.file, 'runNumber': j.run_number, 'runChunk': j.chunk_number, 'prodSlt': j.task.prodslt, 'phastVer': j.task.phastver}
+            TMPMDSTFILE = 'mDST-%(runNumber)s-%(chunkNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'input_file': j.file, 'runNumber': j.run_number, 'chunkNumber': j.chunk_number, 'prodSlt': j.task.prodslt, 'phastVer': j.task.phastver}
             logger.info(TMPMDSTFILE)
-            TMPHISTFILE = '%(runNumber)s-%(runChunk)s-%(prodSlt)s.root' % {'runNumber': j.run_number, 'runChunk': j.chunk_number, 'prodSlt': j.task.prodslt}
+            TMPHISTFILE = '%(runNumber)s-%(chunkNumber)s-%(prodSlt)s.root' % {'runNumber': j.run_number, 'chunkNumber': j.chunk_number, 'prodSlt': j.task.prodslt}
             logger.info(TMPHISTFILE)
-            TMPRICHFILE = 'gfile_%(runNumber)s-%(runChunk)s.gfile' % {'runNumber': j.run_number, 'runChunk': j.chunk_number}
+            TMPRICHFILE = 'gfile_%(runNumber)s-%(chunkNumber)s.gfile' % {'runNumber': j.run_number, 'chunkNumber': j.chunk_number}
             logger.info(TMPRICHFILE)
-            EVTDUMPFILE = 'evtdump%(prodSlt)s-%(runChunk)s-%(runNumber)s.raw' % {'prodSlt': j.task.prodslt, 'runNumber': j.run_number, 'runChunk': j.chunk_number}
+            EVTDUMPFILE = 'evtdump%(prodSlt)s-%(chunkNumber)s-%(runNumber)s.raw' % {'prodSlt': j.task.prodslt, 'runNumber': j.run_number, 'chunkNumber': j.chunk_number}
             logger.info(EVTDUMPFILE)
-            STDOUTFILE = '%(prodNameOnly)s.%(runNumber)s-%(runChunk)s-%(prodSlt)s.stdout' % {'prodNameOnly': j.task.production, 'runNumber': j.run_number, 'runChunk': j.chunk_number, 'prodSlt': j.task.prodslt}
+            STDOUTFILE = '%(prodNameOnly)s.%(runNumber)s-%(chunkNumber)s-%(prodSlt)s.stdout' % {'prodNameOnly': j.task.production, 'runNumber': j.run_number, 'chunkNumber': j.chunk_number, 'prodSlt': j.task.prodslt}
             logger.info(STDOUTFILE)
-            STDERRFILE = '%(prodNameOnly)s.%(runNumber)s-%(runChunk)s-%(prodSlt)s.stderr' % {'prodNameOnly': j.task.production, 'runNumber': j.run_number, 'runChunk': j.chunk_number, 'prodSlt': j.task.prodslt}
+            STDERRFILE = '%(prodNameOnly)s.%(runNumber)s-%(chunkNumber)s-%(prodSlt)s.stderr' % {'prodNameOnly': j.task.production, 'runNumber': j.run_number, 'chunkNumber': j.chunk_number, 'prodSlt': j.task.prodslt}
             logger.info(STDERRFILE)
             PRODSOFT = j.task.soft
             logger.info(PRODSOFT)
@@ -106,7 +106,7 @@ def main():
             job.VO = 'vo.compass.cern.ch'
             job.taskID = j.task.id
             job.jobDefinitionID   = 0
-            job.jobName           = '%(prodName)s-%(fileYear)s--%(runNumber)s-%(runChunk)s-%(prodSlt)s-%(phastVer)s' % {'prodName': j.task.production, 'fileYear': j.task.year, 'runNumber': j.run_number, 'runChunk': j.chunk_number, 'prodSlt': j.task.prodslt, 'phastVer': j.task.phastver}
+            job.jobName           = '%(prodName)s-%(fileYear)s--%(runNumber)s-%(chunkNumber)s-%(prodSlt)s-%(phastVer)s' % {'prodName': j.task.production, 'fileYear': j.task.year, 'runNumber': j.run_number, 'chunkNumber': j.chunk_number, 'prodSlt': j.task.prodslt, 'phastVer': j.task.phastver}
             job.transformation    = j.task.type # payload (can be URL as well)
             job.destinationDBlock = datasetName
             job.destinationSE     = destName
@@ -149,7 +149,7 @@ def main():
                     job.jobParameters += 'rm %(MCGENFILE)s.dat' % params
 #                job.currentPriority   = 10000
             if j.task.type == 'MC reconstruction':
-                job.jobParameters='export EOS_MGM_URL=%(eosHomeRoot)s;ppwd=$(pwd);export COMPASS_SW_PREFIX=%(eosHome)s;export COMPASS_SW_PATH=%(prodPath)s;export COMPASS_PROD_NAME=%(prodName)s;export TMPRAWFILE=%(TMPRAWFILE)s;export TMPMDSTFILE=%(TMPMDSTFILE)s;export TMPHISTFILE=%(TMPHISTFILE)s;export TMPRICHFILE=%(TMPRICHFILE)s;export prodSlt=%(prodSlt)s;export TMPRUNNB=%(RunNumber)s;export PRODSOFT=%(PRODSOFT)s;coralpath=%(ProdPathAndName)s;cd -P $coralpath;export coralpathsetup=$coralpath"/environment.sh";source $coralpathsetup;cd $ppwd;export CDBSERVER=%(cdbServer)s;xrdcp -N -f %(castorHomeRoot)s%(input_file)s\?svcClass=%(svcClass)s .;$CORAL/../phast/coral/coral.exe %(ProdPathAndName)s/%(template)s;cp payload_stderr.txt payload_stderr.out;cp payload_stdout.txt payload_stdout.out;gzip payload_stderr.out;gzip payload_stdout.out;rm %(tail)s' % {'TMPRAWFILE': TMPRAWFILE, 'TMPMDSTFILE': TMPMDSTFILE, 'TMPHISTFILE': TMPHISTFILE, 'TMPRICHFILE': TMPRICHFILE, 'PRODSOFT': PRODSOFT, 'input_file': j.file, 'ProdPathAndName': ProdPathAndName, 'prodPath': j.task.path, 'prodName': j.task.production, 'template': j.task.template, 'tail': tail, 'prodSlt': j.task.prodslt, 'RunNumber': j.run_number, 'STDOUTFILE': STDOUTFILE, 'STDERRFILE': STDERRFILE, 'cdbServer': cdbServer, 'eosHomeRoot': settings.EOS_HOME_ROOT, 'eosHome': settings.EOS_HOME, 'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'svcClass': settings.SVCCLASS}
+                job.jobParameters='export EOS_MGM_URL=%(eosHomeRoot)s;ppwd=$(pwd);export COMPASS_SW_PREFIX=%(eosHome)s;export COMPASS_SW_PATH=%(prodPath)s;export COMPASS_PROD_NAME=%(prodName)s;export TMPRAWFILE=%(TMPRAWFILE)s;export TMPMDSTFILE=%(TMPMDSTFILE)s;export TMPHISTFILE=%(TMPHISTFILE)s;export TMPRICHFILE=%(TMPRICHFILE)s;export prodSlt=%(prodSlt)s;export TMPRUNNB=%(RunNumber)s;export spiNB=%(chunkNumber)s;export PRODSOFT=%(PRODSOFT)s;coralpath=%(ProdPathAndName)s;cd -P $coralpath;export coralpathsetup=$coralpath"/environment.sh";source $coralpathsetup;cd $ppwd;export CDBSERVER=%(cdbServer)s;xrdcp -N -f %(castorHomeRoot)s%(input_file)s\?svcClass=%(svcClass)s .;$CORAL/../phast/coral/coral.exe %(ProdPathAndName)s/%(template)s;cp payload_stderr.txt payload_stderr.out;cp payload_stdout.txt payload_stdout.out;gzip payload_stderr.out;gzip payload_stdout.out;rm %(tail)s' % {'TMPRAWFILE': TMPRAWFILE, 'TMPMDSTFILE': TMPMDSTFILE, 'TMPHISTFILE': TMPHISTFILE, 'TMPRICHFILE': TMPRICHFILE, 'PRODSOFT': PRODSOFT, 'input_file': j.file, 'ProdPathAndName': ProdPathAndName, 'prodPath': j.task.path, 'prodName': j.task.production, 'template': j.task.template, 'tail': tail, 'prodSlt': j.task.prodslt, 'RunNumber': j.run_number, 'chunkNumber': j.chunk_number, 'STDOUTFILE': STDOUTFILE, 'STDERRFILE': STDERRFILE, 'cdbServer': cdbServer, 'eosHomeRoot': settings.EOS_HOME_ROOT, 'eosHome': settings.EOS_HOME, 'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'svcClass': settings.SVCCLASS}
 
     #     fileIRaw = FileSpec()
     #     fileIRaw.lfn = "%s" % (input_file)
@@ -176,7 +176,7 @@ def main():
             job.addFile(fileOstderr)
             
             fileOLog = FileSpec()
-            fileOLog.lfn = "%(prodName)s-%(runNumber)s-%(runChunk)s-%(prodSlt)s-%(phastVer)s.job.log.tgz" % {'prodName': j.task.production, 'runNumber': j.run_number, 'runChunk': j.chunk_number, 'prodSlt': j.task.prodslt, 'phastVer': j.task.phastver}
+            fileOLog.lfn = "%(prodName)s-%(runNumber)s-%(chunkNumber)s-%(prodSlt)s-%(phastVer)s.job.log.tgz" % {'prodName': j.task.production, 'runNumber': j.run_number, 'chunkNumber': j.chunk_number, 'prodSlt': j.task.prodslt, 'phastVer': j.task.phastver}
             fileOLog.destinationDBlock = job.destinationDBlock
             fileOLog.destinationSE     = job.destinationSE
             fileOLog.dataset           = job.destinationDBlock
