@@ -49,6 +49,18 @@ def JobsResendXCheck(modeladmin, request, queryset):
 
 JobsResendXCheck.short_description = 'Resend x-check of selected jobs'
 
+def JobsXCheckIsDone(modeladmin, request, queryset):
+    for q in queryset:
+        if q.task.type == 'MC reconstruction':
+            jobs_list_update = Job.objects.filter(task=q.task).filter(run_number=q.run_number).update(status_x_check='yes', status_merging_histos='ready',
+                                                                                               status_castor_mdst='ready', date_updated=timezone.now())
+        else:
+            jobs_list_update = Job.objects.filter(task=q.task).filter(run_number=q.run_number).update(status_x_check='yes', status_merging_histos='ready',
+                                                                                               status_merging_evntdmp='ready', status_castor_mdst='ready',
+                                                                                               date_updated=timezone.now())
+
+JobsXCheckIsDone.short_description = 'Update x-check of mdst to yes for selected jobs'
+
 def JobsResendMergingEVTDMP(modeladmin, request, queryset):
     for q in queryset:
         jobs_list = Job.objects.all().filter(task=q.task).filter(run_number=q.run_number).update(status_merging_evntdmp='ready',
@@ -451,7 +463,7 @@ class JobAdmin(admin.ModelAdmin):
                    StatusXCheckDUMPFilter, StatusLogsDeletedFilter, StatusLogsArchivedFilter)
     search_fields = ['file', 'run_number']
     
-    actions = [JobsResend, JobsResendMergingMDST, JobsResendMergingHIST, JobsResendXCheck, JobsResendMergingEVTDMP, JobsResendArchiveLogs, ]
+    actions = [JobsResend, JobsResendMergingMDST, JobsResendMergingHIST, JobsResendXCheck, JobsXCheckIsDone, JobsResendMergingEVTDMP, JobsResendArchiveLogs, ]
     
     def panda_id_link(self, obj):
         return format_html('<a href="{}{}{}" target="_blank">{}</a>', settings.MONITORING_HOST, settings.MONITORING_JOB, obj.panda_id, obj.panda_id)
