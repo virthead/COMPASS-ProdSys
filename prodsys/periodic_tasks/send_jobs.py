@@ -55,6 +55,13 @@ def main():
     
     for t in tasks_list:
         max_send_amount = 1000
+        
+        logger.info('Getting count of activated jobs for the queue %s' % t.site)
+        count_activated = Jobsactive4.objects.using('schedconfig').filter(computingsite=t.site).filter(jobstatus='activated').count()
+        if count_activated > 10000:
+            logger.info('The queue is full, skipping')
+            
+            continue
 
         logger.info('Getting jobs in status staged or failed for task %s' % t)
         jobs_list_count = Job.objects.all().filter(task=t).filter(attempt__lt=t.max_attempts).filter(Q(status='staged') | Q(status='failed')).count()
