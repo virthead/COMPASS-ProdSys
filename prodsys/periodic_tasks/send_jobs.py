@@ -60,7 +60,6 @@ def main():
         count_activated = Jobsactive4.objects.using('schedconfig').filter(computingsite=t.site).filter(jobstatus='activated').count()
         if count_activated > 10000:
             logger.info('The queue is full, skipping')
-            
             continue
 
         logger.info('Getting jobs in status staged or failed for task %s' % t)
