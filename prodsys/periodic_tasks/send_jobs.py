@@ -55,6 +55,8 @@ def main():
     
     for t in tasks_list:
         max_send_amount = 1000
+        if t.type == 'MC reconstruction':
+            max_send_amount = 500
         
         logger.info('Getting count of activated jobs for the queue %s' % t.site)
         count_activated = Jobsactive4.objects.using('schedconfig').filter(computingsite=t.site).filter(jobstatus='activated').count()
