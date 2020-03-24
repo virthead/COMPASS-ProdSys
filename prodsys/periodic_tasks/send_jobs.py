@@ -21,7 +21,7 @@ application = get_wsgi_application()
 
 from django.db.models import Q
 from prodsys.models import Task, Job
-from schedconfig.models import Jobsactive4
+from schedconfig.models import Jobsdefined4, Jobsactive4
 
 from utils import check_process, getRotatingFileHandler
 
@@ -57,8 +57,9 @@ def main():
         max_send_amount = 1000
         
         logger.info('Getting count of activated jobs for the queue %s' % t.site)
-        count_activated = Jobsactive4.objects.using('schedconfig').filter(computingsite=t.site).filter(Q(jobstatus='activated') | Q(jobstatus='defined')).count()
-        if count_activated >= 10000:
+        count_defined = Jobsdefined4.objects.using('schedconfig').filter(computingsite=t.site).filter(jobstatus='defined').count()
+        count_activated = Jobsactive4.objects.using('schedconfig').filter(computingsite=t.site).filter(jobstatus='activated').count()
+        if count_defined + count_activated >= 10000:
             logger.info('The queue is full, skipping')
             continue
 
