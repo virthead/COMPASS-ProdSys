@@ -71,7 +71,8 @@ def main():
                 time.sleep(60)
             if len(running_processes) > 20:
                 logger.info('Reached maximum of running processes, sleep 120 seconds')
-                time.sleep(120)
+#                time.sleep(120)
+                break
             
             command = 'python check_job_panda_status_run.py -t %s -r %s' % (t.id, r[0])
             logger.info('Going to run command %s' % command)
