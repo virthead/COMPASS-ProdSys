@@ -117,7 +117,7 @@ def define_jobs_from_runs():
                             
                             logger.info('Check that task and job are unique')
                             
-                            if t.site == 'BW_COMPASS_MCORE' or t.site == 'STAMPEDE_COMPASS_MCORE' or t.site == 'FRONTERA_COMPASS_MCORE':
+                            if t.site == 'BW_COMPASS_MCORE' or t.site == 'STAMPEDE_COMPASS_MCORE' or t.site == 'FRONTERA_COMPASS_MCORE' or t.site == 'FRONTERA_COMPASS_TEST':
                                 hpc_file = t.files_home + l['name'][l['name'].rfind('/')+1:]
                                 logger.info('File for HPC task was changed to %s' % hpc_file)
                                 
