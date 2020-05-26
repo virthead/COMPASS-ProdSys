@@ -66,6 +66,7 @@ def send_merging_job(task, files_list, merge_chunk_number):
     if format(merge_chunk_number, '03d') != '000':
         MERGEDDUMPFILE = MERGEDDUMPFILE + '.' + format(merge_chunk_number, '03d')
     logger.info(MERGEDDUMPFILE)
+    TMPHISTFILE = 'evtdump-%(runNumber)s-ch%(mergeChunkNumber)s.root' % {'runNumber': j.run_number, 'mergeChunkNumber': format(merge_chunk_number, '03d')}
     PRODSOFT = task.soft
     ProdPathAndName = task.home + task.path + task.soft
     if j.task.site == 'BW_COMPASS_MCORE' or j.task.site == 'STAMPEDE_COMPASS_MCORE' or j.task.site == 'FRONTERA_COMPASS_MCORE':
@@ -93,9 +94,9 @@ def send_merging_job(task, files_list, merge_chunk_number):
         job.parentID = j.panda_id_merging_evntdmp
     
     if j.task.site == 'BW_COMPASS_MCORE' or j.task.site == 'STAMPEDE_COMPASS_MCORE' or j.task.site == 'FRONTERA_COMPASS_MCORE':
-        job.jobParameters = 'ppwd=$(pwd);ppwd=$(pwd);export COMPASS_SW_PREFIX=%(filesHomePrefix)s;export COMPASS_SW_PATH=%(prodPath)s;export COMPASS_PROD_NAME=%(prodName)s;export prodSlt=%(prodSlt)s;export MERGEDDUMPFILE=%(MERGEDDUMPFILE)s;export dumpspath=%(dumpsPath)s;export PRODSOFT=%(PRODSOFT)s;%(input_files_copy)scat evtdump%(prodSlt)s-*-*.raw > %(MERGEDDUMPFILE)s;rm evtdump%(prodSlt)s-*-*.raw;' % {'filesHomePrefix': j.task.files_home_prefix, 'MERGEDDUMPFILE': MERGEDDUMPFILE, 'dumpsPath': dumpsPath, 'PRODSOFT': PRODSOFT, 'input_files_copy': input_files_copy, 'ProdPathAndName': ProdPathAndName, 'prodPath': task.path, 'prodName': task.production, 'prodSlt': task.prodslt}
+        job.jobParameters = 'ppwd=$(pwd);ppwd=$(pwd);export COMPASS_SW_PREFIX=%(filesHomePrefix)s;export COMPASS_SW_PATH=%(prodPath)s;export COMPASS_PROD_NAME=%(prodName)s;export prodSlt=%(prodSlt)s;export MERGEDDUMPFILE=%(MERGEDDUMPFILE)s;export TMPHISTFILE=%(TMPHISTFILE)s;export dumpspath=%(dumpsPath)s;export PRODSOFT=%(PRODSOFT)s;%(input_files_copy)scat evtdump%(prodSlt)s-*-*.raw > %(MERGEDDUMPFILE)s;rm evtdump%(prodSlt)s-*-*.raw;' % {'filesHomePrefix': j.task.files_home_prefix, 'MERGEDDUMPFILE': MERGEDDUMPFILE, 'TMPHISTFILE': TMPHISTFILE, 'dumpsPath': dumpsPath, 'PRODSOFT': PRODSOFT, 'input_files_copy': input_files_copy, 'ProdPathAndName': ProdPathAndName, 'prodPath': task.path, 'prodName': task.production, 'prodSlt': task.prodslt}
     else:
-        job.jobParameters = 'export EOS_MGM_URL=%(eosHomeRoot)s;ppwd=$(pwd);export COMPASS_SW_PREFIX=%(eosHome)s;export COMPASS_SW_PATH=%(prodPath)s;export COMPASS_PROD_NAME=%(prodName)s;export prodSlt=%(prodSlt)s;export MERGEDDUMPFILE=%(MERGEDDUMPFILE)s;export dumpspath=%(dumpsPath)s;export PRODSOFT=%(PRODSOFT)s;%(input_files_copy)scat evtdump%(prodSlt)s-*-*.raw > %(MERGEDDUMPFILE)s;rm evtdump%(prodSlt)s-*-*.raw;' % {'MERGEDDUMPFILE': MERGEDDUMPFILE, 'dumpsPath': dumpsPath, 'PRODSOFT': PRODSOFT, 'input_files_copy': input_files_copy, 'ProdPathAndName': ProdPathAndName, 'prodPath': task.path, 'prodName': task.production, 'prodSlt': task.prodslt, 'eosHomeRoot':settings.EOS_HOME_ROOT, 'eosHome': settings.EOS_HOME}
+        job.jobParameters = 'export EOS_MGM_URL=%(eosHomeRoot)s;ppwd=$(pwd);export COMPASS_SW_PREFIX=%(eosHome)s;export COMPASS_SW_PATH=%(prodPath)s;export COMPASS_PROD_NAME=%(prodName)s;export prodSlt=%(prodSlt)s;export MERGEDDUMPFILE=%(MERGEDDUMPFILE)s;export TMPHISTFILE=%(TMPHISTFILE)s;export dumpspath=%(dumpsPath)s;export PRODSOFT=%(PRODSOFT)s;%(input_files_copy)scat evtdump%(prodSlt)s-*-*.raw > %(MERGEDDUMPFILE)s;rm evtdump%(prodSlt)s-*-*.raw;' % {'MERGEDDUMPFILE': MERGEDDUMPFILE, 'TMPHISTFILE': TMPHISTFILE, 'dumpsPath': dumpsPath, 'PRODSOFT': PRODSOFT, 'input_files_copy': input_files_copy, 'ProdPathAndName': ProdPathAndName, 'prodPath': task.path, 'prodName': task.production, 'prodSlt': task.prodslt, 'eosHomeRoot':settings.EOS_HOME_ROOT, 'eosHome': settings.EOS_HOME}
 
     fileOLog = FileSpec()
     fileOLog.lfn = "%s.job.log.tgz" % (job.jobName)
