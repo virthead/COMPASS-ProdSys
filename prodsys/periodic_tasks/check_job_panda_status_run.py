@@ -44,7 +44,7 @@ def main():
         sys.exit()
     
     logger.info('Getting jobs from PanDA table')
-    jobs_list_panda = Jobsarchived4.objects.using('schedconfig').filter(taskid=args.task).filter(jobname__istartswith='%s-%s--%s-' % (t.production, t.year, args.run_number)).filter(Q(jobstatus='closed') | Q(jobstatus='cancelled') | Q(jobstatus='finished') | Q(jobstatus='failed')).values()
+    jobs_list_panda = Jobsarchived4.objects.using('schedconfig').filter(taskid=args.task).filter(jobname__istartswith='%s-%s--%s-' % (t.production, t.year, args.run_number)).values()
     logger.info('Got list of %s jobs' % len(jobs_list_panda))
     
     for j in jobs_list:            
@@ -53,7 +53,7 @@ def main():
                 logger.info('Status in PanDA is %s, status in ProdSys is %s' % (p['jobstatus'], j['status']))
                 
                 today = timezone.now()
-                j_update = Job.objects.get(panda_id=p['pandaid'])
+                j_update = Job.objects.get(id=j['id'])
                 j_update.date_updated = today
                 
                 if p['jobstatus'] == 'cancelled':
