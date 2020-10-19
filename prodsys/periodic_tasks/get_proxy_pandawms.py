@@ -35,7 +35,7 @@ def main():
         js = saga.job.Service("ssh://%s" % settings.PROXY_HOST, session=session)
 
         jd = saga.job.Description()        
-        jd.executable      = "voms-proxy-init -voms vo.compass.cern.ch:/vo.compass.cern.ch/Role=production --valid 96:00 -q -old --out /home/virthead/x509up_u500 -pwstdin < proxy/gp"
+        jd.executable      = "voms-proxy-init --cert ~/.globus/AP-CERN.crt.pem --key ~/.globus/AP-CERN.key.pem -voms vo.compass.cern.ch:/vo.compass.cern.ch/Role=production --valid 96:00 -q -old --out /home/virthead/x509up_u1000"
         jd.output          = "/home/virthead/proxy/GetProxy.stdout"  # full path to remote stdout
         jd.error           = "/home/virthead/proxy/GetProxy.stderr"  # full path to remote srderr
 
@@ -43,7 +43,7 @@ def main():
         myjob.run()
         myjob.wait()
         old_proxy = 0.0
-        outfilesource = 'sftp://%s/home/virthead/x509up_u500' % settings.PROXY_HOST # path to proxy
+        outfilesource = 'sftp://%s/home/virthead/x509up_u1000' % settings.PROXY_HOST # path to proxy
         outfiletarget = 'file://localhost%s' % proxy_local
         logger.info('start loading proxy')
         load = True
