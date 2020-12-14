@@ -31,6 +31,7 @@ class Task(models.Model):
         ('send', 'send'),
         ('resend failed', 'resend failed'),
         ('resend staging', 'resend staging'),
+        ('resend manual check', 'resend manual check'),
         ('running', 'running'),
         ('paused', 'paused'),
         ('cancelled', 'cancelled'),
