@@ -59,7 +59,7 @@ def main():
         logger.info('Getting count of activated jobs for the queue %s' % t.site)
         count_defined = Jobsdefined4.objects.using('schedconfig').filter(computingsite=t.site).filter(jobstatus='defined').count()
         count_activated = Jobsactive4.objects.using('schedconfig').filter(computingsite=t.site).filter(jobstatus='activated').count()
-        if count_defined + count_activated >= 10000:
+        if count_defined + count_activated >= 20000:
             logger.info('The queue is full, skipping')
             continue
 
