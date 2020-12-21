@@ -99,6 +99,15 @@ def define_jobs_from_runs_mcgen():
                 logger.info('Going to generate %s chunk for run %s' % (i, r['run_number']))
                 new_settings_xml = settings_xml
                 new_path = path + file_name_xml
+                
+                logger.info('Going to check if file %s already defined in the current task' % new_path)
+                qs = Job.objects.filter(task=t, file=new_path)
+                if qs.exists():
+                    logger.info('Such task and job already exist in the system, skipping')
+                    chunks_generated += 1
+                    i += 1
+                    continue
+
                 for seed in new_settings_xml.iter('seed'):
                     seed.text = str(i)
                 for runName in new_settings_xml.iter('runName'):
@@ -141,12 +150,7 @@ def define_jobs_from_runs_mcgen():
                     break
                 
                 logger.info('%s was uploaded successfully, going to create a job for the file' % file_name_xml)
-                
-                qs = Job.objects.filter(task=t, file=new_path)
-                if qs.exists():
-                    logger.info('Such task and job already exist in the system, skipping')
-                    continue
-                
+                                
                 j = Job(
                     task = t,
                     file = new_path,
