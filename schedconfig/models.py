@@ -380,13 +380,13 @@ class PandaJob(models.Model):
     def __str__(self):
         return 'PanDA:' + str(self.pandaid)
 
-    # __setattr__
-    def __setattr__(self, name, value):
-        super(PandaJob, self).__setattr__(name, value)
-
-    # __getattr__
-    def __getattr__(self, name):
-        return super(PandaJob, self).__getattr__(name)
+#     # __setattr__
+#     def __setattr__(self, name, value):
+#         super(PandaJob, self).__setattr__(name, value)
+# 
+#     # __getattr__
+#     def __getattr__(self, name):
+#         return super(PandaJob, self).__getattr__(name)
 
     # __getitem__
     def __getitem__(self, name):
@@ -453,3 +453,19 @@ class Filestable4(models.Model):
     class Meta:
         db_table = u'filestable4'
         unique_together = ('row_id', 'modificationtime')
+
+class MetaTable(models.Model):
+    pandaid = models.BigIntegerField(db_column='PANDAID', primary_key=True)
+    modificationtime = models.DateTimeField(db_column='MODIFICATIONTIME', primary_key=True)
+    metadata = models.TextField(db_column='METADATA', blank=True)
+    class Meta:
+        managed = False
+        db_table = u'metatable'
+
+class JobParamsTable(models.Model):
+    pandaid = models.BigIntegerField(db_column='PANDAID', primary_key=True)
+    modificationtime = models.DateTimeField(db_column='MODIFICATIONTIME', primary_key=True)
+    jobparameters = models.TextField(db_column='JOBPARAMETERS', blank=True)
+    class Meta:
+        managed = False
+        db_table = u'jobparamstable'
