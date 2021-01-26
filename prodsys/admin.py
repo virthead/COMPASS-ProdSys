@@ -89,8 +89,8 @@ class TaskAdmin(admin.ModelAdmin):
                     'status_files_deleted')
     search_fields = ['name', 'production', 'soft', 'status']
     
-    add_exclude = ('date_updated', 'date_processing_start', 'date_processing_finish', 'status_files_deleted', )
-    edit_exclude = ('date_added', 'date_processing_start', 'date_processing_finish', 'status_files_deleted', )
+    add_exclude = ('date_updated', 'date_processing_start', 'date_processing_finish', 'status_files_deleted', 'status_failed_jobs_deleted', )
+    edit_exclude = ('date_added', 'date_processing_start', 'date_processing_finish', 'status_files_deleted', 'status_failed_jobs_deleted', )
 
     def add_view(self, *args, **kwargs):
         self.exclude = getattr(self, 'add_exclude', ())
