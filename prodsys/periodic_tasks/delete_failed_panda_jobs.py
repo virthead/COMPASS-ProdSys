@@ -38,8 +38,8 @@ if check_process(__file__, pid):
 
 def main():
     logger.info('Getting tasks with status archived')
-#    tasks_list = Task.objects.all().filter(status='archived')
-    tasks_list = Task.objects.all().filter(name='dvcs2016P07t1_mu+_part1')
+    tasks_list = Task.objects.all().filter(status='archived').filter(status_failed_jobs_deleted='no').order_by('id')
+#    tasks_list = Task.objects.all().filter(id=7)
     logger.info('Got list of %s tasks' % len(tasks_list))
     
     for t in tasks_list:
@@ -49,8 +49,15 @@ def main():
         jobs_list = Jobsarchived4.objects.using('schedconfig').filter(taskid=t.id).filter(jobstatus='failed')[:max_delete_amount]
         logger.info('Got list of %s jobs' % len(jobs_list))
         
+        if len(jobs_list) == 0:
+            logger.info('All failed jobs already deleted for task %s' % len(t.name))
+            task_update = Task.objects.filter(id=t.id).update(status_failed_jobs_deleted='yes', date_updated=timezone.now())
+            continue
+        
         i = 0
         for j in jobs_list:
+            logger.info('Processing job %s out of %s' % (i, max_delete_amount))
+            
             logger.info('Going to delete panda job %s of %s task' % (j.pandaid, t.name))
             
             j_ft = Filestable4.objects.using('schedconfig').filter(pandaid=j.pandaid).delete()
@@ -65,7 +72,9 @@ def main():
             j_ja = Jobsarchived4.objects.using('schedconfig').filter(pandaid=j.pandaid).delete()
             logger.info('Deleted from Jobsarchived4')
             
-        i += 1
+            i += 1
+        
+        break
     
     logger.info('done')
 
