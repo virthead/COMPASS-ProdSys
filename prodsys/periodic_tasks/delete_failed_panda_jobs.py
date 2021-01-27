@@ -50,7 +50,7 @@ def main():
         logger.info('Got list of %s jobs' % len(jobs_list))
         
         if len(jobs_list) == 0:
-            logger.info('All failed jobs already deleted for task %s' % len(t.name))
+            logger.info('All failed jobs already deleted for task %s' % t)
             task_update = Task.objects.filter(id=t.id).update(status_failed_jobs_deleted='yes', date_updated=timezone.now())
             continue
         
@@ -58,7 +58,7 @@ def main():
         for j in jobs_list:
             logger.info('Processing job %s out of %s' % (i, max_delete_amount))
             
-            logger.info('Going to delete panda job %s of %s task' % (j.pandaid, t.name))
+            logger.info('Going to delete panda job %s of %s task' % (j.pandaid, t))
             
             j_ft = Filestable4.objects.using('schedconfig').filter(pandaid=j.pandaid).delete()
             logger.info('Deleted from Filestable4')
