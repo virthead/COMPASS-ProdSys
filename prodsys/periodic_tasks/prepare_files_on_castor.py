@@ -146,6 +146,8 @@ def prepare_on_castor():
                         logger.info('Session expired, exiting')
                         break
                     
+                    os.remove('/tmp/Run_%s.list' % run_number)
+                    
 #                     cmd = "more /tmp/Run_%s.list" % (run_number)
 #                     logger.info(cmd)
 #                     result = exec_remote_cmd(cmd)
