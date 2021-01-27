@@ -10,9 +10,10 @@ import logging
 from django.core.wsgi import get_wsgi_application
 from django.db import DatabaseError, IntegrityError
 from _mysql import NULL
-from fabric.api import env, run, execute, settings as sett, hide
+from fabric.api import env, run, execute, settings as sett, hide, put
 from fabric.context_managers import shell_env, cd
 import csv
+import time
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../')) # fix me in case of using outside the project
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "compass.settings")
@@ -122,7 +123,7 @@ def prepare_on_castor():
                     logger.info('In runs list branch')
                     
                     logger.info('Going to generate file with files list for run number %s' % run_number)
-                    cmd = '%s %s' % (settings.GET_FILE_LIST_PL, run_number)
+                    cmd = "grep '%s.raw' %s%s*" % (run_number, settings.CVMFS_ORACLE_DB, t.year)
                     logger.info(cmd)
                     result = exec_remote_cmd(cmd)
                     logger.info(result)
@@ -130,10 +131,26 @@ def prepare_on_castor():
                         logger.info('Session expired, exiting')
                         break
                     
-                    if result.find(' found for run %s in the DB. (see file Run_%s.list)' % (run_number, run_number)) == -1:
-                        logger.info('Error building list of files for run %s, skipping' % run_number)
-                        logger.error(result)
-                        continue
+                    reader = csv.DictReader(result.splitlines(), delimiter = ' ', skipinitialspace = True, fieldnames = ['pattern', 'run_number', 'name', 'events'])
+                    
+                    logger.info('Writing results to the file Run_%s.list' % run_number)
+                    with open("/tmp/Run_%s.list" % run_number, "w") as f:
+                        for r in reader:
+                            f.write('%s\n' % r['name'].rstrip())
+                    f.close()
+                    
+                    logger.info('Uploading file /tmp/Run_%s.list to lxplus' % run_number)
+                    try:
+                        put('/tmp/Run_%s.list' % run_number, '/tmp/Run_%s.list' % run_number)
+                    except:
+                        logger.info('Session expired, exiting')
+                        break
+                    
+#                     cmd = "more /tmp/Run_%s.list" % (run_number)
+#                     logger.info(cmd)
+#                     result = exec_remote_cmd(cmd)
+#                     logger.info(result)
+                    
                 else:
                     logger.info('In files list branch')
                     
