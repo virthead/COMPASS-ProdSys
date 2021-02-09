@@ -205,7 +205,7 @@ def prepare_on_castor():
                     
                     jobs_list_update = Job.objects.filter(task=t).filter(run_number=run_number).filter(status='staging')
                     for r in reader:
-                        if r['status'] == 'STAGED':
+                        if r['status'] == 'STAGED' or r['status'] == 'CANBEMIGR':
                             logger.info('File %s has status %s, going to get a job' % (r['file'], r['status']))
                             for j in jobs_list_update:
                                 if r['file'] == j.file:
