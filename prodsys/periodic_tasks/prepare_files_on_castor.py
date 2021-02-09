@@ -206,7 +206,7 @@ def prepare_on_castor():
                     jobs_list_update = Job.objects.filter(task=t).filter(run_number=run_number).filter(status='staging')
                     for r in reader:
                         if r['status'] == 'STAGED':
-                            logger.info('File %s has status STAGED, going to get a job' % r['file'])
+                            logger.info('File %s has status %s, going to get a job' % (r['file'], r['status']))
                             for j in jobs_list_update:
                                 if r['file'] == j.file:
                                     j_update = Job.objects.get(file=r['file'], task__id=t.id)
@@ -227,4 +227,8 @@ def prepare_on_castor():
                     logger.info('Error sending request to castor')
                     logger.error(result1)
             
+                    if result1.find('Unknown user tag') != -1:
+                        logger.info('Tag %s has expired, going to reset it' % run_number)
+                        jobs_list = Job.objects.filter(task=t).filter(run_number=run_number).filter(status='staging').update(status='defined')
+                    
     logger.info('done')
