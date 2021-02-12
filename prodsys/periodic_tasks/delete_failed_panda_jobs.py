@@ -43,7 +43,7 @@ def main():
     logger.info('Got list of %s tasks' % len(tasks_list))
     
     for t in tasks_list:
-        max_delete_amount = 1000
+        max_delete_amount = settings.DELETE_FAILED_JOBS_MAX_DELETE_AMOUNT
         
         logger.info('Getting jobs in status failed for task %s' % t)
         jobs_list = Jobsarchived4.objects.using('schedconfig').filter(taskid=t.id).filter(jobstatus='failed')[:max_delete_amount]
