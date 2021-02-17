@@ -54,7 +54,7 @@ def send_merging_job(task, files_list, merge_chunk_number):
     for j in files_list:
         TMPHISTFILE = '%(runNumber)s-%(runChunk)s-%(prodSlt)s.root' % {'runNumber': j.run_number, 'runChunk': j.chunk_number, 'prodSlt': j.task.prodslt}
         input_files += ' ' + TMPHISTFILE
-        if j.task.site == 'BW_COMPASS_MCORE':
+        if j.task.site == 'BW_COMPASS_MCORE' or j.task.site == 'STAMPEDE_COMPASS_MCORE' or j.task.site == 'FRONTERA_COMPASS_MCORE':
             input_files_copy += 'cp $histpath/' + TMPHISTFILE + ' .;'
         else:
             input_files_copy += 'xrdcp -N -f $histpath/' + TMPHISTFILE + ' .;'
