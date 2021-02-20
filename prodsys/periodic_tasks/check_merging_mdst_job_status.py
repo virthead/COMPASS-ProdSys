@@ -3,7 +3,6 @@
 
 import sys, os
 import commands
-import datetime
 from django.utils import timezone
 from django.conf import settings
 import logging

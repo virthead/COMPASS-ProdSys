@@ -3,7 +3,7 @@
 
 import sys, os
 import commands
-import datetime
+from django.utils import timezone
 from django.conf import settings
 import logging
 from django.core.wsgi import get_wsgi_application
@@ -30,7 +30,6 @@ from utils import check_process, getRotatingFileHandler
 logger = logging.getLogger('periodic_tasks_logger')
 getRotatingFileHandler(logger, 'periodic_tasks.send_merging_jobs_dump.log')
 
-today = datetime.datetime.today()
 logger.info('Starting %s' % __file__)
 
 logger.info('Setting environment for PanDA client')
@@ -140,7 +139,7 @@ def send_merging_job(task, files_list, merge_chunk_number):
                 j_update.status_merging_evntdmp = 'sent'
                 j_update.attempt_merging_evntdmp = j_update.attempt_merging_evntdmp + 1
                 j_update.chunk_number_merging_evntdmp = merge_chunk_number
-                j_update.date_updated = today
+                j_update.date_updated = timezone.now()
                
                 try:
                     j_update.save()
@@ -201,7 +200,7 @@ def main():
                     j_update.status_merging_evntdmp = 'finished'
                     j_update.status_x_check_evntdmp = 'yes'
                     j_update.status_castor_evntdmp = 'finished'
-                    j_update.date_updated = today
+                    j_update.date_updated = timezone.now()
                     
                     try:
                         j_update.save()

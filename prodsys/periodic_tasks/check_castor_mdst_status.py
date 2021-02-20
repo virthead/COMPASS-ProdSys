@@ -5,6 +5,7 @@ import sys, os
 import commands
 import datetime
 import pytz
+from django.utils import timezone
 from django.conf import settings
 import logging
 from django.core.wsgi import get_wsgi_application
@@ -26,7 +27,6 @@ from utils import check_process, getRotatingFileHandler
 logger = logging.getLogger('periodic_tasks_logger')
 getRotatingFileHandler(logger, 'periodic_tasks.check_castor_mdst_status.log')
 
-today = datetime.datetime.today()
 logger.info('Starting %s' % __file__)
 
 pid = str(os.getpid())
@@ -46,7 +46,7 @@ def exec_remote_cmd(cmd):
 
 def restart_transfer(logger, task, run_number, chunk_number):
     try:
-        j_update = Job.objects.filter(task=task, run_number=run_number, chunk_number_merging_mdst=chunk_number).update(status_castor_mdst='ready', date_updated=today)
+        j_update = Job.objects.filter(task=task, run_number=run_number, chunk_number_merging_mdst=chunk_number).update(status_castor_mdst='ready', date_updated=timezone.now())
         logger.info('Job status_castor_mdst changed to ready for task %s run number %s chunk number %s' % (task, run_number, chunk_number))
     except:
         logger.error('Failed to update jobs for task %s run number %s chunk number %s' % (task, run_number, chunk_number))
@@ -99,7 +99,7 @@ def check_files_on_castor():
                         if r['permissions'][0] == 'm':
                             logger_task.info ('Going to update jobs of the chunk as migrated')
                             try:
-                                j_update = Job.objects.filter(task=t[0], run_number=c[1], chunk_number_merging_mdst=c[2]).update(status_castor_mdst='finished', date_updated=today)
+                                j_update = Job.objects.filter(task=t[0], run_number=c[1], chunk_number_merging_mdst=c[2]).update(status_castor_mdst='finished', date_updated=timezone.now())
                                 logger_task.info('Job status_castor_mdst changed to finished for task %s run number %s chunk number %s' % (t[0], c[1], c[2]))
                             except:
                                 logger_task.error('Failed to update jobs for task %s run number %s chunk number %s' % (t[0], c[1], c[2]))

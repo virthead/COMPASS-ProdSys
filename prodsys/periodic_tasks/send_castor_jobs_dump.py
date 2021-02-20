@@ -3,7 +3,7 @@
 
 import sys, os
 import commands
-import datetime
+from django.utils import timezone
 from django.conf import settings
 import logging
 from django.core.wsgi import get_wsgi_application
@@ -24,7 +24,6 @@ from utils import check_process, getRotatingFileHandler
 logger = logging.getLogger('periodic_tasks_logger')
 getRotatingFileHandler(logger, 'periodic_tasks.send_castor_jobs_dump.log')
 
-today = datetime.datetime.today()
 logger.info('Starting %s' % __file__)
 
 pid = str(os.getpid())
@@ -137,7 +136,7 @@ def copy_to_castor():
                 
                 if result.succeeded:
                     logger.info('Successfully sent to castor run number %s merging chunk number %s' % (r, chunk))
-                    jobs_update = Job.objects.filter(task=t).filter(run_number=r).filter(chunk_number_merging_evntdmp=chunk).update(status_castor_evntdmp='sent', attempt_castor_evntdmp=1, date_updated=today)
+                    jobs_update = Job.objects.filter(task=t).filter(run_number=r).filter(chunk_number_merging_evntdmp=chunk).update(status_castor_evntdmp='sent', attempt_castor_evntdmp=1, date_updated=timezone.now())
                     logger.info(result)
                 else:
                     logger.info('Error sending to castor run number %s merging chunk number %s' % (r, chunk))
@@ -145,6 +144,6 @@ def copy_to_castor():
                     
                     if result.find('No such file or directory') != -1:
                         logger.info('File dissapeared from EOS, going to resend merging of dump for run number %s' % r)
-                        jobs_list = Job.objects.filter(task=t).filter(run_number=r).update(status_merging_evntdmp='ready', chunk_number_merging_evntdmp=-1, status_x_check_evntdmp='no', status_castor_evntdmp=None, date_updated=today)
+                        jobs_list = Job.objects.filter(task=t).filter(run_number=r).update(status_merging_evntdmp='ready', chunk_number_merging_evntdmp=-1, status_x_check_evntdmp='no', status_castor_evntdmp=None, date_updated=timezone.now())
     
     logger.info('done')

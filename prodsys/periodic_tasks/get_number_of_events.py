@@ -3,7 +3,6 @@
 
 import sys, os
 import commands
-import datetime
 from django.conf import settings
 import logging
 from django.core.wsgi import get_wsgi_application
@@ -27,7 +26,6 @@ max_check_amount = 3000
 logger = logging.getLogger('periodic_tasks_logger')
 getRotatingFileHandler(logger, 'periodic_tasks.get_number_of_events.log')
 
-today = datetime.datetime.today()
 logger.info('Starting %s' % __file__)
 
 pid = str(os.getpid())

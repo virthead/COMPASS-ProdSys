@@ -3,7 +3,7 @@
 
 import sys, os
 import commands
-import datetime
+from django.utils import timezone
 from django.conf import settings
 import logging
 from django.core.wsgi import get_wsgi_application
@@ -26,7 +26,6 @@ from utils import check_process, getRotatingFileHandler
 logger = logging.getLogger('periodic_tasks_logger')
 getRotatingFileHandler(logger, 'periodic_tasks.define_jobs_from_runs.log')
 
-today = datetime.datetime.today()
 logger.info('Starting %s' % __file__)
 
 pid = str(os.getpid())
@@ -132,8 +131,8 @@ def define_jobs_from_runs():
                                     number_of_events = number_of_events,
                                     run_number = runNumber,
                                     chunk_number = chunkNumber,
-                                    date_added = today,
-                                    date_updated = today
+                                    date_added = timezone.now(),
+                                    date_updated = timezone.now()
                                 )
                             else:
                                 qs = Job.objects.filter(task=t, file=l['name'])
@@ -147,8 +146,8 @@ def define_jobs_from_runs():
                                     number_of_events = number_of_events,
                                     run_number = runNumber,
                                     chunk_number = chunkNumber,
-                                    date_added = today,
-                                    date_updated = today
+                                    date_added = timezone.now(),
+                                    date_updated = timezone.now()
                                 )
                             try:
                                 j.save()
@@ -223,8 +222,8 @@ def define_jobs_from_runs():
                                     file = hpc_file,
                                     run_number = runNumber,
                                     chunk_number = chunkNumber,
-                                    date_added = today,
-                                    date_updated = today
+                                    date_added = timezone.now(),
+                                    date_updated = timezone.now()
                                 )
                             else:
                                 qs = Job.objects.filter(task=t, file=l)
@@ -237,8 +236,8 @@ def define_jobs_from_runs():
                                     file = l,
                                     run_number = runNumber,
                                     chunk_number = chunkNumber,
-                                    date_added = today,
-                                    date_updated = today
+                                    date_added = timezone.now(),
+                                    date_updated = timezone.now()
                                 )
                             try:
                                 j.save()

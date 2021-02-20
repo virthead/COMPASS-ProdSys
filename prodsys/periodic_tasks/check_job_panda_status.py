@@ -3,8 +3,8 @@
 
 import sys, os
 import commands
-from django.utils import timezone
 import pytz
+from django.utils import timezone
 from django.conf import settings
 import logging
 from django.core.wsgi import get_wsgi_application
@@ -23,7 +23,6 @@ from utils import check_process, getRotatingFileHandler
 logger = logging.getLogger('periodic_tasks_logger')
 getRotatingFileHandler(logger, 'periodic_tasks.check_job_panda_status.log')
 
-today = timezone.now()
 logger.info('Starting %s' % __file__)
 
 pid = str(os.getpid())
