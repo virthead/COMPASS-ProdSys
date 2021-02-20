@@ -3,7 +3,7 @@
 
 import sys, os
 import commands
-import datetime
+from django.utils import timezone
 from django.conf import settings
 import logging
 from django.core.wsgi import get_wsgi_application
@@ -23,7 +23,6 @@ from utils import check_process, getRotatingFileHandler
 logger = logging.getLogger('periodic_tasks_logger')
 getRotatingFileHandler(logger, 'periodic_tasks.x_check_mdst.log')
 
-today = datetime.datetime.today()
 logger.info('Starting %s' % __file__)
 
 pid = str(os.getpid())
@@ -76,13 +75,13 @@ def main():
                 logger.info('Number of events in merged files and run are equal')
                 logger.info('Going to update x check status of jobs of run number %s to yes' % run_number)
                 if t.type == 'MC reconstruction':
-                    jobs_list_update = Job.objects.filter(task=t).filter(run_number=run_number).update(status_x_check='yes', status_merging_histos='ready', status_castor_mdst='ready', date_updated=today)
+                    jobs_list_update = Job.objects.filter(task=t).filter(run_number=run_number).update(status_x_check='yes', status_merging_histos='ready', status_castor_mdst='ready', date_updated=timezone.now())
                 else:
-                    jobs_list_update = Job.objects.filter(task=t).filter(run_number=run_number).update(status_x_check='yes', status_merging_histos='ready', status_merging_evntdmp='ready', status_castor_mdst='ready', date_updated=today)
+                    jobs_list_update = Job.objects.filter(task=t).filter(run_number=run_number).update(status_x_check='yes', status_merging_histos='ready', status_merging_evntdmp='ready', status_castor_mdst='ready', date_updated=timezone.now())
             else:
                 logger.info('Number of events in merged files and run are not equal')
                 logger.info('Going to update x check status of jobs of run number %s to manual check is needed' % run_number)
-                jobs_list_update = Job.objects.filter(task=t).filter(run_number=run_number).update(status_x_check='manual check is needed', date_updated=today)
+                jobs_list_update = Job.objects.filter(task=t).filter(run_number=run_number).update(status_x_check='manual check is needed', date_updated=timezone.now())
         
     logger.info('done')
 
