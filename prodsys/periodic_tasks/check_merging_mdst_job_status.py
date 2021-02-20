@@ -4,6 +4,7 @@
 import sys, os
 import commands
 import datetime
+from django.utils import timezone
 from django.conf import settings
 import logging
 from django.core.wsgi import get_wsgi_application
@@ -23,7 +24,6 @@ from utils import check_process, getRotatingFileHandler
 logger = logging.getLogger('periodic_tasks_logger')
 getRotatingFileHandler(logger, 'periodic_tasks.check_merging_mdst_job_status.log')
 
-today = datetime.datetime.today()
 logger.info('Starting %s' % __file__)
 
 pid = str(os.getpid())
@@ -53,17 +53,16 @@ def main():
             if j['status_merging_mdst'] != j_check.jobstatus:
                 logger.info('Getting jobs for PandaID=%s' % j_check.pandaid)
                 if j_check.jobstatus == 'finished' or j_check.jobstatus == 'failed' or j_check.jobstatus == 'closed':
-                    today = datetime.datetime.today()
                     logger.info('Going to update jobs with PandaID=%s to status %s' % (j_check.pandaid, j_check.jobstatus))
                     if j_check.jobstatus == 'failed' or j_check.jobstatus == 'closed':
                         # refer to pilot's COMPASSExperiment PilotErrors for more details
                         if j_check.piloterrorcode == 1235 or j_check.piloterrorcode == 1237 or j_check.piloterrorcode == 1242:
                             logger.info('%s, job status will be updated to manual check is needed' % j_check.piloterrordiag)
-                            jobs_list_update = Job.objects.filter(panda_id_merging_mdst=j_check.pandaid).update(status_merging_mdst='manual check is needed', date_updated=today)
+                            jobs_list_update = Job.objects.filter(panda_id_merging_mdst=j_check.pandaid).update(status_merging_mdst='manual check is needed', date_updated=timezone.now())
                         else:
-                            jobs_list_update = Job.objects.filter(panda_id_merging_mdst=j_check.pandaid).update(status_merging_mdst='failed', date_updated=today)
+                            jobs_list_update = Job.objects.filter(panda_id_merging_mdst=j_check.pandaid).update(status_merging_mdst='failed', date_updated=timezone.now())
                     else:
-                        jobs_list_update = Job.objects.filter(panda_id_merging_mdst=j_check.pandaid).update(status_merging_mdst=j_check.jobstatus, date_updated=today)
+                        jobs_list_update = Job.objects.filter(panda_id_merging_mdst=j_check.pandaid).update(status_merging_mdst=j_check.jobstatus, date_updated=timezone.now())
     
     logger.info('done')
 
