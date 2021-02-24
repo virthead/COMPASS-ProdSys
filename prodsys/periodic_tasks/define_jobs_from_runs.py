@@ -174,13 +174,6 @@ def define_jobs_from_runs():
                 lines_read = 0
                 count_added = 0
                 for r in runs_list:
-                    cmd0 = 'cd /tmp'
-                    logger.info('Going to change dir to /tmp')
-                    result0 = exec_remote_cmd(cmd0)
-                    if not result0.succeeded:
-                        logger.error('Error changing dir to /tmp')
-                        continue
-                    
                     r = r.strip()
                     cmd = '%s %s' % (settings.GET_FILE_LIST_PL, r)
                     logger.info(cmd)
