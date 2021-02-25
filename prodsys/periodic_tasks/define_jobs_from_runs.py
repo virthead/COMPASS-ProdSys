@@ -179,6 +179,10 @@ def define_jobs_from_runs():
                     logger.info(cmd)
                     result = exec_remote_cmd(cmd)
                     logger.info(result)
+                    if result.find('Can\'t connect to MySQL server on ') != -1:
+                        logger.info(result)
+                        break
+                    
                     if result.find(' found for run %s in the DB. (see file Run_%s.list)' % (r, r)) != -1:
                         logger.info('Files list was generated')
                         cmd1 = 'cat Run_%s.list' % r
