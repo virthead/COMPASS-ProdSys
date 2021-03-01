@@ -49,6 +49,8 @@ def exec_remote_cmd(cmd):
 
 def prepare_on_castor():
     with cd('/tmp'):
+        years_in_text_files = [2015, 2016, 2017, 2018]
+        
         logger.info('Getting tasks with status send and running for HPC')
         tasks_list = Task.objects.all().filter(Q(site='BW_COMPASS_MCORE') | Q(site='STAMPEDE_COMPASS_MCORE') | Q(site='FRONTERA_COMPASS_MCORE')).filter(Q(status='send') | Q(status='running'))
         logger.info('Got list of %s tasks' % len(tasks_list))
@@ -119,7 +121,7 @@ def prepare_on_castor():
                 if i > 5:
                     break
                 
-                if t.files_source == 'runs list':
+                if t.files_source == 'runs list' and t.year in years_in_text_files:
                     logger.info('In runs list branch')
                     
                     logger.info('Going to generate file with files list for run number %s' % run_number)
