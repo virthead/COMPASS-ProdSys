@@ -82,6 +82,13 @@ def define_jobs_from_runs():
                         
                         reader_lines_count = int(sum(1 for row in csv.DictReader(result.splitlines()))) + 1
                         logger.info('Got list of %s files' % reader_lines_count)
+                        logger.info('Going to check that jobs were already defined for this run')
+                        jobs_list_count = Job.objects.all().filter(task=t).filter(run_number=r).count()
+                        logger.info('Got list of %s jobs' % jobs_list_count)
+                        if reader_lines_count == jobs_list_count:
+                            logger.info('Jobs were already added for run number %s' % r)
+                            continue
+                        
                         lines_read += reader_lines_count
                         for l in reader:
                             l['name'] = l['name'].replace("\t", "").replace("\t", "")
@@ -123,6 +130,7 @@ def define_jobs_from_runs():
                                 qs = Job.objects.filter(task=t, file=hpc_file)
                                 if qs.exists():
                                     logger.info('Such task and job already exist in the system, skipping')
+                                    lines_read -= 1
                                     continue
                                 
                                 j = Job(
@@ -138,6 +146,7 @@ def define_jobs_from_runs():
                                 qs = Job.objects.filter(task=t, file=l['name'])
                                 if qs.exists():
                                     logger.info('Such task and job already exist in the system, skipping')
+                                    lines_read -= 1
                                     continue
                                 
                                 j = Job(
