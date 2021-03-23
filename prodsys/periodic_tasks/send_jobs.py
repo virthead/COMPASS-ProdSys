@@ -28,10 +28,10 @@ from utils import check_process, getRotatingFileHandler
 logger = logging.getLogger('periodic_tasks_logger')
 getRotatingFileHandler(logger, 'periodic_tasks.send_jobs.log')
 
-logger.info('Starting %s' % __file__)
+today = timezone.now()
+logger.info('Starting %s' %( __file__))
 
 logger.info('Setting environment for PanDA client')
-aSrvID = None
 os.environ["PANDA_URL_SSL"] = settings.PANDA_URL_SSL
 os.environ["PANDA_URL"] = settings.PANDA_URL
 os.environ["X509_USER_PROXY"] = settings.X509_USER_PROXY
@@ -47,19 +47,21 @@ if check_process(__file__, pid):
 def main():
     logger.info('Getting tasks with status send and running')
     tasks_list = Task.objects.all().filter(Q(status='send') | Q(status='running'))
-    #tasks_list = Task.objects.all().filter(name='dvcs2017align7_mu-')
+    #tasks_list = Task.objects.all().filter(id=571)
     logger.info('Got list of %s tasks' % len(tasks_list))
     
     cdbServerArr = ['compassvm23.cern.ch', 'compassvm24.cern.ch']
     cdbServer = cdbServerArr[0]
+
+    max_send_amount = settings.SEND_JOBS_MAX_SEND_AMOUNT
     
     for t in tasks_list:
-        max_send_amount = 1000
+        jobs_list_send = []
         
         logger.info('Getting count of activated jobs for the queue %s' % t.site)
         count_defined = Jobsdefined4.objects.using('schedconfig').filter(computingsite=t.site).filter(jobstatus='defined').count()
         count_activated = Jobsactive4.objects.using('schedconfig').filter(computingsite=t.site).filter(jobstatus='activated').count()
-        if count_defined + count_activated >= 20000:
+        if count_defined + count_activated >= 10000:
             logger.info('The queue is full, skipping')
             continue
 
@@ -87,25 +89,25 @@ def main():
             datasetName = 'panda.destDB.%s' % umark 
             destName    = 'local' # PanDA will not try to move output data, data will be placed by pilot (based on schedconfig)
             TMPRAWFILE = j.file[j.file.rfind('/') + 1:]
-            logger.info(TMPRAWFILE)
+            #logger.info(TMPRAWFILE)
             TMPMDSTFILE = 'mDST-%(runNumber)s-%(chunkNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'input_file': j.file, 'runNumber': j.run_number, 'chunkNumber': j.chunk_number, 'prodSlt': j.task.prodslt, 'phastVer': j.task.phastver}
-            logger.info(TMPMDSTFILE)
+            #logger.info(TMPMDSTFILE)
             TMPHISTFILE = '%(runNumber)s-%(chunkNumber)s-%(prodSlt)s.root' % {'runNumber': j.run_number, 'chunkNumber': j.chunk_number, 'prodSlt': j.task.prodslt}
-            logger.info(TMPHISTFILE)
+            #logger.info(TMPHISTFILE)
             TMPRICHFILE = 'gfile_%(runNumber)s-%(chunkNumber)s.gfile' % {'runNumber': j.run_number, 'chunkNumber': j.chunk_number}
-            logger.info(TMPRICHFILE)
+            #logger.info(TMPRICHFILE)
             EVTDUMPFILE = 'evtdump%(prodSlt)s-%(chunkNumber)s-%(runNumber)s.raw' % {'prodSlt': j.task.prodslt, 'runNumber': j.run_number, 'chunkNumber': j.chunk_number}
-            logger.info(EVTDUMPFILE)
+            #logger.info(EVTDUMPFILE)
             STDOUTFILE = '%(prodNameOnly)s.%(runNumber)s-%(chunkNumber)s-%(prodSlt)s.stdout' % {'prodNameOnly': j.task.production, 'runNumber': j.run_number, 'chunkNumber': j.chunk_number, 'prodSlt': j.task.prodslt}
-            logger.info(STDOUTFILE)
+            #logger.info(STDOUTFILE)
             STDERRFILE = '%(prodNameOnly)s.%(runNumber)s-%(chunkNumber)s-%(prodSlt)s.stderr' % {'prodNameOnly': j.task.production, 'runNumber': j.run_number, 'chunkNumber': j.chunk_number, 'prodSlt': j.task.prodslt}
-            logger.info(STDERRFILE)
+            #logger.info(STDERRFILE)
             PRODSOFT = j.task.soft
-            logger.info(PRODSOFT)
+            #logger.info(PRODSOFT)
             MCGENFILE = 'mcr%s-%s' % (format(j.chunk_number, '05d'), j.run_number)
-            logger.info(MCGENFILE)
+            #logger.info(MCGENFILE)
             MCGENFILEOUT = 'mcr%s-%s_run000.tgeant' % (format(j.chunk_number, '05d'), j.run_number)
-            logger.info(MCGENFILEOUT)
+            #logger.info(MCGENFILEOUT)
                 
             ProdPathAndName = j.task.home + j.task.path + j.task.soft
         
@@ -113,7 +115,7 @@ def main():
             job.VO = 'vo.compass.cern.ch'
             job.taskID = j.task.id
             job.jobDefinitionID   = 0
-            job.jobName           = '%(prodName)s-%(fileYear)s--%(runNumber)s-%(chunkNumber)s-%(prodSlt)s-%(phastVer)s' % {'prodName': j.task.production, 'fileYear': j.task.year, 'runNumber': j.run_number, 'chunkNumber': j.chunk_number, 'prodSlt': j.task.prodslt, 'phastVer': j.task.phastver}
+            job.jobName           = '%(prodName)s-%(fileYear)s--%(runNumber)s-%(chunkNumber)s-%(prodSlt)s-%(phastVer)s-%(jobId)s-%(jobAttempt)s' % {'prodName': j.task.production, 'fileYear': j.task.year, 'runNumber': j.run_number, 'chunkNumber': j.chunk_number, 'prodSlt': j.task.prodslt, 'phastVer': j.task.phastver, 'jobId': j.id, 'jobAttempt': j.attempt + 1}
             job.transformation    = j.task.type # payload (can be URL as well)
             job.destinationDBlock = datasetName
             job.destinationSE     = destName
@@ -224,43 +226,55 @@ def main():
                 fileODat.dataset           = job.destinationDBlock
                 fileODat.type = 'output'
                 job.addFile(fileODat)
-        
-            s,o = Client.submitJobs([job],srvID=aSrvID)
-            logger.info(s)
-            for x in o:
-                logger.info("PandaID=%s" % x[0])
-                if x[0] != 0 and x[0] != 'NULL':
-                    j_update = Job.objects.get(id=j.id)
-                    j_update.panda_id = x[0]
-                    j_update.status = 'sent'
-                    j_update.attempt = j_update.attempt + 1
-                    j_update.date_updated = timezone.now()
-                
-                    try:
-                        j_update.save()
-                        logger.info('Job %s with PandaID %s updated at %s' % (j.id, x[0], timezone.now()))
-                        
-                        if j_update.task.status == 'send':
-                            logger.info('Going to update status of task %s from send to running' % j_update.task.name)
-                            t_update = Task.objects.get(id=j_update.task.id)
-                            t_update.status = 'running'
-                            t_update.date_updated = timezone.now()
-                        
-                            try:
-                                t_update.save()
-                                logger.info('Task %s updated' % t_update.name) 
-                            except IntegrityError as e:
-                                logger.exception('Unique together catched, was not saved')
-                            except DatabaseError as e:
-                                logger.exception('Something went wrong while saving: %s' % e.message)
-                        
-                    except IntegrityError as e:
-                        logger.exception('Unique together catched, was not saved')
-                    except DatabaseError as e:
-                        logger.exception('Something went wrong while saving: %s' % e.message)
-                else:
-                    logger.info('Job %s was not added to PanDA' % j.id)
+            
+            jobs_list_send.append(job)
             i += 1
+        
+        if len(jobs_list_send) == 0:
+            continue
+        
+        logger.info('Submitting %s jobs to PanDA' % len(jobs_list_send))
+        s,o = Client.submitJobs(jobs_list_send)
+        #logger.info(s)
+        logger.info(o)
+        if s == 0:
+            logger.info('Jobs submitted to panda successfully, going to update panda ids')
+            i = 0
+            for j in jobs_list:
+                jobName = '%(prodName)s-%(fileYear)s--%(runNumber)s-%(chunkNumber)s-%(prodSlt)s-%(phastVer)s-%(jobId)s-%(jobAttempt)s' % {'prodName': j.task.production, 'fileYear': j.task.year, 'runNumber': j.run_number, 'chunkNumber': j.chunk_number, 'prodSlt': j.task.prodslt, 'phastVer': j.task.phastver, 'jobId': j.id, 'jobAttempt': j.attempt + 1}
+                logger.info(jobName)
+                for x in o:
+                    if x[0] != 0 and x[0] != 'NULL' and x[2] == jobName:
+                        j_update = Job.objects.get(id=j.id)
+                        j_update.panda_id = x[0]
+                        j_update.status = 'sent'
+                        j_update.attempt = j_update.attempt + 1
+                        j_update.date_updated = timezone.now()
+                    
+                        try:
+                            j_update.save()
+                            logger.info('Job %s with PandaID %s updated at %s' % (j.id, x[0], timezone.now()))
+                            
+                            if j_update.task.status == 'send':
+                                logger.info('Going to update status of task %s from send to running' % j_update.task.name)
+                                t_update = Task.objects.get(id=j_update.task.id)
+                                t_update.status = 'running'
+                                t_update.date_updated = timezone.now()
+                            
+                                try:
+                                    t_update.save()
+                                    logger.info('Task %s updated' % t_update.name) 
+                                except IntegrityError as e:
+                                    logger.exception('Unique together catched, was not saved')
+                                except DatabaseError as e:
+                                    logger.exception('Something went wrong while saving: %s' % e.message)
+                            
+                        except IntegrityError as e:
+                            logger.exception('Unique together catched, was not saved')
+                        except DatabaseError as e:
+                            logger.exception('Something went wrong while saving: %s' % e.message)
+        else:
+            logger.info('Jobs were not added to PanDA')
     
     logger.info('done')
 
