@@ -193,7 +193,8 @@ VOMS_PROXY_INIT = 'voms-proxy-init --cert ~/.globus/na58dst1.cer.pem --key ~/.gl
 MONITORING_HOST = 'http://vm221-132.jinr.ru/'
 MONITORING_JOB = 'job?pandaid='
 
-DELETE_FAILED_JOBS_MAX_DELETE_AMOUNT = 2000 
+SEND_JOBS_MAX_SEND_AMOUNT = 50
+DELETE_FAILED_JOBS_MAX_DELETE_AMOUNT = 1000
 
 LOGGING_DIR = '/var/log/compass_prodsys/'
 
