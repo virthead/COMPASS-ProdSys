@@ -87,9 +87,14 @@ def main():
                             p['piloterrorcode'] == 1245 or p['piloterrorcode'] == 1247 or p['piloterrorcode'] == 1251 or p['piloterrorcode'] == 1253:
                             logger.info('%s, job status will be updated to manual check is needed' % p['piloterrordiag'])
                             j_update.status = 'manual check is needed'
+                        
                         if p['piloterrorcode'] == 1165 and p['piloterrorcode'] == 'Expected output file testevtdump.raw does not exist':
                             logger.info('Expected output file testevtdump.raw does not exist, job status will be updated to manual check is needed')  
                             j_update.status = 'manual check is needed'
+                        
+                        if p['piloterrorcode'] == 1255:
+                            logger.info('Unable to access file in service class compasscdr, job status will be updated to defined')  
+                            j_update.status = 'defined'
                     
                     if p['jobstatus'] == 'finished':
                         if t.type == 'test production' or t.type == 'mass production' or t.type == 'technical production' or t.type == 'MC reconstruction':
