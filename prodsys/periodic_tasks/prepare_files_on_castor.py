@@ -118,57 +118,34 @@ def prepare_on_castor():
             
             i = 0
             for run_number in runs_list:
-                if i > 5:
+                if i >= 5:
                     break
                 
-                if t.files_source == 'runs list' and t.year in years_in_text_files:
-                    logger.info('In runs list branch')
-                    
-                    logger.info('Going to generate file with files list for run number %s' % run_number)
-                    cmd = "grep '%s.raw' %s%s*" % (run_number, settings.CVMFS_ORACLE_DB, t.year)
-                    logger.info(cmd)
-                    result = exec_remote_cmd(cmd)
-                    logger.info(result)
-                    if result.find('Permission denied') != -1:
-                        logger.info('Session expired, exiting')
-                        break
-                    
-                    reader = csv.DictReader(result.splitlines(), delimiter = ' ', skipinitialspace = True, fieldnames = ['pattern', 'run_number', 'name', 'events'])
-                    
-                    logger.info('Writing results to the file Run_%s.list' % run_number)
-                    with open("/tmp/Run_%s.list" % run_number, "w") as f:
-                        for r in reader:
-                            f.write('%s\n' % r['name'].rstrip())
-                    f.close()
-                    
-                    logger.info('Uploading file /tmp/Run_%s.list to lxplus' % run_number)
-                    try:
-                        put('/tmp/Run_%s.list' % run_number, '/tmp/Run_%s.list' % run_number)
-                    except:
-                        logger.info('Session expired, exiting')
-                        break
-                    
-                    os.remove('/tmp/Run_%s.list' % run_number)
+                # cmd = "nsls %s | grep %s | sed 's/^/%s/' > Run_%s.list" % (path, run_number, path, run_number)
+                logger.info('Getting jobs from run %s with status defined' % run_number)
+                jobs_list = Job.objects.filter(task=t).filter(run_number=run_number).filter(status='defined').values_list('file', flat=True).distinct()
+                logger.info('Got list of %s jobs' % len(jobs_list))
+                
+                logger.info('Writing results to the file Run_%s.list' % run_number)
+                with open("/tmp/Run_%s.list" % run_number, "w") as f:
+                    for jj in jobs_list:
+                        f.write('%s\n' % jj)
+                f.close()
+                
+                logger.info('Uploading file /tmp/Run_%s.list to lxplus' % run_number)
+                try:
+                    put('/tmp/Run_%s.list' % run_number, '/tmp/Run_%s.list' % run_number)
+                except:
+                    logger.info('Session expired, exiting')
+                    break
+                
+                os.remove('/tmp/Run_%s.list' % run_number)
                     
 #                     cmd = "more /tmp/Run_%s.list" % (run_number)
 #                     logger.info(cmd)
 #                     result = exec_remote_cmd(cmd)
 #                     logger.info(result)
-                    
-                else:
-                    logger.info('In files list branch')
-                    
-                    logger.info('Going to generate file with files list for run number %s' % run_number)
-                    single_job = Job.objects.filter(task=t).filter(run_number=run_number)[0]
-                    path = single_job.file[:single_job.file.rfind('/') + 1].replace('/', '\/')
-                    cmd = "nsls %s | grep %s | sed 's/^/%s/' > Run_%s.list" % (path, run_number, path, run_number)
-                    logger.info(cmd)
-                    result = exec_remote_cmd(cmd)
-                    logger.info(result)
-                    if result.find('Permission denied') != -1:
-                        logger.info('Session expired, exiting')
-                        break
-                
+                                
                 cmd1 = 'stager_get -f Run_%s.list -S %s -U %s' % (run_number, settings.SVCCLASS, run_number)
                 logger.info(cmd1)
                 result1 = exec_remote_cmd(cmd1)
@@ -208,7 +185,7 @@ def prepare_on_castor():
                     jobs_list_update = Job.objects.filter(task=t).filter(run_number=run_number).filter(status='staging')
                     for r in reader:
                         if r['status'] == 'STAGED' or r['status'] == 'CANBEMIGR':
-                            logger.info('File %s has status %s, going to get a job' % (r['file'], r['status']))
+                            #logger.info('File %s has status %s, going to get a job' % (r['file'], r['status']))
                             for j in jobs_list_update:
                                 if r['file'] == j.file:
                                     j_update = Job.objects.get(file=r['file'], task__id=t.id)
