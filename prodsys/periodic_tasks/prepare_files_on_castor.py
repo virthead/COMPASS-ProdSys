@@ -93,6 +93,13 @@ def prepare_on_castor():
                 except DatabaseError as e:
                     logger.exception('Something went wrong while saving: %s' % e.message)
         
+        logger.info('Getting count of staged files')
+        jobs_list_count = Job.objects.filter(task__site='CERN_COMPASS_PROD').filter(Q(task__status='send') | Q(task__status='running')).filter(status='staged').count()
+        logger.info('There are %s staged files' % jobs_list_count)
+        if jobs_list_count > settings.MAX_STAGED_JOBS:
+            logger.info('Maximum allowed staged reached, exiting')
+            sys.exit(0)
+        
         logger.info('Getting tasks with status send and running for all sites except HPC')
         tasks_list = Task.objects.all().exclude(Q(site='BW_COMPASS_MCORE') | Q(site='STAMPEDE_COMPASS_MCORE') | Q(site='FRONTERA_COMPASS_MCORE')).filter(Q(status='send') | Q(status='running'))
         logger.info('Got list of %s tasks' % len(tasks_list))
