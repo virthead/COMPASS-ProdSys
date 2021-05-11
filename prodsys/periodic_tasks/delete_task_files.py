@@ -48,11 +48,11 @@ def exec_remote_cmd(cmd):
 
 def delete_task_files():
     logger.info('Getting tasks with status=archived and status_files_deleted=no')
-    tasks_list = Task.objects.all().exclude(Q(site='BW_COMPASS_MCORE') | Q(site='BW_STAMPEDE_MCORE') | Q(site='BW_FRONTERA_MCORE')).filter(status='archived').filter(status_files_deleted='no').order_by('-id')
+    tasks_list = Task.objects.all().exclude(Q(site='BW_COMPASS_MCORE') | Q(site='BW_STAMPEDE_MCORE') | Q(site='BW_FRONTERA_MCORE')).filter(status='archived').filter(status_files_deleted='no').order_by('id')
     logger.info('Got list of %s tasks' % len(tasks_list))
     i = 0
     for t in tasks_list:
-        if i >= 1:
+        if i >= 2:
             logger.info('Reached deletion limit, exiting')
             break
         
@@ -71,11 +71,11 @@ def delete_task_files():
         if t.type == 'MC reconstruction':
             dirs = {'mDST.chunks': 0, 'TRAFDIC': 0, 'logFiles': 0}
             mc = 'mc/'
-            
+        
         logger.info('Task %s' % t.name)
         for dir, val in dirs.iteritems():
             logger.info('Going to delete directory %s' % dir)
-            cmd = 'rm -rf %(eosCompassHome)s%(mc)s%(prodPath)s%(prodSoft)s/%(dir)s' % {'eosCompassHome': settings.EOS_HOME, 'mc': mc, 'prodPath': t.path, 'prodSoft': t.soft, 'dir': dir}
+            cmd = 'eos rm -rf %(eosCompassHome)s%(mc)s%(prodPath)s%(prodSoft)s/%(dir)s' % {'eosCompassHome': settings.EOS_HOME, 'mc': mc, 'prodPath': t.path, 'prodSoft': t.soft, 'dir': dir}
             logger.info(cmd)
             result = exec_remote_cmd(cmd)
             logger.info(result)
@@ -84,7 +84,7 @@ def delete_task_files():
                 break
            
             logger.info('Going to check if log files of %s exist' % dir)
-            cmd = 'ls %(eosCompassHome)s%(mc)s%(prodPath)s%(prodSoft)s/%(dir)s' % {'eosCompassHome': settings.EOS_HOME, 'mc': mc, 'prodPath': t.path, 'prodSoft': t.soft, 'dir': dir}
+            cmd = 'eos ls %(eosCompassHome)s%(mc)s%(prodPath)s%(prodSoft)s/%(dir)s' % {'eosCompassHome': settings.EOS_HOME, 'mc': mc, 'prodPath': t.path, 'prodSoft': t.soft, 'dir': dir}
             logger.info(cmd)
             result = exec_remote_cmd(cmd)
             logger.info(result)
@@ -94,7 +94,34 @@ def delete_task_files():
             if result.find('No such file or directory') != -1:
                 logger.info('%s dir was deleted' % dir)
                 dirs[dir] = 1
+                continue
+            
+            logger.info('Going to delete all files from %s' % dir)
+            
+            slot = ''
+            if dir == 'evtdump':
+                slot = 'slot%(prodSlt)s/' % {'prodSlt': t.prodslt}
+            
+            files_removed = 0
+            files_to_remove_limit = 1000
+            files_arr = result.split('\n')
+            
+            logger.info('Got array of %s files' % len(files_arr))
+            for file in files_arr:
+                cmd = "eos rm %(eosCompassHome)s%(mc)s%(prodPath)s%(prodSoft)s/%(dir)s/%(slot)s%(file)s" % {'eosCompassHome': settings.EOS_HOME, 'mc': mc, 'prodPath': t.path, 'prodSoft': t.soft, 'dir': dir, 'slot': slot, 'file': file.rstrip()}
+                logger.info(cmd)
+                result = exec_remote_cmd(cmd)
+                logger.info(result)
+                if result.find('Permission denied') != -1:
+                    logger.info('Session expired, exiting')
+                    break
+            
+                files_removed += 1
         
+                if files_removed >= files_to_remove_limit:
+                    logger.info('Limit of %s files to be removed reached, exiting' % files_to_remove_limit)
+                    break
+            
         i += 1
         
         problem_occured = False
