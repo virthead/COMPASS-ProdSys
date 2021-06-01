@@ -56,7 +56,7 @@ def main():
         
         i = 0
         for j in jobs_list:
-            logger.info('Processing job %s out of %s' % (i, max_delete_amount))
+            logger.info('Processing job %s out of %s' % (i, len(jobs_list)))
             
             logger.info('Going to delete panda job %s of %s task' % (j.pandaid, t))
             
