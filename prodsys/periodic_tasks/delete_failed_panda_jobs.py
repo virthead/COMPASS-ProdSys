@@ -45,12 +45,12 @@ def main():
     for t in tasks_list:
         max_delete_amount = settings.DELETE_FAILED_JOBS_MAX_DELETE_AMOUNT
         
-        logger.info('Getting jobs in status failed for task %s' % t)
-        jobs_list = Jobsarchived4.objects.using('schedconfig').filter(taskid=t.id).filter(jobstatus='failed')[:max_delete_amount]
+        logger.info('Getting jobs in status failed, cancelled and closed for task %s' % t)
+        jobs_list = Jobsarchived4.objects.using('schedconfig').filter(taskid=t.id).filter(Q(jobstatus='failed') | Q(jobstatus='cancelled') | Q(jobstatus='closed'))[:max_delete_amount]
         logger.info('Got list of %s jobs' % len(jobs_list))
         
         if len(jobs_list) == 0:
-            logger.info('All failed jobs already deleted for task %s' % t)
+            logger.info('All failed, cancelled and closed jobs were already deleted for task %s' % t)
             task_update = Task.objects.filter(id=t.id).update(status_failed_jobs_deleted='yes', date_updated=timezone.now())
             continue
         
