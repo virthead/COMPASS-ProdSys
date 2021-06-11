@@ -12,8 +12,8 @@ from django.db import DatabaseError, IntegrityError
 from _mysql import NULL
 from fabric.api import env, run, execute, settings as sett, hide, put
 from fabric.context_managers import shell_env, cd
-import csv
 import time
+import json
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../')) # fix me in case of using outside the project
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "compass.settings")
@@ -26,7 +26,7 @@ from schedconfig.models import Jobsactive4
 from utils import check_process, getRotatingFileHandler
 
 logger = logging.getLogger('periodic_tasks_logger')
-getRotatingFileHandler(logger, 'periodic_tasks.prepare_files_on_castor.log')
+getRotatingFileHandler(logger, 'periodic_tasks.prepare_files_on_cta.log')
 
 logger.info('Starting %s' % __file__)
 
@@ -34,7 +34,7 @@ pid = str(os.getpid())
 logger.info('pid: %s' % pid)
 logger.info('__file__: %s' % __file__)
 
-if check_process("prepare_files_on_castor.py", pid):
+if check_process("prepare_files_on_cta.py", pid):
     logger.info('Another %s process is running, exiting' % __file__)
     sys.exit(0)
 
@@ -47,7 +47,7 @@ def exec_remote_cmd(cmd):
     with hide('output','running','warnings'), sett(warn_only=True):
         return run(cmd)
 
-def prepare_on_castor():
+def prepare_on_cta():
     with cd('/tmp'):
         years_in_text_files = [2015, 2016, 2017, 2018]
         
@@ -101,7 +101,7 @@ def prepare_on_castor():
             sys.exit(0)
         
         logger.info('Getting tasks with status send and running for all sites except HPC')
-        tasks_list = Task.objects.all().exclude(Q(site='BW_COMPASS_MCORE') | Q(site='STAMPEDE_COMPASS_MCORE') | Q(site='FRONTERA_COMPASS_MCORE')).filter(tapes_backend='castor').filter(Q(status='send') | Q(status='running'))
+        tasks_list = Task.objects.all().exclude(Q(site='BW_COMPASS_MCORE') | Q(site='STAMPEDE_COMPASS_MCORE') | Q(site='FRONTERA_COMPASS_MCORE')).filter(tapes_backend='cta').filter(Q(status='send') | Q(status='running'))
         logger.info('Got list of %s tasks' % len(tasks_list))
         for t in tasks_list:
             if not t.date_processing_start:
@@ -133,71 +133,82 @@ def prepare_on_castor():
                 jobs_list = Job.objects.filter(task=t).filter(run_number=run_number).filter(status='defined').values_list('file', flat=True).distinct()
                 logger.info('Got list of %s jobs' % len(jobs_list))
                 
-                logger.info('Writing results to the file Run_%s.list' % run_number)
-                with open("/tmp/Run_%s.list" % run_number, "w") as f:
-                    for jj in jobs_list:
-                        f.write('%s\n' % jj)
-                f.close()
+                jobs_list_request = ' '
+                for jj in jobs_list:
+                    jobs_list_request += '%s ' % jj
                 
-                logger.info('Uploading file /tmp/Run_%s.list to lxplus' % run_number)
-                try:
-                    put('/tmp/Run_%s.list' % run_number, '/tmp/Run_%s.list' % run_number)
-                except:
-                    logger.info('Session expired, exiting')
-                    break
-                
-                os.remove('/tmp/Run_%s.list' % run_number)
-                    
-#                     cmd = "more /tmp/Run_%s.list" % (run_number)
-#                     logger.info(cmd)
-#                     result = exec_remote_cmd(cmd)
-#                     logger.info(result)
-                                
-                cmd1 = 'stager_get -f Run_%s.list -S %s -U %s' % (run_number, settings.SVCCLASS, run_number)
+                cmd1 = 'xrdfs %s prepare -s %s' % (settings.CTA_HOME_ROOT_READ, jobs_list_request)
                 logger.info(cmd1)
                 result1 = exec_remote_cmd(cmd1)
                 if result1.succeeded:
-                    logger.info('Successfully sent request to castor')
+                    logger.info('Successfully sent request to cta')
                     logger.info(result1)
                     
                     logger.info('Going to update job statuses of run %s to staging' % run_number)
-                    jobs_list = Job.objects.filter(task=t).filter(run_number=run_number).filter(status='defined').update(status='staging')
+                    jobs_list = Job.objects.filter(task=t).filter(run_number=run_number).filter(status='defined').update(status='staging', cta_request_id=result1)
                     
                     i += 1
                 else:
-                    logger.info('Error sending request to castor')
+                    logger.info('Error sending request to cta')
                     logger.error(result1)
-                
-            logger.info('Getting runs with job status staging for task %s' % t.name)
-            runs_list = Job.objects.filter(task=t).filter(status='staging').order_by('run_number').values_list('run_number', flat=True).distinct()
-            logger.info('Got list of %s runs' % len(runs_list))
-            if len(runs_list) == 0:
-                logger.info('No runs found for staging')
             
-            for run_number in runs_list:
-                logger.info('Going to request state of tag %s' % run_number)
+            logger.info('Getting runs with job status staging for task %s' % t.name)
+            cta_requests_list = Job.objects.filter(task=t).filter(status='staging').order_by('cta_request_id').values_list('cta_request_id', flat=True).distinct()
+            logger.info('Got list of %s runs' % len(runs_list))
+            if len(cta_requests_list) == 0:
+                logger.info('No cta requests found for staging')
+            
+            for cta_request_id in cta_requests_list:
+                logger.info('Going to request state of request id %s' % cta_request_id)
                 
-                cmd1 = 'stager_qry -S %s -U %s' % (settings.SVCCLASS, run_number)
+                logger.info('Getting jobs from cta request %s with status staging' % cta_request_id)
+                jobs_list_update = Job.objects.filter(task=t).filter(cta_request_id=cta_request_id).filter(status='staging').values_list('file', flat=True).distinct()
+                logger.info('Got list of %s jobs' % len(jobs_list_update))
+                
+                jobs_list_request = ' '
+                for jj in jobs_list_update:
+                    jobs_list_request += '%s ' % jj
+                
+                cmd1 = 'xrdfs %s query prepare %s %s' % (settings.CTA_HOME_ROOT_READ, cta_request_id, jobs_list_request)
                 logger.info(cmd1)
                 result1 = exec_remote_cmd(cmd1)
                 logger.info(result1)
                 
                 if result1.succeeded:
-                    logger.info('Successfully sent request to castor')
+                    logger.info('Successfully sent request to cta')
                     logger.info(result1)
                     
-                    logger.info('Going to update job statuses of run %s from staging to staged' % run_number)
-                    reader = csv.DictReader(result1.splitlines(), delimiter = ' ', skipinitialspace = True, fieldnames = ['file', 'owner', 'status'])
+                    logger.info('Going to update job statuses of cta request %s from staging to staged' % cta_request_id)
+                    data = json.loads(result1)
+                    responses = data['responses']
                     
-                    jobs_list_update = Job.objects.filter(task=t).filter(run_number=run_number).filter(status='staging')
-                    for r in reader:
-                        if r['status'] == 'STAGED' or r['status'] == 'CANBEMIGR':
+                    #jobs_list_update = Job.objects.filter(task=t).filter(run_number=run_number).filter(status='staging')
+                    for r in responses:
+                        if len(r['error_text']) > 0:
+                            logger.info('Error message: %s' % r['error_text'])
+                            logger.info('Going to reset status of %s to defined' % r['path'])
+                            
+                            j_update = Job.objects.get(file=r['path'], task__id=t.id)
+                            j_update.status = 'defined'
+                            j_update.date_updated = timezone.now()
+                            
+                            try:
+                                j_update.save()
+                                logger.info('Job %s updated at %s' % (j_update.id, timezone.now())) 
+                            except IntegrityError as e:
+                                logger.exception('Unique together catched, was not saved')
+                            except DatabaseError as e:
+                                logger.exception('Something went wrong while saving: %s' % e.message)
+                            
+                            continue
+                        
+                        if r['online']:
                             #logger.info('File %s has status %s, going to get a job' % (r['file'], r['status']))
                             for j in jobs_list_update:
-                                if r['file'] == j.file:
-                                    j_update = Job.objects.get(file=r['file'], task__id=t.id)
+                                if r['path'] == j:
+                                    j_update = Job.objects.get(file=r['path'], task__id=t.id)
                                     if j_update.status == 'staging':
-                                        logger.info('Status of job %s is staging, going to update to staged' % r['file'])
+                                        logger.info('Status of job %s is staging, going to update to staged' % r['path'])
                                         j_update.status = 'staged'
                                         j_update.date_updated = timezone.now()
                             
@@ -208,13 +219,15 @@ def prepare_on_castor():
                                             logger.exception('Unique together catched, was not saved')
                                         except DatabaseError as e:
                                             logger.exception('Something went wrong while saving: %s' % e.message)
+                                    
+                                    continue
                             
                 else:
-                    logger.info('Error sending request to castor')
+                    logger.info('Error sending request to cta')
                     logger.error(result1)
             
-                    if result1.find('Unknown user tag') != -1:
-                        logger.info('Tag %s has expired, going to reset it' % run_number)
-                        jobs_list = Job.objects.filter(task=t).filter(run_number=run_number).filter(status='staging').update(status='defined')
+                    #if result1.find('Unknown user tag') != -1:
+                    #    logger.info('Tag %s has expired, going to reset it' % run_number)
+                    #    jobs_list = Job.objects.filter(task=t).filter(run_number=run_number).filter(status='staging').update(status='defined')
                     
     logger.info('done')

@@ -57,6 +57,11 @@ class Task(models.Model):
         ('no', 'no'),
         )
     
+    tapes_backend_choices = (
+        ('castor', 'castor'),
+        ('cta', 'cta'),
+        )
+    
     name = models.CharField(max_length=300)
     type = models.CharField(choices=type_choices, max_length=50, default='test production')
     parent_task = models.ForeignKey("self", blank=True, null=True)
@@ -84,6 +89,7 @@ class Task(models.Model):
     date_processing_finish = models.DateTimeField(null=True, blank=True)
     status_files_deleted = models.CharField(max_length=5, default='no')
     status_failed_jobs_deleted = models.CharField(max_length=5, default='no')
+    tapes_backend = models.CharField(max_length=6, choices=tapes_backend_choices, default='castor')
     
     def __unicode__(self):
         return self.name
@@ -142,6 +148,7 @@ class Job(models.Model):
     status_castor_mcgen = models.CharField(max_length=50, null=True, blank=True)
     attempt_castor_mcgen = models.IntegerField(default=0)
     status_panda_job_deleted = models.CharField(max_length=10, default='no')
+    cta_request_id = models.CharField(max_length=50, null=True, blank=True)
     
     def __unicode__(self):
         return self.file

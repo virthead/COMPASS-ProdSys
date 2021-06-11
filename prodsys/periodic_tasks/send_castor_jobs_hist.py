@@ -117,14 +117,19 @@ def copy_to_castor():
             
             logger.info('Going to build copy list')
             for c in merged_chunks_list:
+                if t.tapes_backend == 'castor':
+                    tapesHomeRoot = '%(castorHomeRoot)s%(castorHome)s' % {'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'castorHome': settings.CASTOR_HOME}
+                else:
+                    tapesHomeRoot = '%(ctaHomeRoot)s%(ctaHome)s' % {'ctaHomeRoot': settings.CTA_HOME_ROOT_WRITE, 'ctaHome': settings.CTA_HOME}
+                
                 f_from = 'fts-transfer-submit -s %(ftsServer)s -o %(eosHomeRoot)s%(eosHome)s%(mc)s%(prodPath)s%(prodSoft)s/histos/histsum-%(runNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'prodPath': t.path, 'prodSoft': t.soft, 'runNumber': r, 'prodSlt': t.prodslt, 'phastVer': t.phastver, 'ftsServer': settings.FTS_SERVER, 'eosHomeRoot':settings.EOS_HOME_ROOT, 'eosHome': settings.EOS_HOME, 'mc': mc}
                 if format(c, '03d') != '000':
                     f_from = f_from + '.' + format(c, '03d')
                 
                 if t.type == 'MC reconstruction':
-                    f_to = '%(castorHomeRoot)s%(castorHome)smc_prod/CERN/%(Year)s/%(Period)s/%(prodSoft)s/mcreco/histos/histsum-%(runNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'prodPath': t.path, 'prodSoft': t.soft, 'runNumber': r, 'prodSlt': t.prodslt, 'phastVer': t.phastver, 'oracleDst': oracle_dst, 'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'castorHome': settings.CASTOR_HOME, 'Year': t.year, 'Period': t.period}
+                    f_to = '%(tapesHomeRoot)smc_prod/CERN/%(Year)s/%(Period)s/%(prodSoft)s/mcreco/histos/histsum-%(runNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'tapesHomeRoot': tapesHomeRoot, 'prodPath': t.path, 'prodSoft': t.soft, 'runNumber': r, 'prodSlt': t.prodslt, 'phastVer': t.phastver, 'oracleDst': oracle_dst, 'Year': t.year, 'Period': t.period}
                 else:
-                    f_to = '%(castorHomeRoot)s%(castorHome)s%(prodPath)s%(oracleDst)s%(prodSoft)s/histos/histsum-%(runNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'prodPath': t.path, 'prodSoft': t.soft, 'runNumber': r, 'prodSlt': t.prodslt, 'phastVer': t.phastver, 'oracleDst': oracle_dst, 'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'castorHome': settings.CASTOR_HOME}
+                    f_to = '%(tapesHomeRoot)s%(prodPath)s%(oracleDst)s%(prodSoft)s/histos/histsum-%(runNumber)s-%(prodSlt)s-%(phastVer)s.root' % {'tapesHomeRoot': tapesHomeRoot, 'prodPath': t.path, 'prodSoft': t.soft, 'runNumber': r, 'prodSlt': t.prodslt, 'phastVer': t.phastver, 'oracleDst': oracle_dst}
                 if format(c, '03d') != '000':
                     f_to = f_to + '.' + format(c, '03d')
                 
