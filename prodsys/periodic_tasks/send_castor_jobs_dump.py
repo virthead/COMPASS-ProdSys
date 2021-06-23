@@ -112,7 +112,7 @@ def copy_to_castor():
                 if t.tapes_backend == 'castor':
                     tapesHomeRoot = '%(castorHomeRoot)s%(castorHome)s' % {'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'castorHome': settings.CASTOR_HOME}
                 else:
-                    tapesHomeRoot = '%(ctaHomeRoot)s%(ctaHome)s' % {'ctaHomeRoot': settings.CTA_HOME_ROOT_WRITE, 'ctaHome': settings.CTA_HOME}
+                    tapesHomeRoot = '%(ctaHomeRoot)s%(ctaHome)s' % {'ctaHomeRoot': settings.CTA_HOME_ROOT, 'ctaHome': settings.CTA_HOME}
                 
                 f_from = 'fts-transfer-submit -s %(ftsServer)s -o %(eosHomeRoot)s%(eosHome)s%(prodPath)s%(prodSoft)s/mergedDump/slot%(prodSlt)s/evtdump%(prodSlt)s-%(runNumber)s.raw' % {'prodPath': t.path, 'prodSoft': t.soft, 'runNumber': r, 'prodSlt': t.prodslt, 'phastVer': t.phastver, 'ftsServer': settings.FTS_SERVER, 'eosHomeRoot':settings.EOS_HOME_ROOT, 'eosHome': settings.EOS_HOME}
                 if format(c, '03d') != '000':

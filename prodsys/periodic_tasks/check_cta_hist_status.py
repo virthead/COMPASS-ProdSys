@@ -79,7 +79,7 @@ def check_files_on_cta():
         else:
             path = '%(ctaHome)s%(prodPath)s%(oracleDst)s%(prodSoft)s/histos/' % {'ctaHome': settings.CTA_HOME, 'prodPath': t[1], 'prodSoft': t[2], 'oracleDst': oracle_dst}
         
-        cmd = 'xrdfs %(ctaHomeRoot)s ls -l %(path)s' % {'ctaHomeRoot': settings.CTA_HOME_ROOT_WRITE, 'path': path}
+        cmd = 'xrdfs %(ctaHomeRoot)s ls -l %(path)s' % {'ctaHomeRoot': settings.CTA_HOME_ROOT, 'path': path}
         logger_task.info(cmd)
         result = exec_remote_cmd(cmd)
         if result.succeeded:
@@ -98,7 +98,7 @@ def check_files_on_cta():
                         logger_task.info(r)
                         logger_task.info('Found "%s" for task id %s run number %s chunk number %s, %s' % (r['permissions'][0], t[0], c[1], c[2], test))
                         
-                        cmd1 = 'xrdfs %s query prepare %s %s' % (settings.CTA_HOME_ROOT_WRITE, r['name'], r['name'])
+                        cmd1 = 'xrdfs %s query prepare %s %s' % (settings.CTA_HOME_ROOT, r['name'], r['name'])
                         logger.info(cmd1)
                         result1 = exec_remote_cmd(cmd1)
                         if result1.succeeded:

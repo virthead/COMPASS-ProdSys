@@ -79,7 +79,7 @@ def main():
                 tapesHomeRoot = settings.CASTOR_HOME_ROOT
                 svcClass = '\?svcClass=%s' % settings.SVCCLASS
             else:
-                tapesHomeRoot = settings.CTA_HOME_ROOT_READ
+                tapesHomeRoot = settings.CTA_HOME_ROOT
                 svcClass = ''
             
             if j.attempt >= j.task.max_attempts:

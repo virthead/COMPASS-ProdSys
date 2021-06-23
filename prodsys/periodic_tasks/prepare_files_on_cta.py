@@ -137,7 +137,7 @@ def prepare_on_cta():
                 for jj in jobs_list:
                     jobs_list_request += '%s ' % jj
                 
-                cmd1 = 'xrdfs %s prepare -s %s' % (settings.CTA_HOME_ROOT_READ, jobs_list_request)
+                cmd1 = 'xrdfs %s prepare -s %s' % (settings.CTA_HOME_ROOT, jobs_list_request)
                 logger.info(cmd1)
                 result1 = exec_remote_cmd(cmd1)
                 if result1.succeeded:
@@ -169,7 +169,7 @@ def prepare_on_cta():
                 for jj in jobs_list_update:
                     jobs_list_request += '%s ' % jj
                 
-                cmd1 = 'xrdfs %s query prepare %s %s' % (settings.CTA_HOME_ROOT_READ, cta_request_id, jobs_list_request)
+                cmd1 = 'xrdfs %s query prepare %s %s' % (settings.CTA_HOME_ROOT, cta_request_id, jobs_list_request)
                 logger.info(cmd1)
                 result1 = exec_remote_cmd(cmd1)
                 logger.info(result1)
