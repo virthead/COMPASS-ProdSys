@@ -295,7 +295,7 @@ def archive_logs():
             access_denied = True
             break
         if result.find('No such file or directory') == -1:
-            logger.info('Tar file for production %s exists, going to check size and copy it to Castor' % t[0])
+            logger.info('Tar file for production %s exists, going to check size and copy it to cta' % t[0])
             reader = csv.DictReader(result.splitlines(), delimiter = ' ', skipinitialspace = True, fieldnames = ['permissions', 'links', 'owner', 'group', 'size', 'date1', 'date2', 'time', 'name'])
             good_file = False
             for r in reader:
@@ -310,23 +310,23 @@ def archive_logs():
             logger.info('Something went wrong, continue')
             continue
         
-        logger.info('Going to send file to Castor')        
+        logger.info('Going to send file to cta')        
         p_from = 'fts-transfer-submit -s %(ftsServer)s -o %(eosHomeRoot)s%(eosHome)s' % {'ftsServer': settings.FTS_SERVER, 'eosHomeRoot':settings.EOS_HOME_ROOT, 'eosHome': settings.EOS_HOME}
         if t[3] == 'MC generation' or t[3] == 'MC reconstruction':
             p_from += 'mc/'
         p_from += '%(Path)s%(Soft)s/logFiles/' % {'Path': t[1], 'Soft': t[2]}
         if t[3] == 'mass production':
             f_name = '%(Prod)s_logFiles.tarz' % {'Prod': t[0]}
-            p_to = '%(castorHomeRoot)s%(castorHomeLogs)s%(Year)s/' % {'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'castorHomeLogs': settings.CASTOR_HOME_LOGS, 'Year': t[4]}
+            p_to = '%(ctaHomeRoot)s%(ctaHomeLogs)s%(Year)s/' % {'ctaHomeRoot': settings.CTA_HOME_ROOT, 'ctaHomeLogs': settings.CTA_HOME_LOGS, 'Year': t[4]}
         elif t[3] == 'MC generation':
             f_name = '%(Soft)s_logFiles.tarz' % {'Soft': t[2]}
-            p_to = '%(castorHomeRoot)s%(castorHomeLogs)smc_prod/gen/' % {'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'castorHomeLogs': settings.CASTOR_HOME_LOGS}
+            p_to = '%(ctaHomeRoot)s%(ctaHomeLogs)smc_prod/gen/' % {'ctaHomeRoot': settings.CTA_HOME_ROOT, 'ctaHomeLogs': settings.CTA_HOME_LOGS}
         elif t[3] == 'MC reconstruction':
             f_name = '%(Soft)s_logFiles.tarz' % {'Soft': t[2]}
-            p_to = '%(castorHomeRoot)s%(castorHomeLogs)smc_prod/reco/' % {'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'castorHomeLogs': settings.CASTOR_HOME_LOGS}
+            p_to = '%(ctaHomeRoot)s%(ctaHomeLogs)smc_prod/reco/' % {'ctaHomeRoot': settings.CTA_HOME_ROOT, 'ctaHomeLogs': settings.CTA_HOME_LOGS}
         else:
             f_name = '%(Soft)s_logFiles.tarz' % {'Soft': t[2]}
-            p_to = '%(castorHomeRoot)s%(castorHomeLogs)stestproductions/' % {'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'castorHomeLogs': settings.CASTOR_HOME_LOGS}
+            p_to = '%(ctaHomeRoot)s%(ctaHomeLogs)stestproductions/' % {'ctaHomeRoot': settings.CTA_HOME_ROOT, 'ctaHomeLogs': settings.CTA_HOME_LOGS}
         
         cmd = p_from + f_name + ' ' + p_to + f_name
         logger.info(cmd)
@@ -336,11 +336,11 @@ def archive_logs():
             sys.exit(0)
          
         if result.succeeded:
-            logger.info('Successfully sent to Castor %s' % f_name)
+            logger.info('Successfully sent to cta %s' % f_name)
             task_update = Task.objects.filter(production=t[0]).update(status='archiving', date_updated=timezone.now())
             logger.info(result)
         else:
-            logger.info('Error sending to Castor %s' % f_name)
+            logger.info('Error sending to cta %s' % f_name)
             logger.error(result)
             
     logger.info('done')
