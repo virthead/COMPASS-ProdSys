@@ -87,7 +87,7 @@ def check_files_on_cta():
                         responses = data['responses']
                         
                         if responses[0]['on_tape']:
-                            logger_task.info ('Going to update jobs of the chunk as migrated')
+                            logger.info ('Going to update jobs of the chunk as migrated')
                             try:
                                 jobs_update = Job.objects.filter(task__production=t[0]).update(status_logs_castor='yes', date_updated=timezone.now())
                                 task_update = Task.objects.filter(production=t[0]).update(status='archived', date_processing_finish=timezone.now(), date_updated=timezone.now())
@@ -95,16 +95,16 @@ def check_files_on_cta():
                             except:
                                 logger.error('Failed to update tasks for production' % t[0])
                         else:
-                            logger_task.info('Chunk not yet migrated')
+                            logger.info('Chunk not yet migrated')
                     else:
                         logger.info('Error sending request to cta')
                         logger.error(result1)
                     
                     if r['size'] == '0':
                         diff = datetime.datetime.now().replace(tzinfo=None) - c[3].replace(tzinfo=None)
-                        logger_task.info('File %s was not delivered, transfer was submitted at %s which is %s hours from now' % (test, c[3], (diff.seconds/3600)))
+                        logger.info('File %s was not delivered, transfer was submitted at %s which is %s hours from now' % (test, c[3], (diff.seconds/3600)))
                         if diff.seconds/3600 >= 12:
-                            logger_task.info('Problematic chunk found, status will be changed to ready for rewriting')
+                            logger.info('Problematic chunk found, status will be changed to ready for rewriting')
                             try:
                                 task_update = Task.objects.filter(production=t[0]).update(status='archive', date_updated=timezone.now())
                                 logger.info('Tasks status changed to archive for production %s' % t[0])
