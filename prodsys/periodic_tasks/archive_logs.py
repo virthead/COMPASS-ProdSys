@@ -97,7 +97,7 @@ def archive_logs():
         logger.error(result)
     
     logger.info('Getting tasks with status archive')
-    tasks_list = list(Task.objects.all().exclude(Q(site='BW_COMPASS_MCORE') | Q(site='BW_STAMPEDE_MCORE') | Q(site='BW_FRONTERA_MCORE')).filter(status='archive').values_list('production', 'path', 'soft', 'type', 'year').distinct()[:5])
+    tasks_list = list(Task.objects.all().exclude(Q(site='BW_COMPASS_MCORE') | Q(site='BW_STAMPEDE_MCORE') | Q(site='BW_FRONTERA_MCORE')).filter(status='archive').order_by('-id').values_list('production', 'path', 'soft', 'type', 'year').distinct()[:1])
     logger.info('Got list of %s productions' % len(tasks_list))
     access_denied = False
     for t in tasks_list:
@@ -110,18 +110,51 @@ def archive_logs():
         if len(runs_list) == 0:
             logger.info('No runs found')
         
+        mc = ''
+        if t[3] == 'MC generation' or t[3] == 'MC reconstruction':
+            mc = 'mc/'
+            
         runs_tarred = 0
         for run_number in runs_list:
             if runs_tarred >= runs_to_tar:
                 logger.info('Limit of runs to tar has reached, breaking')
                 break
             
-            pars = {'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'run_number': run_number, 'eosHome': settings.EOS_HOME}
-
+            pars = {'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'run_number': run_number, 'eosHome': settings.EOS_HOME, 'mc': mc}
+            
+            logger.info('Going to eos ls all files for run %s' % run_number)
+            cmd = 'eos ls %(eosHome)s%(mc)s%(Path)s%(Soft)s/logFiles/ | grep \'.*.*%(run_number)s.*.gz\'' % pars
+            logger.info(cmd)
+            result = exec_remote_cmd(cmd)
+            logger.info(result)
+            if result.find('Permission denied') != -1 or result.find('Input/output error') != -1:
+                logger.info('Error, exiting')
+                access_denied = True
+                break
+            
+            num_run_files = len(result.splitlines())
+            logger.info('Got list of %s files' % num_run_files)
+            logger.info('Going to copy files to /tmp')
+            i = 1
+            for f in result.splitlines():
+                parsFile = {'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'eosHome': settings.EOS_HOME, 'mc': mc, 'File': f}
+                logger.info('Copying file %s of %s' % (i, num_run_files))
+                
+                cmd = 'cp %(eosHome)s%(mc)s%(Path)s%(Soft)s/logFiles/%(File)s /tmp/' % parsFile
+                logger.info(cmd)
+                result = exec_remote_cmd(cmd)
+                logger.info(result)
+                if result.find('Permission denied') != -1 or result.find('Input/output error') != -1:
+                    logger.info('Error, exiting')
+                    access_denied = True
+                    break
+                
+                i += 1
+                
             logger.info('Going to tar run %s' % run_number)
-            cmd = 'tar -cvzf /tmp/%(Prod)s.%(run_number)s.tar %(eosHome)s%(Path)s%(Soft)s/logFiles/%(Prod)s.*%(run_number)s-*.gz' % pars
+            cmd = 'tar -cvzf /tmp/%(Prod)s.%(run_number)s.tar /tmp/*%(run_number)s*.gz' % pars
             if t[3] == 'MC generation' or t[3] == 'MC reconstruction':
-                cmd = 'tar -cvzf /tmp/%(Prod)s.%(run_number)s.tar %(eosHome)smc/%(Path)s%(Soft)s/logFiles/%(Prod)s.*%(run_number)s*.gz' % pars
+                cmd = 'tar -cvzf /tmp/%(Prod)s.%(run_number)s.tar /tmp/*%(run_number)s*.gz' % pars
             logger.info(cmd)
             result = exec_remote_cmd(cmd)
             logger.info(result)
@@ -146,10 +179,7 @@ def archive_logs():
                 continue
             
             logger.info('Going to move file from /tmp to EOS')
-            cmd = 'mv /tmp/%(Prod)s.%(run_number)s.tar %(eosHome)s' % pars
-            if t[3] == 'MC generation' or t[3] == 'MC reconstruction':
-                cmd += 'mc/'
-            cmd += '%(Path)s%(Soft)s/logFiles/%(Prod)s.%(run_number)s.tar' % pars
+            cmd = 'mv /tmp/%(Prod)s.%(run_number)s.tar %(eosHome)s%(mc)s%(Path)s%(Soft)s/logFiles/%(Prod)s.%(run_number)s.tar' % pars
             logger.info(cmd)
             result = exec_remote_cmd(cmd)
             logger.info(result)
@@ -159,10 +189,7 @@ def archive_logs():
                 break
             
             logger.info('Going to check if tar for run %s exists on EOS' % run_number)
-            path = '%(eosHome)s' % pars
-            if t[3] == 'MC generation' or t[3] == 'MC reconstruction':
-                path += 'mc/'
-            path += '%(Path)s%(Soft)s/logFiles/' % pars
+            path = '%(eosHome)s%(mc)s%(Path)s%(Soft)s/logFiles/' % pars
             file = '%(Prod)s.%(run_number)s.tar' % pars
             cmd = 'ls -al %s%s' % (path, file)
             logger.info(cmd)
@@ -178,7 +205,7 @@ def archive_logs():
                 good_file = False
                 for r in reader:
                     if r['name'].find(file) != -1:
-                        if r['size'] == '0':
+                        if r['size'] == '0' or r['size'] == '45':
                             logger.info('File has zero size, needs to be re-generated')
                         else:
                             good_file = True
@@ -188,6 +215,16 @@ def archive_logs():
             else:
                 logger.info('Something went wrong, continue')
                 continue
+            
+            logger.info('Going to remove .gz files from /tmp')
+            cmd = 'rm -rf /tmp/*%(run_number)s*.gz' % pars
+            logger.info(cmd)
+            result = exec_remote_cmd(cmd)
+            logger.info(result)
+            if result.find('Permission denied') != -1 or result.find('Input/output error') != -1:
+                logger.info('Error, exiting')
+                access_denied = True
+                break
                 
             runs_tarred += 1
         
@@ -197,9 +234,7 @@ def archive_logs():
             continue
         
         logger.info('All runs of %s are in tars, going to check if empty files were generated' % t[0])
-        cmd = 'ls -al %(eosHome)s%(Path)s%(Soft)s/logFiles/%(Prod)s.*.tar' % {'eosHome': settings.EOS_HOME, 'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
-        if t[3] == 'MC generation' or t[3] == 'MC reconstruction':
-            cmd = 'ls -al %(eosHome)smc/%(Path)s%(Soft)s/logFiles/%(Prod)s.*.tar' % {'eosHome': settings.EOS_HOME, 'Prod': t[0], 'Path': t[1], 'Soft': t[2]}
+        cmd = 'eos ls -al %(eosHome)s%(mc)s%(Path)s%(Soft)s/logFiles/ | grep \'.tar\'' % {'eosHome': settings.EOS_HOME, 'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'mc': mc}
         logger.info(cmd)
         result = exec_remote_cmd(cmd)
         logger.info(result)
@@ -215,7 +250,7 @@ def archive_logs():
         reader = csv.DictReader(result.splitlines(), delimiter = ' ', skipinitialspace = True, fieldnames = ['permissions', 'links', 'owner', 'group', 'size', 'date1', 'date2', 'time', 'name'])
         empty_file_found = False
         for r in reader:
-            if r['size'] == '0':
+            if r['size'] == '0' or r['size'] == '45':
                 run_number = r['name'][r['name'].find('.') + 1:r['name'].find('.tar')]
                 logger.info('Empy file found for run: %s, going to resend archiving' % run_number)
                 jobs_update = Job.objects.filter(task__production=t[0]).filter(run_number=run_number).update(status_logs_archived='no', date_updated=timezone.now())
@@ -226,13 +261,42 @@ def archive_logs():
         
         logger.info('Ready to create tar for production %s' % t[0])
         
+        logger.info('Going to eos ls all .tar files')
+        cmd = 'eos ls %(eosHome)s%(mc)s%(Path)s%(Soft)s/logFiles/ | grep \'.tar\'' % {'eosHome': settings.EOS_HOME, 'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'mc': mc}
+        logger.info(cmd)
+        result = exec_remote_cmd(cmd)
+        logger.info(result)
+        if result.find('Permission denied') != -1 or result.find('Input/output error') != -1:
+            logger.info('Error, exiting')
+            access_denied = True
+            break
+        
+        num_run_files = len(result.splitlines())
+        logger.info('Got list of %s files' % num_run_files)
+        logger.info('Going to copy files to /tmp')
+        i = 1
+        for f in result.splitlines():
+            parsFile = {'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'eosHome': settings.EOS_HOME, 'mc': mc, 'File': f}
+            logger.info('Copying file %s of %s' % (i, num_run_files))
+            
+            cmd = 'cp %(eosHome)s%(mc)s%(Path)s%(Soft)s/logFiles/%(File)s /tmp/' % parsFile
+            logger.info(cmd)
+            result = exec_remote_cmd(cmd)
+            logger.info(result)
+            if result.find('Permission denied') != -1 or result.find('Input/output error') != -1:
+                logger.info('Error, exiting')
+                access_denied = True
+                break
+            
+            i += 1
+        
         logger.info('Going to create final tarz file for production %s' % t[0])
         if t[3] == 'mass production':
-            cmd = 'tar -cvzf /tmp/%(Prod)s_logFiles.tarz %(eosHome)s%(Path)s%(Soft)s/logFiles/%(Prod)s.*.tar' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'eosHome': settings.EOS_HOME}
+            cmd = 'tar -cvzf /tmp/%(Prod)s_logFiles.tarz /tmp/%(Prod)s.*.tar' % {'Prod': t[0]}
         elif t[3] == 'MC generation' or t[3] == 'MC reconstruction':
-            cmd = 'tar -cvzf /tmp/%(Soft)s_logFiles.tarz %(eosHome)smc/%(Path)s%(Soft)s/logFiles/%(Prod)s.*.tar' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'eosHome': settings.EOS_HOME}
+            cmd = 'tar -cvzf /tmp/%(Soft)s_logFiles.tarz /tmp/%(Prod)s.*.tar' % {'Prod': t[0], 'Soft': t[2]}
         else:
-            cmd = 'tar -cvzf /tmp/%(Soft)s_logFiles.tarz %(eosHome)s%(Path)s%(Soft)s/logFiles/%(Prod)s.*.tar' % {'Prod': t[0], 'Path': t[1], 'Soft': t[2], 'eosHome': settings.EOS_HOME}
+            cmd = 'tar -cvzf /tmp/%(Soft)s_logFiles.tarz /tmp/%(Prod)s.*.tar' % {'Prod': t[0], 'Soft': t[2]}
         logger.info(cmd)
         result = exec_remote_cmd(cmd)
         logger.info(result)
@@ -286,7 +350,7 @@ def archive_logs():
             file = '%(Prod)s_logFiles.tarz' % {'Prod': t[0]}
         else:
             file = '%(Soft)s_logFiles.tarz' % {'Soft': t[2]}
-        cmd = 'ls -al %s%s' % (path, file)
+        cmd = 'eos ls -al %s%s' % (path, file)
         logger.info(cmd)
         result = exec_remote_cmd(cmd)
         logger.info(result)
@@ -309,6 +373,16 @@ def archive_logs():
         else:
             logger.info('Something went wrong, continue')
             continue
+        
+        logger.info('Going to remove .tar files from /tmp')
+        cmd = 'rm -rf /tmp/%(Prod)s.*.tar' % {'Prod': t[0]}
+        logger.info(cmd)
+        result = exec_remote_cmd(cmd)
+        logger.info(result)
+        if result.find('Permission denied') != -1 or result.find('Input/output error') != -1:
+            logger.info('Error, exiting')
+            access_denied = True
+            break
         
         logger.info('Going to send file to cta')        
         p_from = 'fts-transfer-submit -s %(ftsServer)s -o %(eosHomeRoot)s%(eosHome)s' % {'ftsServer': settings.FTS_SERVER, 'eosHomeRoot':settings.EOS_HOME_ROOT, 'eosHome': settings.EOS_HOME}
