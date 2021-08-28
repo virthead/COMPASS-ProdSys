@@ -43,7 +43,7 @@ def exec_remote_cmd(cmd):
     with hide('output','running','warnings'), sett(warn_only=True):
         return run(cmd)
 
-def copy_to_castor():
+def copy_to_cta():
     logger.info('Going to prepare an environment')
     cmd = 'export LC_ALL=C; unset LANGUAGE;'
     logger.info(cmd)
@@ -109,10 +109,7 @@ def copy_to_castor():
             
             logger.info('Going to build copy list')
             for c in chunks_list:
-                if t.tapes_backend == 'castor':
-                    tapesHomeRoot = '%(castorHomeRoot)s%(castorHome)s' % {'castorHomeRoot': settings.CASTOR_HOME_ROOT, 'castorHome': settings.CASTOR_HOME}
-                else:
-                    tapesHomeRoot = '%(ctaHomeRoot)s%(ctaHome)s' % {'ctaHomeRoot': settings.CTA_HOME_ROOT, 'ctaHome': settings.CTA_HOME}
+                tapesHomeRoot = '%(ctaHomeRoot)s%(ctaHome)s' % {'ctaHomeRoot': settings.CTA_HOME_ROOT, 'ctaHome': settings.CTA_HOME}
                     
                 f_from = 'fts-transfer-submit -s %(ftsServer)s -o %(eosHomeRoot)s%(eosHome)smc/%(prodPath)s%(prodSoft)s/mcgen/mcr%(chunkNumber)s-%(runNumber)s_run000.tgeant' % {'prodPath': t.path, 'prodSoft': t.soft, 'chunkNumber': format(c, '05d'), 'runNumber': r, 'ftsServer': settings.FTS_SERVER, 'eosHomeRoot':settings.EOS_HOME_ROOT, 'eosHome': settings.EOS_HOME}
                 f_to = '%(tapesHomeRoot)smc_prod/CERN/%(Year)s/%(Period)s/%(prodSoft)s/mcgen/mcr%(chunkNumber)s-%(runNumber)s_run000.tgeant' % {'tapesHomeRoot': tapesHomeRoot, 'Year': t.year, 'Period': t.period, 'prodPath': t.path, 'prodSoft': t.soft, 'chunkNumber': format(c, '05d'), 'runNumber': r}
@@ -131,11 +128,11 @@ def copy_to_castor():
                     sys.exit(0)
                 
                 if result.succeeded:
-                    logger.info('Successfully sent to castor run number %s chunk number %s' % (r, chunk))
+                    logger.info('Successfully sent to cta run number %s chunk number %s' % (r, chunk))
                     jobs_update = Job.objects.filter(task=t).filter(run_number=r).filter(chunk_number=chunk).update(status_castor_mcgen='sent', attempt_castor_mcgen=1, date_updated=timezone.now())
                     logger.info(result)
                 else:
-                    logger.info('Error sending to castor run number %s chunk number %s' % (r, chunk))
+                    logger.info('Error sending to cta run number %s chunk number %s' % (r, chunk))
                     logger.error(result)
                     
                     if result.find('No such file or directory') != -1:
