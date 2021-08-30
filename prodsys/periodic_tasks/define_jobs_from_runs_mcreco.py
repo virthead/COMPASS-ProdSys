@@ -49,7 +49,7 @@ def main():
         logger.info('Got list of %s jobs' % len(jobs_list))
         chunks_to_generate = len(jobs_list)
         for pj in jobs_list:
-            file = '%(castorHome)smc_prod/CERN/%(Year)s/%(Period)s/%(prodSoft)s/mcgen/mcr%(chunkNumber)s-%(runNumber)s_run000.tgeant' % {'castorHome': settings.CASTOR_HOME, 'Year': t.parent_task.year, 'Period': t.parent_task.period, 'prodPath': t.parent_task.path, 'prodSoft': t.parent_task.soft, 'chunkNumber': format(pj.chunk_number, '05d'), 'runNumber': pj.run_number}
+            file = '%(ctaHome)smc_prod/CERN/%(Year)s/%(Period)s/%(prodSoft)s/mcgen/mcr%(chunkNumber)s-%(runNumber)s_run000.tgeant' % {'ctaHome': settings.CTA_HOME, 'Year': t.parent_task.year, 'Period': t.parent_task.period, 'prodPath': t.parent_task.path, 'prodSoft': t.parent_task.soft, 'chunkNumber': format(pj.chunk_number, '05d'), 'runNumber': pj.run_number}
             j = Job(
                 task = t,
                 file = file,
