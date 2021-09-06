@@ -101,7 +101,7 @@ def prepare_on_cta():
             sys.exit(0)
         
         logger.info('Getting tasks with status send and running for all sites except HPC')
-        tasks_list = Task.objects.all().exclude(Q(site='BW_COMPASS_MCORE') | Q(site='STAMPEDE_COMPASS_MCORE') | Q(site='FRONTERA_COMPASS_MCORE')).filter(tapes_backend='cta').filter(Q(status='send') | Q(status='running'))
+        tasks_list = Task.objects.all().exclude(Q(site='BW_COMPASS_MCORE') | Q(site='STAMPEDE_COMPASS_MCORE') | Q(site='FRONTERA_COMPASS_MCORE')).filter(Q(status='send') | Q(status='running'))
         logger.info('Got list of %s tasks' % len(tasks_list))
         for t in tasks_list:
             if not t.date_processing_start:

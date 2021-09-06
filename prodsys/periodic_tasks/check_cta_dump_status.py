@@ -55,7 +55,7 @@ def restart_transfer(logger, task, run_number, chunk_number):
 
 def check_files_on_cta():
     logger.info('Getting productions with castor evntdmp status sent')
-    tasks_list = Job.objects.filter(task__tapes_backend='cta').filter(status_castor_evntdmp='sent').values_list('task_id', 'task__path', 'task__soft', 'task__prodslt', 'task__phastver', 'task__type').distinct()
+    tasks_list = Job.objects.filter(status_castor_evntdmp='sent').values_list('task_id', 'task__path', 'task__soft', 'task__prodslt', 'task__phastver', 'task__type').distinct()
     logger.info('Got list of %s prods: %s' % (len(tasks_list), tasks_list))
     logger.info('Check details in the corresponding periodic_tasks.check_cta_dump_status_taskid.log')
     

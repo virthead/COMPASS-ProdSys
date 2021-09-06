@@ -75,12 +75,8 @@ def main():
         
         i = 0
         for j in jobs_list:
-            if j.task.tapes_backend == 'castor':
-                tapesHomeRoot = settings.CASTOR_HOME_ROOT
-                svcClass = '\?svcClass=%s' % settings.SVCCLASS
-            else:
-                tapesHomeRoot = settings.CTA_HOME_ROOT
-                svcClass = ''
+            tapesHomeRoot = settings.CTA_HOME_ROOT
+            svcClass = ''
             
             if j.attempt >= j.task.max_attempts:
                 logger.info('Number of retry attempts has reached for job %s of task %s' % (j.file, j.task.name))
