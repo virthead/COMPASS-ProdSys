@@ -43,10 +43,13 @@ def main():
         
         logger.info('Got list of %s files' % len(filelist))
         count_added = 0
+        lines_read = len(filelist)
+        lines_skipped = 0
         for l in filelist:
             qs = Job.objects.filter(task=t, file=l)
             if qs.exists():
                 logger.info('Such task and job already exist in the system, skipping')
+                lines_skipped += 1
                 continue
             
             logger.info('Going go define a job for %s ' % l)
@@ -71,8 +74,10 @@ def main():
             except DatabaseError as e:
                 logger.exception('Something went wrong while saving: %s' % e.message)
         
+        logger.info('Lines read: %s' % lines_read)
+        logger.info('Lines skipped: %s' % lines_skipped)
         logger.info('Added %s jobs' % count_added)
-        if count_added == len(filelist):
+        if count_added == lines_read - lines_skipped:
             logger.info('Going to update task status to jobs defined')
             t_edit = Task.objects.get(id=t.id)
             t_edit.status = 'jobs ready'
