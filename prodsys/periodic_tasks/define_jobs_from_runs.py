@@ -180,6 +180,8 @@ def define_jobs_from_runs():
                     except Exception as e:
                         logger.exception('%s (%s)' % (e.message, type(e)))
             else:
+                logger.info('Text files with data does not exist for %s, entering .pl script section' % t.year)
+                
                 lines_read = 0
                 count_added = 0
                 for r in runs_list:
@@ -235,6 +237,7 @@ def define_jobs_from_runs():
                                 qs = Job.objects.filter(task=t, file=l)
                                 if qs.exists():
                                     logger.info('Such task and job already exist in the system, skipping')
+                                    lines_read -= 1
                                     continue
                                 
                                 j = Job(
